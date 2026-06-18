@@ -62,18 +62,43 @@ adresini kendi değerlerinle değiştir. Site ilk yüklemede **pending** gelir; 
 
 ## Hostinger Node.js'e kurulum
 
-1. **Node uygulaması oluştur** (hPanel → Website → Node.js). Node sürümü **22**.
-   Uygulama köküne bu repoyu yükle (Git veya dosya yöneticisi).
-2. **Bağımlılıklar ve derleme** (SSH veya hPanel "Run npm script"):
+> ⚠️ **Bu bir Node.js sunucu uygulamasıdır, statik site DEĞİLDİR.** Hostinger'ın
+> "statik site / website build" Git akışı bunu deploy edemez ve **"No output directory
+> found after build"** hatası verir. Mutlaka **hPanel → Gelişmiş → Node.js** (Phusion
+> Passenger) altında bir **Node.js uygulaması** olarak kur.
+
+Hostinger Node.js uygulamaları `npm start` çalıştırmaz; bir **başlangıç dosyası** yükler.
+Bu repoda o dosya `server.js`'tir (Next.js'i production modda başlatır, portu `PORT`
+ortam değişkeninden alır).
+
+1. **Node.js uygulaması oluştur** (hPanel → Gelişmiş → Node.js):
+   - **Node sürümü:** 20 veya 22
+   - **Uygulama kökü (application root):** reponun bulunduğu klasör
+   - **Başlangıç dosyası (application startup file):** `server.js`
+   - **Uygulama URL'si:** alan adın/subdomain
+2. **Kodu getir (Git auto-deploy):** repoyu uygulama köküne bağla/çek. Git yalnızca kodu
+   indirir — derlemeyi aşağıdaki adımda sen tetiklersin.
+3. **Bağımlılıklar + derleme** (SSH ya da Node.js panelindeki "Run NPM install" / script):
    ```bash
-   npm install        # better-sqlite3 burada derlenir
-   npm run build
+   npm install        # better-sqlite3 buradaki Node sürümüne derlenir
+   npm run build      # önce widget (esbuild), sonra next build → .next
    ```
-3. **Ortam değişkenleri**: hPanel'in env arayüzünden yukarıdaki tüm değerleri gir.
-   `DB_PATH` ve `UPLOAD_DIR` için uygulama kökü altında kalıcı bir yol seç (ör. `./data/...`).
-4. **Başlatma komutu**: `npm start` (Next standalone). Uygulama portunu Hostinger atar;
-   Next `PORT` değişkenini kullanır.
-5. Alan adını/şubdomaini uygulamaya yönlendir ve `PUBLIC_BASE_URL`'i ona eşitle.
+4. **Ortam değişkenleri:** Node.js panelinin "Environment variables" bölümünden yukarıdaki
+   tabloyu gir. `DB_PATH`/`UPLOAD_DIR` için **kalıcı** bir yol seç (ör. `./data/...`),
+   yoksa her deploy'da veriler silinir. `PORT` GİRME (Passenger atar).
+5. **Restart App** ile uygulamayı yeniden başlat. `PUBLIC_BASE_URL`'i alan adına eşitle.
+
+### Her güncellemede (Git push sonrası)
+
+Git auto-deploy kodu çeker ama Passenger eski süreci çalıştırmaya devam eder. Yeni kodun
+yayına girmesi için:
+
+```bash
+npm install        # package.json değiştiyse
+npm run build
+```
+ardından panelden **Restart App**. (İstersen bu iki komutu Hostinger'ın deploy hook'una
+ekleyebilirsin.)
 
 > Tek instance varsayılır (rate limit ve SQLite bellek-içi sayaçlar buna göre). Yatay
 > ölçeklemede paylaşımlı bir veri deposu gerekir.
