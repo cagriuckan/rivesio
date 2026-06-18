@@ -61,6 +61,20 @@ export function updateProject(
     .run(...vals);
 }
 
+export function deleteProject(id: string): void {
+  const db = getDb();
+  // Cascade: attachments → feedbacks → sites → project
+  const feedbackIds = db
+    .prepare("SELECT id FROM feedbacks WHERE project_id = ?")
+    .all(id) as { id: string }[];
+  for (const { id: fid } of feedbackIds) {
+    db.prepare("DELETE FROM attachments WHERE feedback_id = ?").run(fid);
+  }
+  db.prepare("DELETE FROM feedbacks WHERE project_id = ?").run(id);
+  db.prepare("DELETE FROM sites WHERE project_id = ?").run(id);
+  db.prepare("DELETE FROM projects WHERE id = ?").run(id);
+}
+
 export function rotateWidgetKey(id: string): string {
   const key = generateWidgetKey();
   getDb().prepare("UPDATE projects SET widget_key = ? WHERE id = ?").run(key, id);

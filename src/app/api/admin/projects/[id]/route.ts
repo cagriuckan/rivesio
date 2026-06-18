@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { rotateWidgetKey, updateProject } from "@/lib/admin-repo";
+import { rotateWidgetKey, updateProject, deleteProject } from "@/lib/admin-repo";
 import { getProjectById, parseSettings } from "@/lib/repo";
 
 const schema = z.object({
@@ -37,4 +37,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   if (d.rotateKey) widget_key = rotateWidgetKey(id);
 
   return NextResponse.json({ ok: true, widget_key });
+}
+
+export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  if (!getProjectById(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  deleteProject(id);
+  return NextResponse.json({ ok: true });
 }

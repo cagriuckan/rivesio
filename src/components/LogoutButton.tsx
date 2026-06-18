@@ -12,9 +12,9 @@ export default function LogoutButton() {
   return (
     <button
       onClick={logout}
-      className="text-sm text-slate-500 hover:text-slate-800"
+      className="w-full rounded-lg px-3 py-2 text-left text-sm text-gray-500 hover:bg-gray-800 hover:text-gray-300 transition-colors"
     >
-      Çıkış
+      Çıkış yap
     </button>
   );
 }

@@ -12,9 +12,16 @@ export default function ProjectsPage() {
   return (
     <Shell>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-slate-900">Widget'lar</h1>
+        <h1 className="text-xl font-bold text-gray-100">Widget&apos;lar</h1>
         <CreateProject />
       </div>
+
+      {projects.length === 0 && (
+        <div className="rounded-xl border border-dashed border-gray-800 bg-gray-900/50 p-12 text-center">
+          <p className="text-sm text-gray-500 mb-4">Henüz widget yok. İlk widget&apos;ı oluştur.</p>
+          <CreateProject />
+        </div>
+      )}
 
       <div className="grid gap-5 lg:grid-cols-2">
         {projects.map((p) => {

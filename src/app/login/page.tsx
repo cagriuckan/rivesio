@@ -34,36 +34,47 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
+    <div className="flex min-h-screen items-center justify-center bg-gray-950 px-4">
       <form
         onSubmit={submit}
-        className="w-full max-w-sm rounded-2xl border border-slate-200 bg-white p-8 shadow-sm"
+        className="w-full max-w-sm rounded-2xl border border-gray-800 bg-gray-900 p-8 shadow-2xl"
       >
-        <h1 className="mb-1 text-lg font-bold text-slate-900">Kanews Feedback</h1>
-        <p className="mb-6 text-sm text-slate-500">Yönetim paneli girişi</p>
+        <div className="mb-6">
+          <div className="mb-1 text-sm font-bold tracking-tight text-indigo-400">Kanews Feedback</div>
+          <h1 className="text-xl font-bold text-gray-100">Giriş yap</h1>
+          <p className="mt-1 text-sm text-gray-500">Yönetim paneline erişmek için giriş yapın.</p>
+        </div>
 
-        <label className="mb-1 block text-sm font-medium text-slate-700">Kullanıcı adı</label>
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
+          Kullanıcı adı
+        </label>
         <input
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="mb-4 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
           autoFocus
+          autoComplete="username"
         />
 
-        <label className="mb-1 block text-sm font-medium text-slate-700">Parola</label>
+        <label className="mb-1 block text-xs font-semibold uppercase tracking-wide text-gray-600">
+          Parola
+        </label>
         <input
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+          className="mb-5 w-full rounded-lg border border-gray-700 bg-gray-800 px-3 py-2 text-sm text-gray-100 placeholder-gray-600 focus:border-indigo-500 focus:outline-none"
+          autoComplete="current-password"
         />
 
-        {error && <p className="mb-4 text-sm text-red-600">{error}</p>}
+        {error && (
+          <div className="mb-4 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-400">{error}</div>
+        )}
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-brand py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-60"
+          className="w-full rounded-lg bg-indigo-600 py-2 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60 transition-colors"
         >
           {loading ? "Giriş yapılıyor…" : "Giriş yap"}
         </button>

@@ -194,6 +194,64 @@ export const widgetCss = `
   font-family: inherit;
 }
 
+/* ── History view ── */
+.kf-view-form,
+.kf-view-history { display: flex; flex-direction: column; }
+.kf-view-history { padding: 8px 0 4px; }
+
+.kf-history-empty {
+  padding: 32px 16px; text-align: center;
+  color: #94a3b8; font-size: 13px;
+}
+.kf-history-list { list-style: none; margin: 0; padding: 0 0 4px; }
+.kf-history-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; border-bottom: 1px solid #f1f5f9;
+  cursor: default;
+}
+.kf-history-item:last-child { border-bottom: none; }
+.kf-hi-left { flex: 1; min-width: 0; }
+.kf-hi-cat {
+  font-size: 12px; font-weight: 700; color: #334155;
+  display: block; margin-bottom: 2px;
+}
+.kf-hi-page {
+  font-size: 11px; color: #94a3b8;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  max-width: 200px; display: block;
+}
+.kf-hi-right { text-align: right; flex-shrink: 0; }
+.kf-hi-id {
+  font-size: 11px; font-weight: 700; color: #6366f1;
+  font-family: "SF Mono", "Fira Code", monospace;
+  background: #eef2ff; border-radius: 5px;
+  padding: 2px 6px; display: inline-block; margin-bottom: 2px;
+  cursor: pointer; transition: background .1s;
+}
+.kf-hi-id:hover { background: #e0e7ff; }
+.kf-hi-date { font-size: 11px; color: #94a3b8; display: block; }
+
+/* Success ID display */
+.kf-ref-box {
+  display: flex; align-items: center; gap: 6px;
+  background: #eef2ff; border-radius: 8px; padding: 6px 10px;
+  margin-top: 6px;
+}
+.kf-ref-label { font-size: 11px; color: #6366f1; font-weight: 600; flex-shrink: 0; }
+.kf-ref-id {
+  font-size: 12px; font-weight: 700; color: #4338ca;
+  font-family: "SF Mono", "Fira Code", monospace;
+  flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.kf-ref-copy {
+  background: none; border: none; cursor: pointer; padding: 2px;
+  color: #818cf8; display: flex; align-items: center; flex-shrink: 0;
+  border-radius: 4px; transition: color .1s, background .1s;
+}
+.kf-ref-copy:hover { color: #4338ca; background: #c7d2fe; }
+.kf-ref-copy svg { width: 13px; height: 13px; }
+.kf-ref-copy.copied { color: #059669; }
+
 /* ── Footer ── */
 .kf-foot {
   display: flex; justify-content: flex-end; gap: 7px;

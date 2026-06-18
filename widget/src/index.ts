@@ -40,7 +40,9 @@ function icon(path: string) {
 }
 
 const ICONS = {
-  chat: icon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
+  chat:   icon('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
+  history: icon('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+  copy:    icon('<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
   camera: icon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
   crop: icon('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'),
   upload: icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
@@ -123,11 +125,21 @@ function mount(
           <div class="kf-title-icon">${ICONS.chat}</div>
           <span class="kf-title">Geri bildirim</span>
         </div>
-        <button class="kf-close" type="button" aria-label="Kapat">${ICONS.close}</button>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <button class="kf-close kf-history-toggle" type="button" aria-label="Geçmiş">${ICONS.history}</button>
+          <button class="kf-close" type="button" aria-label="Kapat">${ICONS.close}</button>
+        </div>
       </div>
 
       <div class="kf-msg" hidden></div>
 
+      <!-- History view -->
+      <div class="kf-view-history" hidden>
+        <p class="kf-history-empty" hidden>Henüz geri bildirim göndermediniz.</p>
+        <ul class="kf-history-list"></ul>
+      </div>
+
+      <div class="kf-view-form">
       <div class="kf-body">
 
         <div>
@@ -162,6 +174,8 @@ function mount(
         <div class="kf-hint">İpucu: <kbd>⌘ / Ctrl + /</kbd> ile her yerden aç</div>
       </div>
 
+      </div> <!-- /kf-view-form -->
+
       <div class="kf-foot">
         <button class="kf-btn kf-btn-ghost kf-cancel" type="button">Vazgeç</button>
         <button class="kf-btn kf-btn-primary kf-submit" type="button">Gönder</button>
@@ -172,22 +186,113 @@ function mount(
   shadow.appendChild(root);
 
   const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
-  const fab          = $<HTMLButtonElement>(".kf-fab");
-  const panel        = $<HTMLDivElement>(".kf-panel");
-  const closeBtn     = $<HTMLButtonElement>(".kf-close");
-  const cancelBtn    = $<HTMLButtonElement>(".kf-cancel");
-  const submitBtn    = $<HTMLButtonElement>(".kf-submit");
-  const capFullBtn   = $<HTMLButtonElement>(".kf-capture-full");
-  const capAreaBtn   = $<HTMLButtonElement>(".kf-capture-area");
-  const uploadBtn    = $<HTMLButtonElement>(".kf-upload");
-  const fileInput    = $<HTMLInputElement>(".kf-file");
-  const textarea     = $<HTMLTextAreaElement>(".kf-textarea");
-  const select       = $<HTMLSelectElement>(".kf-select");
-  const thumbs       = $<HTMLDivElement>(".kf-thumbs");
-  const counter      = $<HTMLSpanElement>(".kf-counter");
-  const msg          = $<HTMLDivElement>(".kf-msg");
+  const fab            = $<HTMLButtonElement>(".kf-fab");
+  const panel          = $<HTMLDivElement>(".kf-panel");
+  const closeBtn       = $<HTMLButtonElement>(".kf-close");
+  const historyToggle  = $<HTMLButtonElement>(".kf-history-toggle");
+  const cancelBtn      = $<HTMLButtonElement>(".kf-cancel");
+  const submitBtn      = $<HTMLButtonElement>(".kf-submit");
+  const capFullBtn     = $<HTMLButtonElement>(".kf-capture-full");
+  const capAreaBtn     = $<HTMLButtonElement>(".kf-capture-area");
+  const uploadBtn      = $<HTMLButtonElement>(".kf-upload");
+  const fileInput      = $<HTMLInputElement>(".kf-file");
+  const textarea       = $<HTMLTextAreaElement>(".kf-textarea");
+  const select         = $<HTMLSelectElement>(".kf-select");
+  const thumbs         = $<HTMLDivElement>(".kf-thumbs");
+  const counter        = $<HTMLSpanElement>(".kf-counter");
+  const msg            = $<HTMLDivElement>(".kf-msg");
+  const viewForm       = $<HTMLDivElement>(".kf-view-form");
+  const viewHistory    = $<HTMLDivElement>(".kf-view-history");
+  const historyList    = $<HTMLUListElement>(".kf-history-list");
+  const historyEmpty   = $<HTMLParagraphElement>(".kf-history-empty");
+  const footEl         = $<HTMLDivElement>(".kf-foot");
 
   const attachments: Attachment[] = [];
+
+  // ── History (localStorage) ────────────────────────────────────────
+
+  const HISTORY_KEY = `kf_history_${server.widgetKey}`;
+
+  interface HistoryEntry {
+    id: string;
+    category: string;
+    page: string;
+    date: number;
+  }
+
+  function loadHistory(): HistoryEntry[] {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; }
+  }
+
+  function saveToHistory(entry: HistoryEntry) {
+    const list = loadHistory();
+    list.unshift(entry);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
+  }
+
+  function formatDate(ts: number): string {
+    return new Date(ts).toLocaleDateString("tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+
+  function renderHistory() {
+    const entries = loadHistory();
+    historyList.innerHTML = "";
+    historyEmpty.hidden = entries.length > 0;
+
+    entries.forEach((e) => {
+      const li = document.createElement("li");
+      li.className = "kf-history-item";
+      li.innerHTML = `
+        <div class="kf-hi-left">
+          <span class="kf-hi-cat">${esc(e.category)}</span>
+          <span class="kf-hi-page">${esc(e.page)}</span>
+        </div>
+        <div class="kf-hi-right">
+          <span class="kf-hi-id" title="Kopyala">#${esc(e.id.slice(0, 8))}</span>
+          <span class="kf-hi-date">${esc(formatDate(e.date))}</span>
+        </div>`;
+      li.querySelector(".kf-hi-id")!.addEventListener("click", () => copyId(e.id));
+      historyList.appendChild(li);
+    });
+  }
+
+  // ── View toggle ───────────────────────────────────────────────────
+
+  let inHistory = false;
+
+  function showFormView() {
+    inHistory = false;
+    viewForm.hidden = false;
+    viewHistory.hidden = true;
+    footEl.hidden = false;
+    historyToggle.title = "Geçmiş";
+    historyToggle.innerHTML = ICONS.history;
+    setMessage("", null);
+  }
+
+  function showHistoryView() {
+    inHistory = true;
+    viewForm.hidden = true;
+    viewHistory.hidden = false;
+    footEl.hidden = true;
+    historyToggle.title = "Forma dön";
+    historyToggle.innerHTML = ICONS.close;
+    renderHistory();
+    setMessage("", null);
+  }
+
+  historyToggle.addEventListener("click", () => inHistory ? showFormView() : showHistoryView());
+
+  // ── Copy helper ────────────────────────────────────────────────────
+
+  function copyId(id: string, btn?: Element) {
+    navigator.clipboard?.writeText(id).catch(() => {});
+    if (btn) {
+      btn.classList.add("copied");
+      btn.innerHTML = ICONS.check;
+      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = ICONS.copy; }, 1800);
+    }
+  }
 
   // ── UI helpers ────────────────────────────────────────────────────
 
@@ -225,8 +330,8 @@ function mount(
     renderAttachments();
   }
 
-  function open()   { root.dataset.open = "1"; setTimeout(() => textarea.focus(), 60); }
-  function close()  { root.dataset.open = "0"; }
+  function open()   { root.dataset.open = "1"; if (!inHistory) setTimeout(() => textarea.focus(), 60); }
+  function close()  { root.dataset.open = "0"; showFormView(); }
   function toggle() { root.dataset.open === "1" ? close() : open(); }
 
   // ── Events ────────────────────────────────────────────────────────
@@ -326,11 +431,27 @@ function mount(
         }).catch(() => {});
       }
 
-      setMessage("Teşekkürler! Geri bildirimin alındı.", "ok");
+      const fid: string = data.feedback_id;
+      saveToHistory({ id: fid, category: select.value, page: location.pathname, date: Date.now() });
+
+      // Show success with copyable reference ID
+      msg.hidden = false;
+      msg.className = "kf-msg kf-ok";
+      msg.innerHTML = `
+        ${ICONS.check} Teşekkürler! Geri bildirimin alındı.
+        <div class="kf-ref-box">
+          <span class="kf-ref-label">Referans no</span>
+          <span class="kf-ref-id">#${esc(fid)}</span>
+          <button class="kf-ref-copy" type="button" aria-label="Kopyala">${ICONS.copy}</button>
+        </div>`;
+      msg.querySelector(".kf-ref-copy")!.addEventListener("click", (e) =>
+        copyId(fid, e.currentTarget as Element)
+      );
+
       textarea.value = "";
       attachments.splice(0).forEach((a) => URL.revokeObjectURL(a.url));
       renderAttachments();
-      setTimeout(close, 1600);
+      setTimeout(close, 4000);
     } catch {
       setMessage("Bağlantı hatası. Lütfen tekrar dene.", "err");
     } finally {
