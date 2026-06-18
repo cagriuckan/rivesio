@@ -1,0 +1,36 @@
+{
+  "name": "kanews-feedback",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Centralized feedback widget server and admin panel for Kanthemes WordPress themes.",
+  "engines": {
+    "node": ">=20 <=22"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build:widget": "node scripts/build-widget.mjs",
+    "build": "npm run build:widget && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "hash": "node scripts/hash-password.mjs"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.8.1",
+    "jose": "^5.9.6",
+    "next": "^15.1.6",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.12",
+    "@types/node": "^22.10.7",
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "autoprefixer": "^10.4.20",
+    "esbuild": "^0.24.2",
+    "html2canvas": "^1.4.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.7.3"
+  }
+}
