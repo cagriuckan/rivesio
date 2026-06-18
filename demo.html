@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kanews Feedback — Demo</title>
+    <style>
+      body { font-family: system-ui, sans-serif; margin: 0; padding: 40px; line-height: 1.6; color: #1e293b; }
+      .box { max-width: 640px; margin: 0 auto; }
+      img { max-width: 100%; border-radius: 8px; }
+      code { background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <h1>Kanews Feedback — Demo sayfası</h1>
+      <p>
+        Bu sayfa widget'ı yerelde denemek içindir. Sağ altta <strong>Geri bildirim</strong>
+        butonu görünmeli; <code>⌘/Ctrl + /</code> ile de açılır. Site ilk yüklemede
+        <em>pending</em> gelir — panelin <strong>Siteler</strong> sayfasından onayla.
+      </p>
+      <p>Ekran yakalama testi için biraz içerik:</p>
+      <img src="https://picsum.photos/640/300" alt="örnek görsel" />
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+    </div>
+
+    <!-- WordPress dışı gömme örneği. Kendi değerlerinle değiştir. -->
+    <script>
+      window.KanewsFeedback = {
+        license: "DEMO-LICENSE",
+        theme: "kanews",
+        domain: location.host || "demo.local",
+      };
+    </script>
+    <script src="http://localhost:3100/api/widget/WIDGET_KEY_BURAYA.js" async></script>
+  </body>
+</html>
