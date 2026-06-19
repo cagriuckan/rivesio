@@ -1,4 +1,5 @@
 import Shell from "@/components/layout/Shell";
+import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import CreateProject from "@/components/CreateProject";
 import ProjectCard from "@/components/ProjectCard";
@@ -28,6 +29,7 @@ export default function ProjectsPage() {
         subtitle={`${projects.length} widget`}
         actions={<CreateProject />}
       />
+      <PageContent>
 
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface py-20 text-center">
@@ -63,6 +65,7 @@ export default function ProjectsPage() {
           })}
         </div>
       )}
+      </PageContent>
     </Shell>
   );
 }

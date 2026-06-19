@@ -33,25 +33,29 @@ export default function StatCard({
 
   const inner = (
     <>
-      <div className="mb-4 flex items-center justify-between">
-        <span className={cn("flex h-9 w-9 items-center justify-center rounded-lg", t.bg)}>
-          <Ico className={cn("h-[18px] w-[18px]", t.text)} />
-        </span>
+      {/* Icon + label */}
+      <div className="mb-4 flex items-start justify-between">
+        <div className="flex flex-col items-start gap-1.5">
+          <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", t.bg)}>
+            <Ico className={cn("h-4 w-4", t.text)} />
+          </span>
+          <span className="text-xs font-medium text-subtle">{label}</span>
+        </div>
         {href && (
           <Icon.arrowRight className="h-4 w-4 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
         )}
       </div>
-      <div className="text-3xl font-bold tracking-tight text-strong tnum">{value}</div>
-      <div className="mt-1 flex items-center gap-1.5 text-sm text-subtle">
-        <span>{label}</span>
-        {hint && <span className="text-faint">·</span>}
-        {hint}
-      </div>
+
+      {/* Value */}
+      <div className="text-2xl font-bold tracking-tight text-strong tnum">{value}</div>
+      {hint && (
+        <div className="mt-1 text-xs text-subtle">{hint}</div>
+      )}
     </>
   );
 
   const className = cn(
-    "group block rounded-xl border border-line bg-surface p-5 shadow-sm transition-colors",
+    "group block rounded-xl border border-line bg-surface p-4 transition-colors",
     href && "hover:border-line-strong"
   );
 

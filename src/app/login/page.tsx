@@ -38,22 +38,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-4">
-      {/* Ambient glow */}
-      <div aria-hidden className="pointer-events-none absolute left-1/2 top-1/3 h-[420px] w-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-accent/10 blur-[120px]" />
-
+    <div className="flex min-h-screen items-center justify-center bg-canvas px-4">
       <form
         onSubmit={submit}
-        className="relative w-full max-w-[380px] rounded-2xl border border-line bg-surface p-8 shadow-lg"
+        className="w-full max-w-[380px] rounded-xl border border-line bg-surface p-8"
       >
         {/* Brand */}
         <div className="mb-7">
           <div className="mb-5 flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-violet shadow-accent">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
               <Icon.feedback className="h-4 w-4 text-white" strokeWidth={2.25} />
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-bold text-strong">Kanews</div>
+              <div className="text-sm font-bold text-strong">Revisto</div>
               <div className="text-2xs font-medium text-subtle">Feedback</div>
             </div>
           </div>

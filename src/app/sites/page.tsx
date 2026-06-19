@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Shell from "@/components/layout/Shell";
+import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import SiteActions from "@/components/SiteActions";
 import { Card } from "@/components/ui/Card";
@@ -33,6 +34,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   return (
     <Shell>
       <PageHeader title="Siteler" subtitle={`${sites.length} kayıtlı site`} />
+      <PageContent>
 
       <div className="mb-5 inline-flex items-center gap-0.5 rounded-lg border border-line bg-base p-1">
         <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
@@ -89,6 +91,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
           </table>
         </Card>
       )}
+      </PageContent>
     </Shell>
   );
 }
@@ -99,7 +102,7 @@ function FilterTab({ href, active, children }: { href: string; active: boolean; 
       href={href}
       className={cn(
         "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-        active ? "bg-surface text-primary shadow-xs" : "text-subtle hover:text-primary"
+        active ? "bg-surface text-primary" : "text-subtle hover:text-primary"
       )}
     >
       {children}

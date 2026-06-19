@@ -84,7 +84,7 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
 
       {open && (
         <div
-          className="ds-fade-in absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-lg border border-line bg-overlay p-1 shadow-pop"
+          className="ds-fade-in absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-lg border border-line bg-overlay p-1"
           role="listbox"
         >
           <OptionRow

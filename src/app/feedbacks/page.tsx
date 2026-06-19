@@ -19,7 +19,6 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
     ? (sp.status as FeedbackStatus)
     : undefined;
   const project = sp.w ? getProjectById(sp.w) : undefined;
-
   const feedbacks = listFeedbacks({ status, projectId: project?.id });
 
   const buildHref = (s?: string) => {
@@ -34,20 +33,25 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
     <Shell>
       <PageHeader
         title="Geri Bildirimler"
-        subtitle={project ? `${project.name} · ${feedbacks.length} kayıt` : `${feedbacks.length} kayıt`}
+        subtitle={`${project ? project.name : "Tüm widget'lar"} · ${feedbacks.length} kayıt`}
       />
+      <div className="flex min-h-[calc(100%-3rem)] flex-col">
+        {/* Status filter */}
+        <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-2.5">
+          <div className="flex items-center gap-1 rounded-md border border-line bg-raised p-0.5">
+            <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
+            {FEEDBACK_STATUSES.map((s) => (
+              <FilterTab key={s} href={buildHref(s)} active={status === s}>
+                {FEEDBACK_STATUS_LABEL[s]}
+              </FilterTab>
+            ))}
+          </div>
+        </div>
 
-      {/* Status filter — segmented control */}
-      <div className="mb-5 inline-flex items-center gap-0.5 rounded-lg border border-line bg-base p-1">
-        <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
-        {FEEDBACK_STATUSES.map((s) => (
-          <FilterTab key={s} href={buildHref(s)} active={status === s}>
-            {FEEDBACK_STATUS_LABEL[s]}
-          </FilterTab>
-        ))}
+        <div className="flex-1">
+          <FeedbacksList feedbacks={feedbacks} initialId={sp.f ?? null} />
+        </div>
       </div>
-
-      <FeedbacksList feedbacks={feedbacks} initialId={sp.f ?? null} />
     </Shell>
   );
 }
@@ -56,11 +60,10 @@ function FilterTab({ href, active, children }: { href: string; active: boolean; 
   return (
     <Link
       href={href}
+      aria-current={active ? "page" : undefined}
       className={cn(
-        "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-        active
-          ? "bg-surface text-primary shadow-xs"
-          : "text-subtle hover:text-primary"
+        "rounded px-3 py-1.5 text-xs font-medium transition-colors",
+        active ? "bg-surface text-primary" : "text-subtle hover:text-primary"
       )}
     >
       {children}

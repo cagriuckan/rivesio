@@ -32,35 +32,43 @@ export default function FeedbackCard({
   return (
     <button
       onClick={onClick}
+      aria-pressed={selected}
       className={cn(
-        "block w-full rounded-xl border p-4 text-left transition-all outline-none",
+        "group flex w-full flex-col gap-3 rounded-xl border p-4 text-left transition-colors outline-none",
         "focus-visible:ring-2 focus-visible:ring-accent",
         selected
           ? "border-accent-line bg-accent-soft"
-          : "border-line bg-surface shadow-sm hover:border-line-strong"
+          : "border-line bg-surface hover:border-line-strong"
       )}
     >
-      <div className="mb-2.5 flex items-center gap-2">
+      {/* Top: status + time */}
+      <div className="flex items-center gap-2">
         <Badge tone={FEEDBACK_TONE[feedback.status]} dot>
           {FEEDBACK_STATUS_LABEL[feedback.status]}
         </Badge>
         {feedback.priority === "high" && (
-          <Badge tone={PRIORITY_TONE[feedback.priority]}>{PRIORITY_LABEL[feedback.priority]}</Badge>
+          <Badge tone={PRIORITY_TONE[feedback.priority]}>
+            {PRIORITY_LABEL[feedback.priority]}
+          </Badge>
         )}
-        <span className="ml-auto shrink-0 text-2xs text-faint tnum">{relativeTime(feedback.created_at)}</span>
+        <span className="ml-auto shrink-0 text-2xs text-faint tnum">
+          {relativeTime(feedback.created_at)}
+        </span>
       </div>
 
-      <p className={cn("text-sm font-medium leading-snug text-primary", compact ? "line-clamp-2" : "line-clamp-2")}>
+      {/* Message */}
+      <p className="line-clamp-3 text-sm leading-relaxed text-primary">
         {feedback.message}
       </p>
 
-      <div className="mt-3 flex items-center gap-2">
+      {/* Bottom: sender + category + attachments */}
+      <div className="flex items-center gap-2">
         <Avatar name={feedback.wp_user || feedback.domain} size="xs" />
-        <span className="truncate text-xs text-subtle">{feedback.domain}</span>
-        <span className="ml-auto flex shrink-0 items-center gap-2.5 text-2xs text-faint">
-          <span className="rounded bg-raised px-1.5 py-0.5 font-medium text-subtle">{feedback.category}</span>
+        <span className="min-w-0 truncate text-xs text-subtle">{feedback.domain}</span>
+        <span className="ml-auto flex shrink-0 items-center gap-2 text-2xs text-faint">
+          <span className="rounded bg-raised px-1.5 py-0.5 text-subtle">{feedback.category}</span>
           {feedback.attachment_count > 0 && (
-            <span className="flex items-center gap-1">
+            <span className="flex items-center gap-0.5">
               <Icon.paperclip className="h-3 w-3" />
               {feedback.attachment_count}
             </span>

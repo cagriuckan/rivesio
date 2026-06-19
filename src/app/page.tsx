@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Shell from "@/components/layout/Shell";
+import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import StatCard from "@/components/dashboard/StatCard";
 import BreakdownCard from "@/components/dashboard/BreakdownCard";
@@ -48,6 +49,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     return (
       <Shell>
         <PageHeader title="Genel Bakış" subtitle="Geri bildirim kontrol paneli" />
+        <PageContent>
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface py-20 text-center">
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
             <Icon.code className="h-6 w-6 text-subtle" />
@@ -64,6 +66,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             Widget oluştur
           </Link>
         </div>
+        </PageContent>
       </Shell>
     );
   }
@@ -76,13 +79,14 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         actions={
           <Link
             href={feedbacksHref}
-            className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-raised px-4 text-sm font-medium text-primary transition-colors hover:border-line-strong"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line px-3 text-xs font-medium text-secondary transition-colors hover:border-line-strong hover:text-primary"
           >
-            <Icon.feedback className="h-4 w-4 text-subtle" />
+            <Icon.feedback className="h-3.5 w-3.5" />
             Geri bildirimler
           </Link>
         }
       />
+      <PageContent>
 
       {/* KPIs */}
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -152,6 +156,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         />
         <CategoryCard categories={categories} />
       </div>
+      </PageContent>
     </Shell>
   );
 }

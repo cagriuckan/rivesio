@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Kanews Feedback",
+  title: "Revisto Feedback",
   description: "Kanthemes geri bildirim yönetim paneli",
 };
 

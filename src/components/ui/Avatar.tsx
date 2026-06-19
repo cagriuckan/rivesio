@@ -1,19 +1,18 @@
 import { cn } from "./cn";
 
-/** Deterministic gradient from a string seed. */
-const GRADIENTS = [
-  "from-[#6e79d6] to-[#a78bfa]",
-  "from-[#3ecf8e] to-[#4aa8ff]",
-  "from-[#f5a623] to-[#f5535b]",
-  "from-[#4aa8ff] to-[#6e79d6]",
-  "from-[#a78bfa] to-[#f5535b]",
-  "from-[#3ecf8e] to-[#6e79d6]",
+const COLORS = [
+  { bg: "#6e79d6", text: "#fff" },
+  { bg: "#3ecf8e", text: "#fff" },
+  { bg: "#f5a623", text: "#fff" },
+  { bg: "#4aa8ff", text: "#fff" },
+  { bg: "#a78bfa", text: "#fff" },
+  { bg: "#f5535b", text: "#fff" },
 ];
 
 function seedIndex(seed: string): number {
   let h = 0;
   for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
-  return Math.abs(h) % GRADIENTS.length;
+  return Math.abs(h) % COLORS.length;
 }
 
 function initials(name: string): string {
@@ -39,15 +38,15 @@ export function Avatar({
   size?: keyof typeof SIZES;
   className?: string;
 }) {
+  const c = COLORS[seedIndex(name)];
   return (
     <span
       className={cn(
-        "inline-flex shrink-0 items-center justify-center rounded-full",
-        "bg-gradient-to-br font-semibold text-white",
-        GRADIENTS[seedIndex(name)],
+        "inline-flex shrink-0 items-center justify-center rounded-full font-semibold",
         SIZES[size],
         className
       )}
+      style={{ backgroundColor: c.bg, color: c.text }}
       aria-hidden
     >
       {initials(name)}
