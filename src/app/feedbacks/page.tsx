@@ -17,17 +17,22 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
     : undefined;
 
   const feedbacks = listFeedbacks({ status });
-
   const filterLink = (s?: string) => (s ? `/feedbacks?status=${s}` : "/feedbacks");
 
   return (
     <Shell>
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-100">Geri bildirimler</h1>
-        <span className="text-sm text-gray-500">{feedbacks.length} kayıt</span>
+        <div>
+          <h1 className="text-lg font-bold" style={{ color: "var(--color-strong)", letterSpacing: "-0.025em" }}>
+            Geri bildirimler
+          </h1>
+          <p className="mt-0.5 text-xs" style={{ color: "var(--color-subtle)" }}>
+            {feedbacks.length} kayıt
+          </p>
+        </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex flex-wrap items-center gap-1.5">
         <FilterChip href={filterLink()} active={!status}>Tümü</FilterChip>
         {FEEDBACK_STATUSES.map((s) => (
           <FilterChip key={s} href={filterLink(s)} active={status === s}>
@@ -45,12 +50,16 @@ function FilterChip({ href, active, children }: { href: string; active: boolean;
   return (
     <Link
       href={href}
-      className={[
-        "rounded-full px-3 py-1 text-xs font-semibold transition-colors",
+      className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+      style={
         active
-          ? "bg-indigo-600 text-white"
-          : "bg-gray-800 text-gray-400 hover:bg-gray-700 hover:text-gray-200",
-      ].join(" ")}
+          ? { backgroundColor: "var(--color-accent)", color: "#fff" }
+          : {
+              backgroundColor: "var(--color-elevated)",
+              color: "var(--color-secondary)",
+              border: "1px solid var(--color-border)",
+            }
+      }
     >
       {children}
     </Link>

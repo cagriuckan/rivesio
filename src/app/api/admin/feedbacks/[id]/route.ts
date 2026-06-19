@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { updateFeedback, getFeedbackWithMeta } from "@/lib/admin-repo";
+import { updateFeedback, getFeedbackWithMeta, deleteFeedback } from "@/lib/admin-repo";
 import { listAttachments } from "@/lib/repo";
+import { deleteAttachmentDir } from "@/lib/storage";
 
 const schema = z.object({
   status: z.enum(["new", "planned", "in_progress", "resolved", "wontfix"]).optional(),
@@ -15,6 +16,14 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   if (!fb) return NextResponse.json({ error: "not_found" }, { status: 404 });
   const attachments = listAttachments(id);
   return NextResponse.json({ ...fb, attachments });
+}
+
+export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const { id } = await ctx.params;
+  if (!getFeedbackWithMeta(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  deleteAttachmentDir(id);
+  deleteFeedback(id);
+  return NextResponse.json({ ok: true });
 }
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {

@@ -1,33 +1,68 @@
 import type { FeedbackStatus, Priority, SiteStatus } from "@/lib/types";
 
-const FEEDBACK_COLORS: Record<FeedbackStatus, string> = {
-  new: "bg-blue-100 text-blue-700",
-  planned: "bg-violet-100 text-violet-700",
-  in_progress: "bg-amber-100 text-amber-700",
-  resolved: "bg-emerald-100 text-emerald-700",
-  wontfix: "bg-slate-200 text-slate-600",
+type BadgeVariant = "info" | "violet" | "warn" | "ok" | "muted" | "danger" | "accent";
+
+const FEEDBACK_VARIANTS: Record<FeedbackStatus, BadgeVariant> = {
+  new:         "info",
+  planned:     "violet",
+  in_progress: "warn",
+  resolved:    "ok",
+  wontfix:     "muted",
 };
 
-const PRIORITY_COLORS: Record<Priority, string> = {
-  low: "bg-slate-100 text-slate-600",
-  normal: "bg-sky-100 text-sky-700",
-  high: "bg-red-100 text-red-700",
+const PRIORITY_VARIANTS: Record<Priority, BadgeVariant> = {
+  low:    "muted",
+  normal: "accent",
+  high:   "danger",
 };
 
-const SITE_COLORS: Record<SiteStatus, string> = {
-  pending: "bg-amber-100 text-amber-700",
-  approved: "bg-emerald-100 text-emerald-700",
-  blocked: "bg-red-100 text-red-700",
+const SITE_VARIANTS: Record<SiteStatus, BadgeVariant> = {
+  pending:  "warn",
+  approved: "ok",
+  blocked:  "danger",
 };
 
-export function Badge({ color, children }: { color: string; children: React.ReactNode }) {
+const VARIANT_STYLES: Record<BadgeVariant, { bg: string; text: string; dot: string }> = {
+  info:   { bg: "var(--color-info-muted)",   text: "var(--color-info-text)",   dot: "var(--color-info)" },
+  violet: { bg: "var(--color-violet-muted)", text: "var(--color-violet-text)", dot: "var(--color-violet)" },
+  warn:   { bg: "var(--color-warn-muted)",   text: "var(--color-warn-text)",   dot: "var(--color-warn)" },
+  ok:     { bg: "var(--color-ok-muted)",     text: "var(--color-ok-text)",     dot: "var(--color-ok)" },
+  muted:  { bg: "var(--color-elevated)",     text: "var(--color-subtle)",      dot: "var(--color-subtle)" },
+  danger: { bg: "var(--color-danger-muted)", text: "var(--color-danger-text)", dot: "var(--color-danger)" },
+  accent: { bg: "var(--color-accent-muted)", text: "var(--color-accent-text)", dot: "var(--color-accent)" },
+};
+
+export function Badge({
+  variant = "muted",
+  dot = false,
+  children,
+}: {
+  variant?: BadgeVariant;
+  dot?: boolean;
+  children: React.ReactNode;
+}) {
+  const s = VARIANT_STYLES[variant];
   return (
-    <span className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${color}`}>
+    <span
+      className="ds-badge"
+      style={{ backgroundColor: s.bg, color: s.text }}
+    >
+      {dot && (
+        <span
+          className="inline-block h-1.5 w-1.5 shrink-0 rounded-full"
+          style={{ backgroundColor: s.dot }}
+        />
+      )}
       {children}
     </span>
   );
 }
 
-export const feedbackColor = (s: FeedbackStatus) => FEEDBACK_COLORS[s];
-export const priorityColor = (p: Priority) => PRIORITY_COLORS[p];
-export const siteColor = (s: SiteStatus) => SITE_COLORS[s];
+export const feedbackVariant = (s: FeedbackStatus): BadgeVariant => FEEDBACK_VARIANTS[s];
+export const priorityVariant = (p: Priority): BadgeVariant => PRIORITY_VARIANTS[p];
+export const siteVariant = (s: SiteStatus): BadgeVariant => SITE_VARIANTS[s];
+
+/* Legacy helpers kept for any remaining callers */
+export const feedbackColor = (_s: FeedbackStatus) => "";
+export const priorityColor = (_p: Priority) => "";
+export const siteColor = (_s: SiteStatus) => "";

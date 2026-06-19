@@ -195,6 +195,12 @@ export function updateFeedback(
     .run(...vals);
 }
 
+export function deleteFeedback(id: string): void {
+  const db = getDb();
+  db.prepare("DELETE FROM attachments WHERE feedback_id = ?").run(id);
+  db.prepare("DELETE FROM feedbacks WHERE id = ?").run(id);
+}
+
 export function getAttachmentById(id: string): AttachmentRow | undefined {
   return getDb().prepare("SELECT * FROM attachments WHERE id = ?").get(id) as
     | AttachmentRow

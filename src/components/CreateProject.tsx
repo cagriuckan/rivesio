@@ -9,7 +9,7 @@ export default function CreateProject() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [themeSlug, setThemeSlug] = useState("");
-  const [accentColor, setAccentColor] = useState("#4f46e5");
+  const [accentColor, setAccentColor] = useState("#6366f1");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -41,42 +41,75 @@ export default function CreateProject() {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark"
+        className="ds-btn-primary"
       >
-        + Yeni widget
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        Yeni widget
       </button>
     );
   }
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5">
-      <h3 className="mb-4 text-sm font-semibold text-slate-700">Yeni widget / tema</h3>
-      <div className="grid gap-3 sm:grid-cols-2">
+    <div
+      className="mb-6 rounded-xl p-5"
+      style={{
+        backgroundColor: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        boxShadow: "var(--shadow-card)",
+      }}
+    >
+      <h3
+        className="mb-4 text-sm font-semibold"
+        style={{ color: "var(--color-strong)" }}
+      >
+        Yeni widget / tema
+      </h3>
+      <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Ad" value={name} onChange={setName} placeholder="Kanews" />
         <Field label="Slug (a-z0-9-)" value={slug} onChange={setSlug} placeholder="kanews" />
         <Field label="Tema slug" value={themeSlug} onChange={setThemeSlug} placeholder="kanews" />
         <div>
-          <label className="mb-1 block text-xs font-medium text-slate-500">Vurgu rengi</label>
-          <input
-            type="color"
-            value={accentColor}
-            onChange={(e) => setAccentColor(e.target.value)}
-            className="h-9 w-16 rounded border border-slate-300"
-          />
+          <label
+            className="mb-1.5 block text-xs font-semibold uppercase tracking-widest"
+            style={{ color: "var(--color-subtle)" }}
+          >
+            Vurgu rengi
+          </label>
+          <div className="flex items-center gap-3">
+            <input
+              type="color"
+              value={accentColor}
+              onChange={(e) => setAccentColor(e.target.value)}
+              className="h-9 w-14 cursor-pointer rounded-lg border"
+              style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-elevated)" }}
+            />
+            <code
+              className="text-xs"
+              style={{ color: "var(--color-secondary)", fontFamily: "var(--font-mono)" }}
+            >
+              {accentColor}
+            </code>
+          </div>
         </div>
       </div>
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-      <div className="mt-4 flex gap-2">
+
+      {error && (
+        <p className="mt-3 text-sm" style={{ color: "var(--color-danger-text)" }}>{error}</p>
+      )}
+
+      <div className="mt-5 flex gap-2">
         <button
           onClick={create}
           disabled={busy || !name || !slug || !themeSlug}
-          className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-dark disabled:opacity-50"
+          className="ds-btn-primary"
         >
-          Oluştur
+          {busy ? "Oluşturuluyor…" : "Oluştur"}
         </button>
         <button
           onClick={() => setOpen(false)}
-          className="rounded-lg px-4 py-2 text-sm text-slate-500 hover:bg-slate-100"
+          className="ds-btn-ghost"
         >
           Vazgeç
         </button>
@@ -85,21 +118,41 @@ export default function CreateProject() {
   );
 }
 
-function Field(props: {
+function Field({ label, value, onChange, placeholder }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   placeholder?: string;
 }) {
+  const [focused, setFocused] = useState(false);
   return (
-    <div>
-      <label className="mb-1 block text-xs font-medium text-slate-500">{props.label}</label>
+    <label className="block">
+      <span
+        className="mb-1.5 block text-xs font-semibold uppercase tracking-widest"
+        style={{ color: "var(--color-subtle)" }}
+      >
+        {label}
+      </span>
       <input
-        value={props.value}
-        onChange={(e) => props.onChange(e.target.value)}
-        placeholder={props.placeholder}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        placeholder={placeholder}
+        style={{
+          width: "100%",
+          backgroundColor: "var(--color-elevated)",
+          border: `1px solid ${focused ? "var(--color-accent)" : "var(--color-border)"}`,
+          borderRadius: "var(--radius-md)",
+          padding: "8px 12px",
+          fontSize: "13px",
+          color: "var(--color-primary)",
+          fontFamily: "var(--font-sans)",
+          boxShadow: focused ? "0 0 0 3px var(--color-accent-muted)" : "none",
+          outline: "none",
+          transition: "border-color .15s, box-shadow .15s",
+        }}
       />
-    </div>
+    </label>
   );
 }

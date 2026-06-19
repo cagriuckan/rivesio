@@ -107,7 +107,11 @@ function mount(
   const root = document.createElement("div");
   root.className = "kf-root";
   root.dataset.pos = project.position || "bottom-right";
-  root.style.setProperty("--kf-accent", project.accentColor || "#4f46e5");
+  root.style.setProperty("--kf-accent", project.accentColor || "#6366f1");
+
+  // Mirror host page theme into widget
+  const pageTheme = document.documentElement.getAttribute("data-theme");
+  if (pageTheme === "light") root.dataset.theme = "light";
 
   const categoryOptions = (project.categories ?? ["Öneri"])
     .map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)
@@ -125,9 +129,9 @@ function mount(
           <div class="kf-title-icon">${ICONS.chat}</div>
           <span class="kf-title">Geri bildirim</span>
         </div>
-        <div style="display:flex;gap:4px;align-items:center;">
-          <button class="kf-close kf-history-toggle" type="button" aria-label="Geçmiş">${ICONS.history}</button>
-          <button class="kf-close" type="button" aria-label="Kapat">${ICONS.close}</button>
+        <div class="kf-head-actions">
+          <button class="kf-icon-btn kf-history-toggle" type="button" aria-label="Geçmiş">${ICONS.history}</button>
+          <button class="kf-icon-btn kf-close-btn" type="button" aria-label="Kapat">${ICONS.close}</button>
         </div>
       </div>
 
@@ -143,12 +147,12 @@ function mount(
       <div class="kf-body">
 
         <div>
-          <label class="kf-field-label">Kategori</label>
+          <label class="kf-label">Kategori</label>
           <select class="kf-select" aria-label="Kategori">${categoryOptions}</select>
         </div>
 
         <div>
-          <label class="kf-field-label">Açıklama</label>
+          <label class="kf-label">Açıklama</label>
           <textarea class="kf-textarea" placeholder="Ne eklensin ya da nerede bir sorun var?"></textarea>
         </div>
 
@@ -188,7 +192,7 @@ function mount(
   const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
   const fab            = $<HTMLButtonElement>(".kf-fab");
   const panel          = $<HTMLDivElement>(".kf-panel");
-  const closeBtn       = $<HTMLButtonElement>(".kf-close");
+  const closeBtn       = $<HTMLButtonElement>(".kf-close-btn");
   const historyToggle  = $<HTMLButtonElement>(".kf-history-toggle");
   const cancelBtn      = $<HTMLButtonElement>(".kf-cancel");
   const submitBtn      = $<HTMLButtonElement>(".kf-submit");

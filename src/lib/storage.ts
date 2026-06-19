@@ -19,6 +19,12 @@ export function saveAttachment(feedbackId: string, fileId: string, mime: string,
   return path.relative(env.uploadDir, abs);
 }
 
+/** Deletes all attachment files for a feedback (the per-feedback directory). */
+export function deleteAttachmentDir(feedbackId: string): void {
+  const dir = path.join(env.uploadDir, feedbackId);
+  fs.rmSync(dir, { recursive: true, force: true });
+}
+
 /** Resolves a stored relative path back to an absolute path, guarding against traversal. */
 export function resolveAttachment(relPath: string): string | null {
   const abs = path.resolve(env.uploadDir, relPath);
