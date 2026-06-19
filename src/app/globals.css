@@ -20,26 +20,26 @@
   --radius-2xl:  20px;
   --radius-full: 9999px;
 
-  /* ── Background scale (dark) ── */
-  --color-canvas:   #0a0a0b;
-  --color-base:     #0d0d0f;
-  --color-surface:  #111114;
-  --color-raised:   #18181c;
-  --color-overlay:  #1e1e23;
-  --color-inset:    #080809;
+  /* ── Background scale (dark) — pure black/grey, no colour tint ── */
+  --color-canvas:   #0a0a0a;
+  --color-base:     #0f0f0f;
+  --color-surface:  #141414;
+  --color-raised:   #1a1a1a;
+  --color-overlay:  #212121;
+  --color-inset:    #080808;
 
   /* ── Borders ── */
-  --color-line:        #202025;
-  --color-line-soft:   #191919;
-  --color-line-strong: #2e2e35;
+  --color-line:        #262626;
+  --color-line-soft:   #1f1f1f;
+  --color-line-strong: #333333;
 
   /* ── Text scale ── */
-  --color-faint:     #46464e;
-  --color-subtle:    #64646e;
-  --color-muted:     #87878f;
-  --color-secondary: #a5a5ae;
-  --color-primary:   #e4e4e8;
-  --color-strong:    #f8f8fa;
+  --color-faint:     #404040;
+  --color-subtle:    #616161;
+  --color-muted:     #8a8a8a;
+  --color-secondary: #a8a8a8;
+  --color-primary:   #ededed;
+  --color-strong:    #ffffff;
 
   /* ── Accent (Linear blurple) ── */
   --color-accent:        #6e79d6;
