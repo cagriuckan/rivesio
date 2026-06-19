@@ -21,9 +21,13 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
 
   return (
     <Shell>
-      <div className="mb-6 flex items-center justify-between">
+      {/* Header */}
+      <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold" style={{ color: "var(--color-strong)", letterSpacing: "-0.025em" }}>
+          <h1
+            className="text-base font-bold"
+            style={{ color: "var(--color-strong)", letterSpacing: "-0.02em" }}
+          >
             Geri bildirimler
           </h1>
           <p className="mt-0.5 text-xs" style={{ color: "var(--color-subtle)" }}>
@@ -32,12 +36,16 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
         </div>
       </div>
 
-      <div className="mb-4 flex flex-wrap items-center gap-1.5">
-        <FilterChip href={filterLink()} active={!status}>Tümü</FilterChip>
+      {/* Filter tabs */}
+      <div
+        className="mb-4 flex items-center gap-1 rounded-lg p-1"
+        style={{ backgroundColor: "var(--color-elevated)", width: "fit-content" }}
+      >
+        <FilterTab href={filterLink()} active={!status}>Tümü</FilterTab>
         {FEEDBACK_STATUSES.map((s) => (
-          <FilterChip key={s} href={filterLink(s)} active={status === s}>
+          <FilterTab key={s} href={filterLink(s)} active={status === s}>
             {FEEDBACK_STATUS_LABEL[s]}
-          </FilterChip>
+          </FilterTab>
         ))}
       </div>
 
@@ -46,18 +54,20 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
   );
 }
 
-function FilterChip({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+function FilterTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
   return (
     <Link
       href={href}
-      className="rounded-full px-3 py-1.5 text-xs font-semibold transition-all"
+      className="rounded-md px-3 py-1.5 text-xs font-semibold transition-all"
       style={
         active
-          ? { backgroundColor: "var(--color-accent)", color: "#fff" }
+          ? {
+              backgroundColor: "var(--color-surface)",
+              color: "var(--color-primary)",
+              boxShadow: "var(--shadow-card)",
+            }
           : {
-              backgroundColor: "var(--color-elevated)",
               color: "var(--color-secondary)",
-              border: "1px solid var(--color-border)",
             }
       }
     >

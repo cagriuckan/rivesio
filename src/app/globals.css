@@ -3,124 +3,112 @@
 /* ─── Design Tokens ─────────────────────────────────────────────────────── */
 
 @theme {
-  /* Radius scale */
-  --radius-xs:  4px;
-  --radius-sm:  6px;
-  --radius-md:  8px;
-  --radius-lg:  12px;
-  --radius-xl:  16px;
-  --radius-2xl: 20px;
+  --radius-xs:   3px;
+  --radius-sm:   5px;
+  --radius-md:   8px;
+  --radius-lg:   12px;
+  --radius-xl:   16px;
   --radius-full: 9999px;
 
-  /* Neutral palette — dark-first */
-  --color-base:     #09090b;
-  --color-surface:  #111113;
-  --color-elevated: #18181b;
-  --color-overlay:  #1e1e21;
-  --color-border:   #27272a;
+  /* Dark palette */
+  --color-base:          #09090b;
+  --color-surface:       #111113;
+  --color-elevated:      #18181b;
+  --color-overlay:       #1e1e21;
+  --color-border:        #27272a;
   --color-border-subtle: #1f1f22;
-  --color-muted:    #3f3f46;
-  --color-subtle:   #52525b;
-  --color-secondary: #71717a;
-  --color-tertiary:  #a1a1aa;
-  --color-primary:   #e4e4e7;
-  --color-strong:    #fafafa;
+  --color-muted:         #3f3f46;
+  --color-subtle:        #52525b;
+  --color-secondary:     #71717a;
+  --color-tertiary:      #a1a1aa;
+  --color-primary:       #e4e4e7;
+  --color-strong:        #fafafa;
 
-  /* Accent — indigo/violet gradient family */
+  /* Accent */
   --color-accent:        #6366f1;
-  --color-accent-hover:  #7c3aed;
-  --color-accent-muted:  color-mix(in srgb, #6366f1 14%, transparent);
-  --color-accent-border: color-mix(in srgb, #6366f1 35%, transparent);
+  --color-accent-hover:  #4f46e5;
+  --color-accent-muted:  color-mix(in srgb, #6366f1 12%, transparent);
+  --color-accent-border: color-mix(in srgb, #6366f1 30%, transparent);
   --color-accent-text:   #a5b4fc;
 
   /* Semantic */
-  --color-ok:          #10b981;
-  --color-ok-muted:    color-mix(in srgb, #10b981 14%, transparent);
-  --color-ok-text:     #6ee7b7;
-  --color-warn:        #f59e0b;
-  --color-warn-muted:  color-mix(in srgb, #f59e0b 14%, transparent);
-  --color-warn-text:   #fcd34d;
-  --color-danger:      #ef4444;
-  --color-danger-muted: color-mix(in srgb, #ef4444 14%, transparent);
-  --color-danger-text: #fca5a5;
-  --color-info:        #38bdf8;
-  --color-info-muted:  color-mix(in srgb, #38bdf8 14%, transparent);
-  --color-info-text:   #7dd3fc;
-  --color-violet:      #8b5cf6;
-  --color-violet-muted: color-mix(in srgb, #8b5cf6 14%, transparent);
-  --color-violet-text: #c4b5fd;
+  --color-ok:            #10b981;
+  --color-ok-muted:      color-mix(in srgb, #10b981 13%, transparent);
+  --color-ok-text:       #6ee7b7;
+  --color-warn:          #f59e0b;
+  --color-warn-muted:    color-mix(in srgb, #f59e0b 13%, transparent);
+  --color-warn-text:     #fcd34d;
+  --color-danger:        #ef4444;
+  --color-danger-muted:  color-mix(in srgb, #ef4444 13%, transparent);
+  --color-danger-text:   #fca5a5;
+  --color-info:          #38bdf8;
+  --color-info-muted:    color-mix(in srgb, #38bdf8 13%, transparent);
+  --color-info-text:     #7dd3fc;
+  --color-violet:        #8b5cf6;
+  --color-violet-muted:  color-mix(in srgb, #8b5cf6 13%, transparent);
+  --color-violet-text:   #c4b5fd;
 
   /* Typography */
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
-  --tracking-tight: -0.025em;
-  --tracking-dense: -0.015em;
 
   /* Shadows */
-  --shadow-card: 0 1px 3px rgba(0,0,0,.4), 0 4px 12px rgba(0,0,0,.25);
-  --shadow-panel: 0 0 0 1px rgba(255,255,255,.05), 0 8px 24px rgba(0,0,0,.5), 0 32px 64px rgba(0,0,0,.4);
+  --shadow-card:    0 1px 2px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.04);
+  --shadow-panel:   0 0 0 1px rgba(255,255,255,.06), 0 4px 16px rgba(0,0,0,.5);
   --shadow-dropdown: 0 0 0 1px rgba(255,255,255,.06), 0 4px 12px rgba(0,0,0,.4);
-  --shadow-fab: 0 4px 6px rgba(0,0,0,.3), 0 12px 24px rgba(0,0,0,.35);
+  --shadow-fab:     0 4px 6px rgba(0,0,0,.3), 0 12px 24px rgba(0,0,0,.35);
 }
 
-/* ─── Light theme overrides ─────────────────────────────────────────────── */
+/* ─── Light theme ───────────────────────────────────────────────────────── */
 
 [data-theme="light"] {
-  --color-base:     #ffffff;
-  --color-surface:  #fafafa;
-  --color-elevated: #f4f4f5;
-  --color-overlay:  #f0f0f2;
-  --color-border:   #e4e4e7;
+  /* ── Taskk reference palette ── */
+  --color-base:          #f3f4f6;
+  --color-surface:       #ffffff;
+  --color-elevated:      #f9fafb;
+  --color-overlay:       #f3f4f6;
+  --color-border:        #e5e7eb;
   --color-border-subtle: #f0f0f2;
-  --color-muted:    #d4d4d8;
-  --color-subtle:   #a1a1aa;
-  --color-secondary: #71717a;
-  --color-tertiary:  #52525b;
-  --color-primary:   #18181b;
-  --color-strong:    #09090b;
+  --color-muted:         #d1d5db;
+  --color-subtle:        #9ca3af;
+  --color-secondary:     #6b7280;
+  --color-tertiary:      #374151;
+  --color-primary:       #111827;
+  --color-strong:        #030712;
 
   --color-accent:        #4f46e5;
   --color-accent-hover:  #4338ca;
-  --color-accent-muted:  color-mix(in srgb, #4f46e5 10%, transparent);
-  --color-accent-border: color-mix(in srgb, #4f46e5 25%, transparent);
+  --color-accent-muted:  color-mix(in srgb, #4f46e5 9%, transparent);
+  --color-accent-border: color-mix(in srgb, #4f46e5 22%, transparent);
   --color-accent-text:   #4f46e5;
 
-  --color-ok-text:     #059669;
-  --color-warn-text:   #d97706;
-  --color-danger-text: #dc2626;
-  --color-info-text:   #0284c7;
-  --color-violet-text: #7c3aed;
+  --color-ok-text:       #059669;
+  --color-warn-text:     #d97706;
+  --color-danger-text:   #dc2626;
+  --color-info-text:     #0284c7;
+  --color-violet-text:   #7c3aed;
 
-  --shadow-card: 0 1px 3px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.06);
-  --shadow-panel: 0 0 0 1px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.1), 0 32px 64px rgba(0,0,0,.08);
-  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,.08), 0 4px 12px rgba(0,0,0,.1);
-  --shadow-fab: 0 4px 6px rgba(0,0,0,.12), 0 12px 24px rgba(0,0,0,.14);
+  --shadow-card:    0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.05);
+  --shadow-panel:   0 0 0 1px rgba(0,0,0,.06), 0 4px 16px rgba(0,0,0,.08);
+  --shadow-dropdown: 0 0 0 1px rgba(0,0,0,.07), 0 4px 12px rgba(0,0,0,.1);
+  --shadow-fab:     0 4px 6px rgba(0,0,0,.1), 0 12px 24px rgba(0,0,0,.12);
 }
 
 /* ─── Base ──────────────────────────────────────────────────────────────── */
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+*, *::before, *::after { box-sizing: border-box; }
 
-:root {
-  color-scheme: dark;
-}
-
-[data-theme="light"] {
-  color-scheme: light;
-}
+:root { color-scheme: dark; }
+[data-theme="light"] { color-scheme: light; }
 
 html {
   -webkit-text-size-adjust: 100%;
-  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  font-feature-settings: "cv02","cv03","cv04","cv11";
 }
 
 body {
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: 13px;
   line-height: 1.5;
   background-color: var(--color-base);
   color: var(--color-primary);
@@ -128,15 +116,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ─── Custom scrollbar ──────────────────────────────────────────────────── */
-
+/* ─── Scrollbar ─────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-muted); border-radius: 9999px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--color-subtle); }
 
-/* ─── Focus ring ────────────────────────────────────────────────────────── */
-
+/* ─── Focus ─────────────────────────────────────────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -144,69 +130,50 @@ body {
 }
 
 /* ─── Selection ─────────────────────────────────────────────────────────── */
-
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 25%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
   color: var(--color-strong);
 }
 
-/* ─── Utility classes (design system primitives) ───────────────────────── */
+/* ─── Design system primitives ──────────────────────────────────────────── */
 
-/* Card */
-.ds-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-}
-
-/* Badge */
 .ds-badge {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 2px 8px;
+  padding: 2px 7px;
   border-radius: var(--radius-full);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   line-height: 1.6;
 }
 
-/* Input / Select / Textarea shared base */
 .ds-input {
   width: 100%;
-  background: var(--color-elevated);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 8px 12px;
+  padding: 7px 11px;
   font-size: 13px;
   color: var(--color-primary);
   font-family: var(--font-sans);
   transition: border-color .15s, box-shadow .15s;
   outline: none;
 }
-
-.ds-input::placeholder {
-  color: var(--color-subtle);
-}
-
-.ds-input:hover {
-  border-color: var(--color-muted);
-}
-
+.ds-input::placeholder { color: var(--color-subtle); }
+.ds-input:hover { border-color: var(--color-muted); }
 .ds-input:focus {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px var(--color-accent-muted);
 }
 
-/* Primary button */
 .ds-btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 16px;
+  padding: 7px 14px;
   background: var(--color-accent);
   color: #fff;
   font-size: 13px;
@@ -214,27 +181,21 @@ body {
   border-radius: var(--radius-md);
   border: none;
   cursor: pointer;
-  transition: background .15s, transform .1s, box-shadow .15s;
+  transition: background .15s, transform .1s;
   outline: none;
   font-family: var(--font-sans);
   letter-spacing: -0.01em;
 }
-
-.ds-btn-primary:hover {
-  background: var(--color-accent-hover);
-  box-shadow: 0 0 0 1px var(--color-accent-border), 0 4px 12px var(--color-accent-muted);
-}
-
+.ds-btn-primary:hover { background: var(--color-accent-hover); }
 .ds-btn-primary:active { transform: scale(.98); }
 .ds-btn-primary:disabled { opacity: .45; cursor: not-allowed; }
 
-/* Ghost button */
 .ds-btn-ghost {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 8px 12px;
+  padding: 7px 12px;
   background: transparent;
   color: var(--color-secondary);
   font-size: 13px;
@@ -246,22 +207,19 @@ body {
   outline: none;
   font-family: var(--font-sans);
 }
-
 .ds-btn-ghost:hover {
   background: var(--color-elevated);
   color: var(--color-primary);
   border-color: var(--color-muted);
 }
-
 .ds-btn-ghost:active { transform: scale(.98); }
 
-/* Icon button */
 .ds-btn-icon {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   background: transparent;
   color: var(--color-subtle);
   border-radius: var(--radius-md);
@@ -271,70 +229,20 @@ body {
   outline: none;
   flex-shrink: 0;
 }
-
 .ds-btn-icon:hover {
   background: var(--color-elevated);
   color: var(--color-primary);
 }
 
-/* Divider */
-.ds-divider {
-  height: 1px;
-  background: var(--color-border);
-  border: none;
-  margin: 0;
-}
-
-/* Table */
-.ds-table {
-  width: 100%;
-  font-size: 13px;
-  border-collapse: collapse;
-}
-
-.ds-table thead tr {
-  border-bottom: 1px solid var(--color-border);
-}
-
-.ds-table th {
-  padding: 10px 16px;
-  text-align: left;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-subtle);
-}
-
-.ds-table td {
-  padding: 10px 16px;
-  border-top: 1px solid var(--color-border-subtle);
-  color: var(--color-tertiary);
-  vertical-align: middle;
-}
-
-.ds-table tbody tr:first-child td {
-  border-top: none;
-}
-
-.ds-table tbody tr {
-  transition: background .1s;
-}
-
-.ds-table tbody tr:hover td {
-  background: var(--color-elevated);
-}
-
-/* Loading shimmer */
+/* ─── Shimmer ───────────────────────────────────────────────────────────── */
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
 }
-
 .ds-shimmer {
   background: linear-gradient(90deg,
     var(--color-elevated) 25%,
-    var(--color-overlay) 50%,
+    var(--color-overlay)  50%,
     var(--color-elevated) 75%
   );
   background-size: 200% 100%;
@@ -342,8 +250,5 @@ body {
   border-radius: var(--radius-sm);
 }
 
-/* ─── Theme toggle transition ───────────────────────────────────────────── */
-
-html {
-  transition: background-color .2s, color .2s;
-}
+/* ─── Theme transition ──────────────────────────────────────────────────── */
+html { transition: background-color .2s, color .2s; }
