@@ -56,10 +56,20 @@ export default function FeedbackCard({
         </span>
       </div>
 
-      {/* Message */}
-      <p className="line-clamp-3 text-sm leading-relaxed text-primary">
-        {feedback.message}
-      </p>
+      {/* Message + thumbnail */}
+      <div className="flex items-start gap-3">
+        <p className="min-w-0 flex-1 line-clamp-3 text-sm leading-relaxed text-primary">
+          {feedback.message}
+        </p>
+        {feedback.first_attachment_id && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={`/api/admin/attachments/${feedback.first_attachment_id}`}
+            alt="Ek"
+            className="h-14 w-20 shrink-0 rounded-md border border-line object-cover"
+          />
+        )}
+      </div>
 
       {/* Bottom: sender + category + attachments + id */}
       <div className="flex items-center gap-2">

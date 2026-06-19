@@ -121,6 +121,7 @@ export interface FeedbackWithMeta extends FeedbackRow {
   project_name: string;
   domain: string;
   attachment_count: number;
+  first_attachment_id: string | null;
 }
 
 export function listFeedbacks(filter: {
@@ -146,7 +147,8 @@ export function listFeedbacks(filter: {
   return getDb()
     .prepare(
       `SELECT f.*, p.name AS project_name, s.domain AS domain,
-        (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count
+        (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count,
+        (SELECT a.id FROM attachments a WHERE a.feedback_id = f.id ORDER BY a.id LIMIT 1) AS first_attachment_id
        FROM feedbacks f
        JOIN projects p ON p.id = f.project_id
        JOIN sites s ON s.id = f.site_id
@@ -161,7 +163,8 @@ export function getFeedbackWithMeta(id: string): FeedbackWithMeta | undefined {
   return getDb()
     .prepare(
       `SELECT f.*, p.name AS project_name, s.domain AS domain,
-        (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count
+        (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count,
+        (SELECT a.id FROM attachments a WHERE a.feedback_id = f.id ORDER BY a.id LIMIT 1) AS first_attachment_id
        FROM feedbacks f
        JOIN projects p ON p.id = f.project_id
        JOIN sites s ON s.id = f.site_id

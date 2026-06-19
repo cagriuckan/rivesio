@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icons";
 import FeedbackCard from "./FeedbackCard";
 import FeedbackDetail from "./FeedbackDetail";
@@ -15,18 +16,36 @@ export default function FeedbacksList({
   initialId: string | null;
   filterBar?: React.ReactNode;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [selectedId, setSelectedId] = useState<string | null>(
     initialId && feedbacks.some((f) => f.id === initialId) ? initialId : null
   );
   const [query, setQuery] = useState("");
 
+  function openFeedback(id: string) {
+    setSelectedId(id);
+    const params = new URLSearchParams(window.location.search);
+    params.set("f", id);
+    router.replace(`${pathname}?${params}`, { scroll: false });
+  }
+
+  function closeFeedback() {
+    setSelectedId(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("f");
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }
+
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setSelectedId(null);
+      if (e.key === "Escape") closeFeedback();
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, []);
+  });
 
   const open = selectedId !== null;
 
@@ -40,8 +59,8 @@ export default function FeedbacksList({
         <FeedbackDetail
           key={selectedId}
           id={selectedId}
-          onClose={() => setSelectedId(null)}
-          onDeleted={() => setSelectedId(null)}
+          onClose={closeFeedback}
+          onDeleted={closeFeedback}
         />
       </div>
     );
@@ -49,7 +68,6 @@ export default function FeedbacksList({
 
   return (
     <>
-      {/* Toolbar: filter tabs + search */}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         {filterBar}
         <div className="relative ml-auto">
@@ -82,7 +100,7 @@ export default function FeedbacksList({
                 feedback={f}
                 selected={false}
                 compact={false}
-                onClick={() => setSelectedId(f.id)}
+                onClick={() => openFeedback(f.id)}
               />
             </div>
           ))}

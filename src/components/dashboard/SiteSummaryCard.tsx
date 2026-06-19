@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 
-function Tile({
+function StatRow({
   label, value, dot, href,
 }: {
   label: string;
@@ -14,13 +14,13 @@ function Tile({
   return (
     <Link
       href={href}
-      className="flex flex-col gap-1 rounded-lg border border-line bg-inset p-3 transition-colors hover:border-line-strong"
+      className="flex items-center justify-between py-2.5 transition-colors hover:opacity-80 first:pt-0 last:pb-0"
     >
-      <span className="flex items-center gap-1.5 text-xs text-subtle">
-        <span className={cn("h-1.5 w-1.5 rounded-full", dot)} />
+      <span className="flex items-center gap-2 text-sm text-subtle">
+        <span className={cn("h-2 w-2 rounded-full shrink-0", dot)} />
         {label}
       </span>
-      <span className="text-xl font-bold text-strong tnum">{value}</span>
+      <span className="text-sm font-semibold text-primary tnum">{value}</span>
     </Link>
   );
 }
@@ -46,14 +46,14 @@ export default function SiteSummaryCard({
         </Link>
       </CardHeader>
       <CardBody>
-        <div className="grid grid-cols-3 gap-2">
-          <Tile label="Onaylı" value={approved} dot="bg-success" href={`${baseHref}?status=approved`} />
-          <Tile label="Bekleyen" value={pending} dot="bg-warning" href={`${baseHref}?status=pending`} />
-          <Tile label="Engelli" value={blocked} dot="bg-danger" href={`${baseHref}?status=blocked`} />
+        <div className="divide-y divide-line-soft">
+          <StatRow label="Onaylı" value={approved} dot="bg-success" href={`${baseHref}?status=approved`} />
+          <StatRow label="Bekleyen" value={pending} dot="bg-warning" href={`${baseHref}?status=pending`} />
+          <StatRow label="Engelli" value={blocked} dot="bg-danger" href={`${baseHref}?status=blocked`} />
         </div>
-        <div className="mt-3 flex items-center justify-between rounded-lg bg-raised px-3 py-2">
-          <span className="text-xs text-subtle">Toplam kayıtlı site</span>
-          <span className="text-sm font-semibold text-primary tnum">{total}</span>
+        <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
+          <span className="text-xs text-faint">Toplam kayıtlı site</span>
+          <span className="text-sm font-semibold text-secondary tnum">{total}</span>
         </div>
       </CardBody>
     </Card>
