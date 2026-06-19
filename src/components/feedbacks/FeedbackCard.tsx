@@ -61,7 +61,7 @@ export default function FeedbackCard({
         {feedback.message}
       </p>
 
-      {/* Bottom: sender + category + attachments */}
+      {/* Bottom: sender + category + attachments + id */}
       <div className="flex items-center gap-2">
         <Avatar name={feedback.wp_user || feedback.domain} size="xs" />
         <span className="min-w-0 truncate text-xs text-subtle">{feedback.domain}</span>
@@ -73,6 +73,7 @@ export default function FeedbackCard({
               {feedback.attachment_count}
             </span>
           )}
+          <span className="font-mono text-faint" title={feedback.id}>#{feedback.id.slice(0, 8)}</span>
         </span>
       </div>
     </button>

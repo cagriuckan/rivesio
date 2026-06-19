@@ -18,6 +18,7 @@ export default function FeedbacksList({
   const [selectedId, setSelectedId] = useState<string | null>(
     initialId && feedbacks.some((f) => f.id === initialId) ? initialId : null
   );
+  const [query, setQuery] = useState("");
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -29,19 +30,9 @@ export default function FeedbacksList({
 
   const open = selectedId !== null;
 
-  if (feedbacks.length === 0 && !open) {
-    return (
-      <>
-        {filterBar && <div className="mb-5">{filterBar}</div>}
-        <div className="flex flex-col items-center justify-center py-24 text-center">
-          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-raised">
-            <Icon.inbox className="h-5 w-5 text-subtle" />
-          </div>
-          <p className="text-sm text-secondary">Bu filtreye uygun geri bildirim yok.</p>
-        </div>
-      </>
-    );
-  }
+  const filtered = query.trim()
+    ? feedbacks.filter((f) => f.id.startsWith(query.trim().replace(/^#/, "")))
+    : feedbacks;
 
   if (open && selectedId) {
     return (
@@ -58,19 +49,45 @@ export default function FeedbacksList({
 
   return (
     <>
-      {filterBar && <div className="mb-5">{filterBar}</div>}
-      <div className="flex flex-col gap-3" role="list" aria-label="Geri bildirimler">
-        {feedbacks.map((f) => (
-          <div key={f.id} role="listitem">
-            <FeedbackCard
-              feedback={f}
-              selected={false}
-              compact={false}
-              onClick={() => setSelectedId(f.id)}
-            />
-          </div>
-        ))}
+      {/* Toolbar: filter tabs + search */}
+      <div className="mb-5 flex flex-wrap items-center gap-3">
+        {filterBar}
+        <div className="relative ml-auto">
+          <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ID ile ara…"
+            className="h-8 w-48 rounded-md border border-line bg-surface pl-8 pr-3 text-xs text-primary placeholder:text-faint outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+            aria-label="ID ile ara"
+          />
+        </div>
       </div>
+
+      {filtered.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 text-center">
+          <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl border border-line bg-raised">
+            <Icon.inbox className="h-5 w-5 text-subtle" />
+          </div>
+          <p className="text-sm text-secondary">
+            {query ? `"${query}" ile eşleşen geri bildirim yok.` : "Bu filtreye uygun geri bildirim yok."}
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-3" role="list" aria-label="Geri bildirimler">
+          {filtered.map((f) => (
+            <div key={f.id} role="listitem">
+              <FeedbackCard
+                feedback={f}
+                selected={false}
+                compact={false}
+                onClick={() => setSelectedId(f.id)}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </>
   );
 }

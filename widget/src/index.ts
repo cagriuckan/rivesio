@@ -445,7 +445,7 @@ function mount(
         ${ICONS.check} Teşekkürler! Geri bildirimin alındı.
         <div class="kf-ref-box">
           <span class="kf-ref-label">Referans no</span>
-          <span class="kf-ref-id">#${esc(fid)}</span>
+          <span class="kf-ref-id" title="${esc(fid)}">#${esc(fid.slice(0, 8))}</span>
           <button class="kf-ref-copy" type="button" aria-label="Kopyala">${ICONS.copy}</button>
         </div>`;
       msg.querySelector(".kf-ref-copy")!.addEventListener("click", (e) =>
