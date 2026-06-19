@@ -10,14 +10,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="tr" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://rsms.me/" />
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                var t = localStorage.getItem('kf_theme');
-                if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
-              } catch(e){}
-            `,
+            __html: `try{if(localStorage.getItem('kf_theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}`,
           }}
         />
       </head>

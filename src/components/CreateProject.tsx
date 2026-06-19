@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
+import { Input, Field } from "@/components/ui/Field";
+import { Icon } from "@/components/ui/Icons";
+
+const ACCENTS = ["#6e79d6", "#3ecf8e", "#f5a623", "#f5535b", "#4aa8ff", "#a78bfa"];
 
 export default function CreateProject() {
   const router = useRouter();
@@ -9,7 +14,7 @@ export default function CreateProject() {
   const [name, setName] = useState("");
   const [slug, setSlug] = useState("");
   const [themeSlug, setThemeSlug] = useState("");
-  const [accentColor, setAccentColor] = useState("#6366f1");
+  const [accentColor, setAccentColor] = useState(ACCENTS[0]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -28,9 +33,7 @@ export default function CreateProject() {
         return;
       }
       setOpen(false);
-      setName("");
-      setSlug("");
-      setThemeSlug("");
+      setName(""); setSlug(""); setThemeSlug("");
       router.refresh();
     } finally {
       setBusy(false);
@@ -39,120 +42,78 @@ export default function CreateProject() {
 
   if (!open) {
     return (
-      <button
-        onClick={() => setOpen(true)}
-        className="ds-btn-primary"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-          <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-        </svg>
+      <Button variant="primary" onClick={() => setOpen(true)}>
+        <Icon.plus className="h-4 w-4" />
         Yeni widget
-      </button>
+      </Button>
     );
   }
 
   return (
-    <div
-      className="mb-6 rounded-xl p-5"
-      style={{
-        backgroundColor: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        boxShadow: "var(--shadow-card)",
-      }}
-    >
-      <h3
-        className="mb-4 text-sm font-semibold"
-        style={{ color: "var(--color-strong)" }}
-      >
-        Yeni widget / tema
-      </h3>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Ad" value={name} onChange={setName} placeholder="Kanews" />
-        <Field label="Slug (a-z0-9-)" value={slug} onChange={setSlug} placeholder="kanews" />
-        <Field label="Tema slug" value={themeSlug} onChange={setThemeSlug} placeholder="kanews" />
-        <div>
-          <label
-            className="mb-1.5 block text-xs font-semibold uppercase tracking-widest"
-            style={{ color: "var(--color-subtle)" }}
+    <>
+      {/* Backdrop */}
+      <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={() => setOpen(false)} />
+
+      {/* Modal */}
+      <div className="fixed left-1/2 top-1/2 z-50 w-[440px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-line bg-surface shadow-pop">
+        <div className="flex items-center justify-between border-b border-line px-5 py-4">
+          <h3 className="text-sm font-semibold text-strong">Yeni widget / tema</h3>
+          <button
+            onClick={() => setOpen(false)}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-subtle transition-colors hover:bg-raised hover:text-primary"
+            aria-label="Kapat"
           >
-            Vurgu rengi
-          </label>
-          <div className="flex items-center gap-3">
-            <input
-              type="color"
-              value={accentColor}
-              onChange={(e) => setAccentColor(e.target.value)}
-              className="h-9 w-14 cursor-pointer rounded-lg border"
-              style={{ borderColor: "var(--color-border)", backgroundColor: "var(--color-elevated)" }}
-            />
-            <code
-              className="text-xs"
-              style={{ color: "var(--color-secondary)", fontFamily: "var(--font-mono)" }}
-            >
-              {accentColor}
-            </code>
+            <Icon.close className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="space-y-4 p-5">
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Ad">
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Kanews" autoFocus />
+            </Field>
+            <Field label="Slug">
+              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="kanews" />
+            </Field>
           </div>
+
+          <Field label="Tema slug">
+            <Input value={themeSlug} onChange={(e) => setThemeSlug(e.target.value)} placeholder="kanews" />
+          </Field>
+
+          <div>
+            <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-subtle">Vurgu rengi</div>
+            <div className="flex items-center gap-2">
+              {ACCENTS.map((c) => (
+                <button
+                  key={c}
+                  onClick={() => setAccentColor(c)}
+                  className="h-7 w-7 rounded-lg transition-transform hover:scale-110"
+                  style={{
+                    background: c,
+                    boxShadow: accentColor === c ? `0 0 0 2px var(--color-surface), 0 0 0 4px ${c}` : "none",
+                  }}
+                  aria-label={c}
+                />
+              ))}
+            </div>
+          </div>
+
+          {error && (
+            <div className="flex items-center gap-2 rounded-md bg-danger-soft px-3 py-2 text-xs text-danger-text">
+              <Icon.close className="h-3.5 w-3.5" />
+              {error}
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
+          <Button variant="ghost" onClick={() => setOpen(false)}>Vazgeç</Button>
+          <Button variant="primary" onClick={create} disabled={busy || !name || !slug || !themeSlug}>
+            {busy ? "Oluşturuluyor…" : "Oluştur"}
+          </Button>
         </div>
       </div>
-
-      {error && (
-        <p className="mt-3 text-sm" style={{ color: "var(--color-danger-text)" }}>{error}</p>
-      )}
-
-      <div className="mt-5 flex gap-2">
-        <button
-          onClick={create}
-          disabled={busy || !name || !slug || !themeSlug}
-          className="ds-btn-primary"
-        >
-          {busy ? "Oluşturuluyor…" : "Oluştur"}
-        </button>
-        <button
-          onClick={() => setOpen(false)}
-          className="ds-btn-ghost"
-        >
-          Vazgeç
-        </button>
-      </div>
-    </div>
-  );
-}
-
-function Field({ label, value, onChange, placeholder }: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-}) {
-  const [focused, setFocused] = useState(false);
-  return (
-    <label className="block">
-      <span
-        className="mb-1.5 block text-xs font-semibold uppercase tracking-widest"
-        style={{ color: "var(--color-subtle)" }}
-      >
-        {label}
-      </span>
-      <input
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder={placeholder}
-        style={{
-          width: "100%",
-          backgroundColor: "var(--color-elevated)",
-          border: `1px solid ${focused ? "var(--color-accent)" : "var(--color-border)"}`,
-          borderRadius: "var(--radius-md)",
-          padding: "8px 12px",
-          fontSize: "13px",
-          color: "var(--color-primary)",
-          fontFamily: "var(--font-sans)",
-          boxShadow: focused ? "0 0 0 3px var(--color-accent-muted)" : "none",
-          outline: "none",
-          transition: "border-color .15s, box-shadow .15s",
-        }}
-      />
-    </label>
+    </>
   );
 }

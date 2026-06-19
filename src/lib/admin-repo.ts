@@ -212,17 +212,74 @@ export function getAttachmentById(id: string): AttachmentRow | undefined {
 export interface Stats {
   newFeedbacks: number;
   totalFeedbacks: number;
+  resolvedFeedbacks: number;
   pendingSites: number;
+  approvedSites: number;
+  blockedSites: number;
+  totalSites: number;
   projects: number;
 }
 
-export function getStats(): Stats {
+/** Builds a `WHERE` fragment + values to scope a query to one project (or all). */
+function projectScope(projectId: string | undefined, alias = ""): { clause: string; vals: unknown[] } {
+  const col = alias ? `${alias}.project_id` : "project_id";
+  return projectId
+    ? { clause: `WHERE ${col} = ?`, vals: [projectId] }
+    : { clause: "", vals: [] };
+}
+
+export function getStats(projectId?: string): Stats {
   const db = getDb();
-  const q = (sql: string) => (db.prepare(sql).get() as { c: number }).c;
+  const fb = projectScope(projectId);
+  const st = projectScope(projectId);
+  const count = (sql: string, vals: unknown[] = []) =>
+    (db.prepare(sql).get(...vals) as { c: number }).c;
+
+  const and = (extra: string) => (fb.clause ? `${fb.clause} AND ${extra}` : `WHERE ${extra}`);
+
   return {
-    newFeedbacks: q("SELECT COUNT(*) AS c FROM feedbacks WHERE status = 'new'"),
-    totalFeedbacks: q("SELECT COUNT(*) AS c FROM feedbacks"),
-    pendingSites: q("SELECT COUNT(*) AS c FROM sites WHERE status = 'pending'"),
-    projects: q("SELECT COUNT(*) AS c FROM projects"),
+    totalFeedbacks: count(`SELECT COUNT(*) AS c FROM feedbacks ${fb.clause}`, fb.vals),
+    newFeedbacks: count(`SELECT COUNT(*) AS c FROM feedbacks ${and("status = 'new'")}`, fb.vals),
+    resolvedFeedbacks: count(`SELECT COUNT(*) AS c FROM feedbacks ${and("status = 'resolved'")}`, fb.vals),
+    pendingSites: count(`SELECT COUNT(*) AS c FROM sites ${st.clause ? `${st.clause} AND status = 'pending'` : "WHERE status = 'pending'"}`, st.vals),
+    approvedSites: count(`SELECT COUNT(*) AS c FROM sites ${st.clause ? `${st.clause} AND status = 'approved'` : "WHERE status = 'approved'"}`, st.vals),
+    blockedSites: count(`SELECT COUNT(*) AS c FROM sites ${st.clause ? `${st.clause} AND status = 'blocked'` : "WHERE status = 'blocked'"}`, st.vals),
+    totalSites: count(`SELECT COUNT(*) AS c FROM sites ${st.clause}`, st.vals),
+    projects: count("SELECT COUNT(*) AS c FROM projects"),
   };
+}
+
+/** Counts feedbacks grouped by status, scoped to a project or all. */
+export function getStatusBreakdown(projectId?: string): Record<FeedbackStatus, number> {
+  const { clause, vals } = projectScope(projectId);
+  const rows = getDb()
+    .prepare(`SELECT status, COUNT(*) AS c FROM feedbacks ${clause} GROUP BY status`)
+    .all(...vals) as { status: FeedbackStatus; c: number }[];
+  const out: Record<FeedbackStatus, number> = {
+    new: 0, planned: 0, in_progress: 0, resolved: 0, wontfix: 0,
+  };
+  for (const r of rows) out[r.status] = r.c;
+  return out;
+}
+
+/** Counts feedbacks grouped by priority, scoped to a project or all. */
+export function getPriorityBreakdown(projectId?: string): Record<Priority, number> {
+  const { clause, vals } = projectScope(projectId);
+  const rows = getDb()
+    .prepare(`SELECT priority, COUNT(*) AS c FROM feedbacks ${clause} GROUP BY priority`)
+    .all(...vals) as { priority: Priority; c: number }[];
+  const out: Record<Priority, number> = { low: 0, normal: 0, high: 0 };
+  for (const r of rows) out[r.priority] = r.c;
+  return out;
+}
+
+/** Returns the top feedback categories by count, scoped to a project or all. */
+export function getCategoryBreakdown(projectId?: string, limit = 6): { category: string; count: number }[] {
+  const { clause, vals } = projectScope(projectId);
+  return getDb()
+    .prepare(
+      `SELECT category, COUNT(*) AS count FROM feedbacks ${clause}
+       GROUP BY category ORDER BY count DESC LIMIT ?`
+    )
+    .all(...vals, limit) as { category: string; count: number }[];
 }

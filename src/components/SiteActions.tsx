@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/Button";
 import type { SiteStatus } from "@/lib/types";
 
 export default function SiteActions({ id, status }: { id: string; status: SiteStatus }) {
@@ -25,34 +26,19 @@ export default function SiteActions({ id, status }: { id: string; status: SiteSt
   return (
     <div className="flex justify-end gap-1.5">
       {status !== "approved" && (
-        <button
-          onClick={() => set("approved")}
-          disabled={busy}
-          className="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-ok-muted)", color: "var(--color-ok-text)" }}
-        >
+        <Button size="sm" variant="secondary" onClick={() => set("approved")} disabled={busy}>
           Onayla
-        </button>
+        </Button>
       )}
       {status !== "blocked" && (
-        <button
-          onClick={() => set("blocked")}
-          disabled={busy}
-          className="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-danger-muted)", color: "var(--color-danger-text)" }}
-        >
+        <Button size="sm" variant="danger" onClick={() => set("blocked")} disabled={busy}>
           Engelle
-        </button>
+        </Button>
       )}
       {status === "blocked" && (
-        <button
-          onClick={() => set("pending")}
-          disabled={busy}
-          className="rounded-md px-2.5 py-1 text-xs font-semibold transition-colors disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-elevated)", color: "var(--color-secondary)", border: "1px solid var(--color-border)" }}
-        >
+        <Button size="sm" variant="outline" onClick={() => set("pending")} disabled={busy}>
           Engeli kaldır
-        </button>
+        </Button>
       )}
     </div>
   );

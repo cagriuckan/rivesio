@@ -1,7 +1,10 @@
-import Shell from "@/components/Shell";
+import Shell from "@/components/layout/Shell";
+import PageHeader from "@/components/layout/PageHeader";
 import CreateProject from "@/components/CreateProject";
 import ProjectCard from "@/components/ProjectCard";
+import { Icon } from "@/components/ui/Icons";
 import { listProjects, parseSettings } from "@/lib/repo";
+import { listFeedbacks, listSites } from "@/lib/admin-repo";
 import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -9,47 +12,39 @@ export const dynamic = "force-dynamic";
 export default function ProjectsPage() {
   const projects = listProjects();
 
+  // Per-project counts for the card stats.
+  const counts = new Map<string, { feedbacks: number; sites: number }>();
+  for (const p of projects) {
+    counts.set(p.id, {
+      feedbacks: listFeedbacks({ projectId: p.id }).length,
+      sites: listSites({ projectId: p.id }).length,
+    });
+  }
+
   return (
     <Shell>
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1
-            className="text-lg font-bold"
-            style={{ color: "var(--color-strong)", letterSpacing: "-0.025em" }}
-          >
-            Widget&apos;lar
-          </h1>
-          <p className="mt-0.5 text-xs" style={{ color: "var(--color-subtle)" }}>
-            {projects.length} widget
-          </p>
-        </div>
-        <CreateProject />
-      </div>
+      <PageHeader
+        title="Widget'lar"
+        subtitle={`${projects.length} widget`}
+        actions={<CreateProject />}
+      />
 
-      {projects.length === 0 && (
-        <div
-          className="rounded-xl p-16 text-center"
-          style={{ border: "1px dashed var(--color-border)", backgroundColor: "var(--color-surface)" }}
-        >
-          <div
-            className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
-            style={{ backgroundColor: "var(--color-elevated)" }}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" style={{ color: "var(--color-subtle)" }}>
-              <polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" />
-            </svg>
+      {projects.length === 0 ? (
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
+            <Icon.code className="h-6 w-6 text-subtle" />
           </div>
-          <p className="mb-5 text-sm" style={{ color: "var(--color-subtle)" }}>
-            Henüz widget yok. İlk widget&apos;ı oluştur.
+          <h3 className="mb-1.5 text-base font-semibold text-strong">Henüz widget yok</h3>
+          <p className="mb-5 max-w-xs text-sm text-subtle">
+            İlk widget&apos;ını oluştur ve gömme kodunu sitene ekle.
           </p>
           <CreateProject />
         </div>
-      )}
-
-      {projects.length > 0 && (
+      ) : (
         <div className="grid gap-4 lg:grid-cols-2">
           {projects.map((p) => {
             const s = parseSettings(p);
+            const c = counts.get(p.id)!;
             return (
               <ProjectCard
                 key={p.id}
@@ -62,6 +57,7 @@ export default function ProjectsPage() {
                   widgetKey: p.widget_key,
                   accentColor: s.accentColor,
                 }}
+                stats={c}
               />
             );
           })}

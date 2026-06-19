@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icons";
+import { cn } from "@/components/ui/cn";
 
 export interface ProjectView {
   id: string;
@@ -12,7 +17,15 @@ export interface ProjectView {
   accentColor: string;
 }
 
-export default function ProjectCard({ project, baseUrl }: { project: ProjectView; baseUrl: string }) {
+export default function ProjectCard({
+  project,
+  baseUrl,
+  stats,
+}: {
+  project: ProjectView;
+  baseUrl: string;
+  stats: { feedbacks: number; sites: number };
+}) {
   const router = useRouter();
   const [widgetKey, setWidgetKey] = useState(project.widgetKey);
   const [copied, setCopied] = useState<"key" | "snippet" | null>(null);
@@ -51,112 +64,82 @@ export default function ProjectCard({ project, baseUrl }: { project: ProjectView
   }
 
   return (
-    <div
-      className="rounded-xl p-5"
-      style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-    >
+    <Card className="overflow-hidden">
       {/* Header */}
-      <div className="mb-5 flex items-center gap-3">
-        <div
-          className="h-4 w-4 shrink-0 rounded-full"
-          style={{ background: project.accentColor, boxShadow: `0 0 8px ${project.accentColor}60` }}
-        />
-        <h3
-          className="flex-1 text-sm font-semibold truncate"
-          style={{ color: "var(--color-strong)" }}
+      <div className="flex items-center gap-3 border-b border-line px-5 py-4">
+        <span
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+          style={{ background: project.accentColor }}
         >
-          {project.name}
-        </h3>
-        <code
-          className="rounded px-1.5 py-0.5 text-xs"
-          style={{ backgroundColor: "var(--color-elevated)", color: "var(--color-subtle)", fontFamily: "var(--font-mono)" }}
+          {project.name.slice(0, 1).toUpperCase()}
+        </span>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
+          <span className="text-2xs text-subtle">{project.themeSlug}</span>
+        </div>
+        <Link
+          href={`/?w=${project.id}`}
+          className="flex items-center gap-1 text-xs font-medium text-accent-text hover:underline"
         >
-          {project.themeSlug}
-        </code>
+          Panel <Icon.chevronRight className="h-3 w-3" />
+        </Link>
       </div>
 
-      {/* Widget key */}
-      <div className="mb-4">
-        <div
-          className="mb-1.5 text-xs font-semibold uppercase tracking-widest"
-          style={{ color: "var(--color-subtle)" }}
-        >
-          Widget anahtarı
+      {/* Stats */}
+      <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
+        <div className="px-5 py-3">
+          <div className="text-lg font-bold text-strong tnum">{stats.feedbacks}</div>
+          <div className="text-2xs text-subtle">Geri bildirim</div>
         </div>
-        <div className="flex items-center gap-2">
-          <code
-            className="flex-1 truncate rounded-lg px-3 py-2 text-xs"
-            style={{ backgroundColor: "var(--color-elevated)", color: "var(--color-tertiary)", fontFamily: "var(--font-mono)", border: "1px solid var(--color-border)" }}
-          >
-            {widgetKey}
-          </code>
-          <button
-            onClick={() => copy(widgetKey, "key")}
-            className="flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-xs font-medium transition-colors"
-            style={{ backgroundColor: "var(--color-elevated)", color: copied === "key" ? "var(--color-ok-text)" : "var(--color-secondary)", border: "1px solid var(--color-border)" }}
-          >
-            {copied === "key" ? (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-3 w-3"><polyline points="20 6 9 17 4 12" /></svg>
-                Kopyalandı
-              </>
-            ) : (
-              <>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-3 w-3"><rect x="9" y="9" width="13" height="13" rx="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
-                Kopyala
-              </>
-            )}
-          </button>
+        <div className="px-5 py-3">
+          <div className="text-lg font-bold text-strong tnum">{stats.sites}</div>
+          <div className="text-2xs text-subtle">Site</div>
         </div>
       </div>
 
-      {/* Script snippet */}
-      <div className="mb-5">
-        <div className="mb-1.5 flex items-center justify-between">
-          <div
-            className="text-xs font-semibold uppercase tracking-widest"
-            style={{ color: "var(--color-subtle)" }}
-          >
-            Script
+      <div className="space-y-4 p-5">
+        {/* Widget key */}
+        <div>
+          <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-faint">Widget anahtarı</div>
+          <div className="flex items-center gap-2">
+            <code className="flex-1 truncate rounded-md border border-line bg-inset px-2.5 py-2 text-2xs text-secondary">
+              {widgetKey}
+            </code>
+            <Button size="sm" variant="secondary" onClick={() => copy(widgetKey, "key")}>
+              {copied === "key" ? <Icon.check className="h-3.5 w-3.5 text-success-text" /> : <Icon.copy className="h-3.5 w-3.5" />}
+              {copied === "key" ? "Kopyalandı" : "Kopyala"}
+            </Button>
           </div>
-          <button
-            onClick={() => copy(snippet, "snippet")}
-            className="flex items-center gap-1 text-xs font-medium transition-colors"
-            style={{ color: copied === "snippet" ? "var(--color-ok-text)" : "var(--color-accent-text)" }}
-          >
-            {copied === "snippet" ? "✓ Kopyalandı" : "Kopyala"}
-          </button>
         </div>
-        <pre
-          className="overflow-x-auto rounded-lg px-3 py-3 text-xs leading-relaxed"
-          style={{ backgroundColor: "var(--color-base)", color: "var(--color-tertiary)", border: "1px solid var(--color-border)", fontFamily: "var(--font-mono)" }}
-        >
-          {snippet}
-        </pre>
-      </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <button
-          onClick={rotate}
-          disabled={busy}
-          className="ds-btn-ghost text-xs"
-          style={{ padding: "6px 12px" }}
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
-            <path d="M23 4v6h-6" /><path d="M1 20v-6h6" />
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-          </svg>
-          Anahtarı yenile
-        </button>
-        <button
-          onClick={remove}
-          disabled={busy}
-          className="ml-auto rounded-lg px-3 py-1.5 text-xs font-medium transition-colors disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-danger-muted)", color: "var(--color-danger-text)" }}
-        >
-          Sil
-        </button>
+        {/* Snippet */}
+        <div>
+          <div className="mb-1.5 flex items-center justify-between">
+            <span className="text-2xs font-semibold uppercase tracking-wider text-faint">Gömme kodu</span>
+            <button
+              onClick={() => copy(snippet, "snippet")}
+              className={cn("text-2xs font-medium transition-colors", copied === "snippet" ? "text-success-text" : "text-accent-text hover:underline")}
+            >
+              {copied === "snippet" ? "✓ Kopyalandı" : "Kopyala"}
+            </button>
+          </div>
+          <pre className="overflow-x-auto rounded-md border border-line bg-inset px-2.5 py-2.5 text-2xs leading-relaxed text-secondary">
+            {snippet}
+          </pre>
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 pt-1">
+          <Button size="sm" variant="outline" onClick={rotate} disabled={busy}>
+            <Icon.refresh className="h-3.5 w-3.5" />
+            Anahtarı yenile
+          </Button>
+          <Button size="sm" variant="danger" className="ml-auto" onClick={remove} disabled={busy}>
+            <Icon.trash className="h-3.5 w-3.5" />
+            Sil
+          </Button>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }

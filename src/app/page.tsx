@@ -1,152 +1,156 @@
 import Link from "next/link";
-import Shell from "@/components/Shell";
-import { getStats } from "@/lib/admin-repo";
-import { listProjects } from "@/lib/repo";
-import { formatDate } from "@/lib/labels";
+import Shell from "@/components/layout/Shell";
+import PageHeader from "@/components/layout/PageHeader";
+import StatCard from "@/components/dashboard/StatCard";
+import BreakdownCard from "@/components/dashboard/BreakdownCard";
+import RecentFeedbacks from "@/components/dashboard/RecentFeedbacks";
+import CategoryCard from "@/components/dashboard/CategoryCard";
+import SiteSummaryCard from "@/components/dashboard/SiteSummaryCard";
+import { Icon } from "@/components/ui/Icons";
+import {
+  getStats,
+  getStatusBreakdown,
+  getPriorityBreakdown,
+  getCategoryBreakdown,
+  listFeedbacks,
+} from "@/lib/admin-repo";
+import { getProjectById, listProjects } from "@/lib/repo";
+import { FEEDBACK_STATUS_LABEL, PRIORITY_LABEL } from "@/lib/labels";
+import { FEEDBACK_STATUSES, PRIORITIES } from "@/lib/types";
+import { FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
 
 export const dynamic = "force-dynamic";
 
-function StatCard({
-  label,
-  value,
-  href,
-  accent,
-  icon,
-}: {
-  label: string;
-  value: number;
-  href: string;
-  accent?: string;
-  icon: React.ReactNode;
-}) {
-  return (
-    <Link
-      href={href}
-      className="group block rounded-xl p-5 transition-all"
-      style={{ backgroundColor: "var(--color-surface)", border: "1px solid var(--color-border)" }}
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <span style={{ color: "var(--color-subtle)" }}>{icon}</span>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 opacity-0 transition-opacity group-hover:opacity-100" style={{ color: "var(--color-subtle)" }}>
-          <path d="M5 12h14M12 5l7 7-7 7" />
-        </svg>
-      </div>
-      <div
-        className="text-3xl font-bold"
-        style={{ color: accent ?? "var(--color-strong)", letterSpacing: "-0.03em" }}
-      >
-        {value}
-      </div>
-      <div className="mt-1 text-xs font-medium" style={{ color: "var(--color-subtle)" }}>{label}</div>
-    </Link>
-  );
-}
+type SearchParams = Promise<{ w?: string }>;
 
-export default function DashboardPage() {
-  const stats = getStats();
+export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
+  const { w } = await searchParams;
+  const project = w ? getProjectById(w) : undefined;
+  const projectId = project?.id;
   const projects = listProjects();
+
+  const stats = getStats(projectId);
+  const statusBd = getStatusBreakdown(projectId);
+  const priorityBd = getPriorityBreakdown(projectId);
+  const categories = getCategoryBreakdown(projectId);
+  const recent = listFeedbacks({ projectId }).slice(0, 6);
+
+  const resolutionRate =
+    stats.totalFeedbacks > 0
+      ? Math.round((stats.resolvedFeedbacks / stats.totalFeedbacks) * 100)
+      : 0;
+
+  const wq = projectId ? `?w=${projectId}` : "";
+  const feedbacksHref = `/feedbacks${wq}`;
+
+  // No widgets created yet → onboarding.
+  if (projects.length === 0) {
+    return (
+      <Shell>
+        <PageHeader title="Genel Bakış" subtitle="Geri bildirim kontrol paneli" />
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
+            <Icon.code className="h-6 w-6 text-subtle" />
+          </div>
+          <h3 className="mb-1.5 text-base font-semibold text-strong">İlk widget&apos;ını oluştur</h3>
+          <p className="mb-5 max-w-xs text-sm text-subtle">
+            Bir widget oluşturduğunda burada geri bildirim istatistiklerini göreceksin.
+          </p>
+          <Link
+            href="/projects"
+            className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          >
+            <Icon.plus className="h-4 w-4" />
+            Widget oluştur
+          </Link>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <Shell>
-      <div className="mb-8">
-        <h1
-          className="text-lg font-bold"
-          style={{ color: "var(--color-strong)", letterSpacing: "-0.025em" }}
-        >
-          Panel
-        </h1>
-        <p className="mt-0.5 text-xs" style={{ color: "var(--color-subtle)" }}>
-          Geri bildirim özeti
-        </p>
-      </div>
+      <PageHeader
+        title="Genel Bakış"
+        subtitle={project ? `${project.name} · ${project.theme_slug}` : "Tüm widget'lar birleşik"}
+        actions={
+          <Link
+            href={feedbacksHref}
+            className="inline-flex h-9 items-center gap-2 rounded-md border border-line bg-raised px-4 text-sm font-medium text-primary transition-colors hover:border-line-strong"
+          >
+            <Icon.feedback className="h-4 w-4 text-subtle" />
+            Geri bildirimler
+          </Link>
+        }
+      />
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
-          label="Yeni geri bildirim"
-          value={stats.newFeedbacks}
-          href="/feedbacks?status=new"
-          accent="var(--color-accent-text)"
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-4 w-4"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>}
-        />
-        <StatCard
-          label="Toplam geri bildirim"
+          label="Toplam"
           value={stats.totalFeedbacks}
-          href="/feedbacks"
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-4 w-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>}
+          icon={Icon.inbox}
+          tone="accent"
+          href={feedbacksHref}
         />
         <StatCard
-          label="Onay bekleyen site"
-          value={stats.pendingSites}
-          href="/sites?status=pending"
-          accent={stats.pendingSites > 0 ? "var(--color-warn-text)" : undefined}
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-4 w-4"><circle cx="12" cy="12" r="10" /><line x1="2" y1="12" x2="22" y2="12" /><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" /></svg>}
+          label="Yeni"
+          value={stats.newFeedbacks}
+          icon={Icon.feedback}
+          tone="info"
+          href={`${feedbacksHref}${wq ? "&" : "?"}status=new`}
+          hint={stats.newFeedbacks > 0 ? <span className="font-medium text-info-text">bekliyor</span> : undefined}
         />
         <StatCard
-          label="Widget / tema"
-          value={stats.projects}
-          href="/projects"
-          icon={<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" className="h-4 w-4"><polyline points="16 18 22 12 16 6" /><polyline points="8 6 2 12 8 18" /></svg>}
+          label="Çözüldü"
+          value={stats.resolvedFeedbacks}
+          icon={Icon.checkCircle}
+          tone="success"
+          hint={<span className="font-medium text-success-text">%{resolutionRate}</span>}
+        />
+        <StatCard
+          label="Aktif site"
+          value={stats.approvedSites}
+          icon={Icon.globe}
+          tone="violet"
+          href="/sites?status=approved"
+          hint={stats.pendingSites > 0 ? <span className="font-medium text-warning-text">{stats.pendingSites} bekliyor</span> : undefined}
         />
       </div>
 
-      <div className="mb-3 flex items-center justify-between">
-        <h2
-          className="text-xs font-semibold uppercase tracking-widest"
-          style={{ color: "var(--color-subtle)" }}
-        >
-          Widget&apos;lar
-        </h2>
-        <Link href="/projects" className="text-xs font-medium" style={{ color: "var(--color-accent-text)" }}>
-          Tümünü gör →
-        </Link>
+      {/* Recent + sites */}
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RecentFeedbacks feedbacks={recent} detailHref={feedbacksHref} />
+        </div>
+        <SiteSummaryCard
+          approved={stats.approvedSites}
+          pending={stats.pendingSites}
+          blocked={stats.blockedSites}
+          total={stats.totalSites}
+          baseHref="/sites"
+        />
       </div>
 
-      <div
-        className="overflow-hidden rounded-xl"
-        style={{ border: "1px solid var(--color-border)", backgroundColor: "var(--color-surface)" }}
-      >
-        <table className="ds-table">
-          <thead>
-            <tr>
-              <th>Ad</th>
-              <th>Tema</th>
-              <th>Oluşturma</th>
-              <th />
-            </tr>
-          </thead>
-          <tbody>
-            {projects.length === 0 && (
-              <tr>
-                <td colSpan={4} className="py-12 text-center text-sm" style={{ color: "var(--color-subtle)" }}>
-                  Henüz widget yok.{" "}
-                  <Link href="/projects" className="font-medium" style={{ color: "var(--color-accent-text)" }}>
-                    Widget&apos;lar
-                  </Link>{" "}
-                  sayfasından oluştur.
-                </td>
-              </tr>
-            )}
-            {projects.map((p) => (
-              <tr key={p.id}>
-                <td className="font-medium" style={{ color: "var(--color-primary)" }}>{p.name}</td>
-                <td>
-                  <code
-                    className="rounded px-1.5 py-0.5 text-xs"
-                    style={{ backgroundColor: "var(--color-elevated)", color: "var(--color-tertiary)", fontFamily: "var(--font-mono)" }}
-                  >
-                    {p.theme_slug}
-                  </code>
-                </td>
-                <td>{formatDate(p.created_at)}</td>
-                <td className="text-right">
-                  <Link href="/projects" className="text-xs font-medium" style={{ color: "var(--color-accent-text)" }}>
-                    Yönet →
-                  </Link>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Breakdowns */}
+      <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <BreakdownCard
+          title="Durum dağılımı"
+          items={FEEDBACK_STATUSES.map((s) => ({
+            label: FEEDBACK_STATUS_LABEL[s],
+            value: statusBd[s],
+            tone: FEEDBACK_TONE[s],
+          }))}
+        />
+        <BreakdownCard
+          title="Öncelik dağılımı"
+          items={PRIORITIES.map((p) => ({
+            label: PRIORITY_LABEL[p],
+            value: priorityBd[p],
+            tone: PRIORITY_TONE[p],
+          }))}
+        />
+        <CategoryCard categories={categories} />
       </div>
     </Shell>
   );
