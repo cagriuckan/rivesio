@@ -1,7 +1,9 @@
 import Link from "next/link";
 import Shell from "@/components/layout/Shell";
+import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import FeedbacksList from "@/components/feedbacks/FeedbacksList";
+import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import { listFeedbacks } from "@/lib/admin-repo";
 import { getProjectById } from "@/lib/repo";
@@ -31,27 +33,27 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
 
   return (
     <Shell>
-      <PageHeader
-        title="Geri Bildirimler"
-        subtitle={`${project ? project.name : "Tüm widget'lar"} · ${feedbacks.length} kayıt`}
-      />
-      <div className="flex min-h-[calc(100%-3rem)] flex-col">
-        {/* Status filter */}
-        <div className="flex shrink-0 items-center justify-between border-b border-line px-5 py-2.5">
-          <div className="flex items-center gap-1 rounded-md border border-line bg-raised p-0.5">
-            <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
-            {FEEDBACK_STATUSES.map((s) => (
-              <FilterTab key={s} href={buildHref(s)} active={status === s}>
-                {FEEDBACK_STATUS_LABEL[s]}
-              </FilterTab>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex-1">
-          <FeedbacksList feedbacks={feedbacks} initialId={sp.f ?? null} />
-        </div>
-      </div>
+      <PageContent>
+        <PageHeader
+          icon={Icon.feedback}
+          title="Geri Bildirimler"
+          subtitle={`${project ? project.name : "Tüm widget'lar"} · ${feedbacks.length} kayıt`}
+        />
+        <FeedbacksList
+          feedbacks={feedbacks}
+          initialId={sp.f ?? null}
+          filterBar={
+            <div className="flex items-center gap-1 rounded-md border border-line bg-raised p-0.5 w-fit">
+              <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
+              {FEEDBACK_STATUSES.map((s) => (
+                <FilterTab key={s} href={buildHref(s)} active={status === s}>
+                  {FEEDBACK_STATUS_LABEL[s]}
+                </FilterTab>
+              ))}
+            </div>
+          }
+        />
+      </PageContent>
     </Shell>
   );
 }

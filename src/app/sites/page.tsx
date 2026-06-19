@@ -33,8 +33,8 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
 
   return (
     <Shell>
-      <PageHeader title="Siteler" subtitle={`${sites.length} kayıtlı site`} />
       <PageContent>
+      <PageHeader icon={Icon.globe} title="Siteler" subtitle={`${sites.length} kayıtlı site`} />
 
       <div className="mb-5 inline-flex items-center gap-0.5 rounded-lg border border-line bg-base p-1">
         <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>

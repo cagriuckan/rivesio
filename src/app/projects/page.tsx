@@ -24,12 +24,13 @@ export default function ProjectsPage() {
 
   return (
     <Shell>
+      <PageContent>
       <PageHeader
+        icon={Icon.code}
         title="Widget'lar"
         subtitle={`${projects.length} widget`}
         actions={<CreateProject />}
       />
-      <PageContent>
 
       {projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-line bg-surface py-20 text-center">

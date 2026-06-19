@@ -56,9 +56,14 @@ export default function Header({
         )}
 
         <div className="flex items-center gap-3">
-          <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-accent">
-            <Icon.feedback className="h-3.5 w-3.5 text-white" strokeWidth={2.25} />
-          </div>
+          <span className="flex h-6 w-6 shrink-0 items-center justify-center overflow-hidden rounded-md" aria-hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="h-full w-full">
+              <rect width="100" height="100" rx="22" fill="#5b63d3"/>
+              <rect x="17" y="24" width="66" height="44" rx="11" fill="white"/>
+              <path d="M26 68 L18 84 L44 68 Z" fill="white"/>
+              <polyline points="31,46 43,58 69,32" fill="none" stroke="#5b63d3" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </span>
           <span className="text-sm font-semibold tracking-tight text-strong">Revisto</span>
           <span className="hidden h-4 w-px bg-line-strong sm:block" aria-hidden />
           <span className="hidden text-sm text-secondary sm:block">{title}</span>

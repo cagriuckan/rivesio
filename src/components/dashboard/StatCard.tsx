@@ -13,6 +13,17 @@ const TONE_ICON: Record<Tone, { bg: string; text: string }> = {
   violet:  { bg: "bg-violet-soft",  text: "text-violet-text" },
 };
 
+function TrendBadge({ change }: { change: number }) {
+  if (change === 0) return <span className="text-xs text-subtle">—</span>;
+  const up = change > 0;
+  return (
+    <span className={cn("inline-flex items-center gap-0.5 text-xs font-medium", up ? "text-success-text" : "text-danger-text")}>
+      {up ? <Icon.chevronRight className="h-3 w-3 rotate-[-90deg]" /> : <Icon.chevronRight className="h-3 w-3 rotate-90" />}
+      {Math.abs(change)}%
+    </span>
+  );
+}
+
 export default function StatCard({
   label,
   value,
@@ -20,6 +31,8 @@ export default function StatCard({
   tone = "neutral",
   hint,
   href,
+  change,
+  changeLabel,
 }: {
   label: string;
   value: number | string;
@@ -27,13 +40,14 @@ export default function StatCard({
   tone?: Tone;
   hint?: React.ReactNode;
   href?: string;
+  change?: number;
+  changeLabel?: string;
 }) {
   const Ico = icon;
   const t = TONE_ICON[tone];
 
   const inner = (
     <>
-      {/* Icon + label */}
       <div className="mb-4 flex items-start justify-between">
         <div className="flex flex-col items-start gap-1.5">
           <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", t.bg)}>
@@ -41,16 +55,15 @@ export default function StatCard({
           </span>
           <span className="text-xs font-medium text-subtle">{label}</span>
         </div>
-        {href && (
+        {change !== undefined && <TrendBadge change={change} />}
+        {change === undefined && href && (
           <Icon.arrowRight className="h-4 w-4 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
         )}
       </div>
 
-      {/* Value */}
       <div className="text-2xl font-bold tracking-tight text-strong tnum">{value}</div>
-      {hint && (
-        <div className="mt-1 text-xs text-subtle">{hint}</div>
-      )}
+      {hint && <div className="mt-1 text-xs text-subtle">{hint}</div>}
+      {changeLabel && <div className="mt-1 text-xs text-subtle">{changeLabel}</div>}
     </>
   );
 

@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Revisto Feedback",
   description: "Kanthemes geri bildirim yönetim paneli",
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -283,3 +283,76 @@ export function getCategoryBreakdown(projectId?: string, limit = 6): { category:
     )
     .all(...vals, limit) as { category: string; count: number }[];
 }
+
+export interface PeriodStats {
+  total: number;
+  newCount: number;
+  resolved: number;
+  highPriority: number;
+  resolutionRate: number;
+}
+
+function getPeriodStats(projectId: string | undefined, fromTs: number, toTs: number): PeriodStats {
+  const db = getDb();
+  const proj = projectId ? "AND project_id = ?" : "";
+  const baseVals = projectId ? [fromTs, toTs, projectId] : [fromTs, toTs];
+
+  const count = (extra: string) =>
+    (db.prepare(`SELECT COUNT(*) AS c FROM feedbacks WHERE created_at >= ? AND created_at < ? ${proj} ${extra}`)
+      .get(...baseVals) as { c: number }).c;
+
+  const total = count("");
+  const newCount = count("AND status = 'new'");
+  const resolved = count("AND status = 'resolved'");
+  const highPriority = count("AND priority = 'high'");
+
+  return {
+    total,
+    newCount,
+    resolved,
+    highPriority,
+    resolutionRate: total > 0 ? Math.round((resolved / total) * 100) : 0,
+  };
+}
+
+export interface TrendPoint { date: string; count: number; }
+
+export function getDailyTrend(projectId?: string, days = 30): TrendPoint[] {
+  const db = getDb();
+  const now = Date.now();
+  const from = now - days * 86_400_000;
+  const proj = projectId ? "AND project_id = ?" : "";
+  const vals = projectId ? [from, projectId] : [from];
+
+  const rows = db
+    .prepare(
+      `SELECT date(created_at / 1000, 'unixepoch') AS date, COUNT(*) AS count
+       FROM feedbacks WHERE created_at >= ? ${proj}
+       GROUP BY date ORDER BY date ASC`
+    )
+    .all(...vals) as TrendPoint[];
+
+  // Fill missing days with 0
+  const map = new Map(rows.map((r) => [r.date, r.count]));
+  const result: TrendPoint[] = [];
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(now - i * 86_400_000);
+    const key = d.toISOString().slice(0, 10);
+    result.push({ date: key, count: map.get(key) ?? 0 });
+  }
+  return result;
+}
+
+export interface StatsWithTrend {
+  current: PeriodStats;
+  previous: PeriodStats;
+}
+
+export function getStatsWithTrend(projectId?: string, days = 30): StatsWithTrend {
+  const now = Date.now();
+  const periodMs = days * 86_400_000;
+  return {
+    current: getPeriodStats(projectId, now - periodMs, now),
+    previous: getPeriodStats(projectId, now - 2 * periodMs, now - periodMs),
+  };
+}

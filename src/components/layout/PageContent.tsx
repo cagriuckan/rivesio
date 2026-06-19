@@ -1,6 +1,6 @@
 export default function PageContent({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-auto w-full max-w-4xl px-5 py-5">
+    <div className="mx-auto w-full max-w-6xl px-6 py-6">
       {children}
     </div>
   );
