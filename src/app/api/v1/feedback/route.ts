@@ -10,7 +10,6 @@ export const runtime = "nodejs";
 const schema = z.object({
   widget_key: z.string().min(1).max(200),
   domain: z.string().min(1).max(300),
-  license_key: z.string().max(300).optional().nullable(),
   theme: z.string().max(100).optional().nullable(),
   category: z.string().max(100).optional(),
   message: z.string().min(1).max(limits.maxMessageLength),
@@ -39,7 +38,6 @@ export async function POST(req: Request) {
   const result = guardSubmission({
     widgetKey: data.widget_key,
     domain: data.domain,
-    licenseKey: data.license_key,
     theme: data.theme,
     meta: { ...(data.meta ?? {}), ip },
   });

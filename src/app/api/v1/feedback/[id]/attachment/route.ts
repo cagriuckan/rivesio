@@ -24,13 +24,12 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
   const widgetKey = String(form.get("widget_key") ?? "");
   const domain = String(form.get("domain") ?? "");
-  const licenseKey = String(form.get("license_key") ?? "");
   const theme = form.get("theme") ? String(form.get("theme")) : null;
   const kind = form.get("kind") === "screenshot" ? "screenshot" : "upload";
   const file = form.get("file");
 
-  // Authorize against the same license/theme/approval rules as feedback submission.
-  const guard = guardSubmission({ widgetKey, domain, licenseKey, theme, meta: { ip } });
+  // Authorize against the same theme/approval rules as feedback submission.
+  const guard = guardSubmission({ widgetKey, domain, theme, meta: { ip } });
   if (!guard.ok) return corsJson({ error: guard.error }, 403);
 
   // The feedback must exist and belong to this guarded project.

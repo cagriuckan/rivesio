@@ -37,7 +37,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
   const project = getProjectByWidgetKey(key);
   if (!project) {
     // Unknown key: serve a no-op so a stale embed never throws on the host page.
-    return js("/* kanews-feedback: unknown widget key */", 404);
+    return js("/* revisto: unknown widget key */", 404);
   }
 
   const settings = parseSettings(project);

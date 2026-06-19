@@ -9,7 +9,7 @@ type DB = Database.Database;
 declare global {
   // Reuse the connection across Next.js hot reloads in development.
   // eslint-disable-next-line no-var
-  var __kanewsFeedbackDb: DB | undefined;
+  var __revistoDb: DB | undefined;
 }
 
 const DEFAULT_CATEGORIES = ["Öneri", "Hata", "Tasarım", "Diğer"];
@@ -73,7 +73,7 @@ function migrate(db: DB): void {
     CREATE INDEX IF NOT EXISTS idx_attachments_feedback ON attachments(feedback_id);
   `);
 
-  // Seed the default Kanews project on first run so the panel is usable immediately.
+  // Seed the default project on first run so the panel is usable immediately.
   const count = db.prepare("SELECT COUNT(*) AS c FROM projects").get() as { c: number };
   if (count.c === 0) {
     db.prepare(
@@ -81,9 +81,9 @@ function migrate(db: DB): void {
        VALUES (?, ?, ?, ?, ?, ?, ?)`
     ).run(
       generateId(),
-      "kanews",
-      "Kanews",
-      "kanews",
+      "revisto",
+      "Revisto",
+      "revisto",
       generateWidgetKey(),
       JSON.stringify({
         accentColor: "#4f46e5",
@@ -104,10 +104,10 @@ function open(): DB {
 }
 
 export function getDb(): DB {
-  if (!global.__kanewsFeedbackDb) {
-    global.__kanewsFeedbackDb = open();
+  if (!global.__revistoDb) {
+    global.__revistoDb = open();
   }
-  return global.__kanewsFeedbackDb;
+  return global.__revistoDb;
 }
 
 export const DEFAULT_PROJECT_CATEGORIES = DEFAULT_CATEGORIES;

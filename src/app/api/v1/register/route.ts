@@ -8,7 +8,6 @@ export const runtime = "nodejs";
 const schema = z.object({
   widget_key: z.string().min(1).max(200),
   domain: z.string().min(1).max(300),
-  license_key: z.string().max(300).optional().nullable(),
   theme: z.string().max(100).optional().nullable(),
   meta: z.record(z.unknown()).optional(),
 });
@@ -32,7 +31,6 @@ export async function POST(req: Request) {
   const result = guardRegister({
     widgetKey: parsed.data.widget_key,
     domain: parsed.data.domain,
-    licenseKey: parsed.data.license_key,
     theme: parsed.data.theme,
     meta,
   });

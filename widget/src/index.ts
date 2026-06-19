@@ -13,7 +13,6 @@ interface ServerConfig {
 }
 
 interface HostConfig {
-  license?: string;
   domain?: string;
   theme?: string;
   themeVersion?: string;
@@ -23,7 +22,7 @@ interface HostConfig {
 declare global {
   interface Window {
     __KF_CONFIG__?: ServerConfig;
-    KanewsFeedback?: HostConfig;
+    RevistoFeedback?: HostConfig;
   }
 }
 
@@ -59,10 +58,9 @@ function delay(ms: number) {
 async function boot() {
   const server = window.__KF_CONFIG__;
   if (!server) return;
-  const host: HostConfig = window.KanewsFeedback ?? {};
+  const host: HostConfig = window.RevistoFeedback ?? {};
 
   const domain = host.domain || location.host;
-  const license = host.license || "";
   const theme = host.theme || "";
 
   let registration: { enabled: boolean; project?: ServerConfig["project"] };
@@ -73,7 +71,6 @@ async function boot() {
       body: JSON.stringify({
         widget_key: server.widgetKey,
         domain,
-        license_key: license,
         theme,
         meta: { themeVersion: host.themeVersion, user: host.user, href: location.href },
       }),
@@ -86,17 +83,17 @@ async function boot() {
   if (!registration.enabled) return;
 
   const cfg = { ...server.project, ...(registration.project ?? {}) };
-  mount(server, host, cfg, { domain, license, theme });
+  mount(server, host, cfg, { domain, theme });
 }
 
 function mount(
   server: ServerConfig,
   host: HostConfig,
   project: ServerConfig["project"],
-  ctx: { domain: string; license: string; theme: string }
+  ctx: { domain: string; theme: string }
 ) {
   const containerHost = document.createElement("div");
-  containerHost.id = "kanews-feedback-widget";
+  containerHost.id = "revisto-widget";
   document.body.appendChild(containerHost);
   const shadow = containerHost.attachShadow({ mode: "open" });
 
@@ -404,7 +401,6 @@ function mount(
         body: JSON.stringify({
           widget_key: server.widgetKey,
           domain: ctx.domain,
-          license_key: ctx.license,
           theme: ctx.theme,
           category: select.value,
           message,
@@ -424,7 +420,6 @@ function mount(
         const fd = new FormData();
         fd.append("widget_key", server.widgetKey);
         fd.append("domain", ctx.domain);
-        fd.append("license_key", ctx.license);
         if (ctx.theme) fd.append("theme", ctx.theme);
         fd.append("kind", att.kind);
         const ext = att.blob.type === "image/png" ? "png" : "jpg";

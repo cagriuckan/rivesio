@@ -70,15 +70,15 @@ export default function CreateProject() {
         <div className="space-y-4 p-5">
           <div className="grid grid-cols-2 gap-4">
             <Field label="Ad">
-              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Kanews" autoFocus />
+              <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Revisto" autoFocus />
             </Field>
             <Field label="Slug">
-              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="kanews" />
+              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="revisto" />
             </Field>
           </div>
 
           <Field label="Tema slug">
-            <Input value={themeSlug} onChange={(e) => setThemeSlug(e.target.value)} placeholder="kanews" />
+            <Input value={themeSlug} onChange={(e) => setThemeSlug(e.target.value)} placeholder="revisto" />
           </Field>
 
           <div>

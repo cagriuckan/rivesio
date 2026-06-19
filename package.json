@@ -1,8 +1,8 @@
 {
-  "name": "kanews-feedback",
+  "name": "revisto",
   "version": "1.0.0",
   "private": true,
-  "description": "Centralized feedback widget server and admin panel for Kanthemes WordPress themes.",
+  "description": "Centralized feedback widget server and admin panel.",
   "engines": {
     "node": ">=20 <=22"
   },

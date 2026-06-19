@@ -57,7 +57,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
           <table className="w-full">
             <thead>
               <tr className="border-b border-line">
-                {["Domain", "Widget", "Lisans", "Bildirim", "Son görülme", "Durum", ""].map((h, i) => (
+                {["Domain", "Widget", "Bildirim", "Son görülme", "Durum", ""].map((h, i) => (
                   <th key={i} className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-subtle">
                     {h}
                   </th>
@@ -74,11 +74,6 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
                     </div>
                   </td>
                   <td className="px-4 py-3 text-xs text-subtle">{s.project_name}</td>
-                  <td className="px-4 py-3">
-                    <code className="rounded bg-inset px-1.5 py-0.5 text-2xs text-secondary">
-                      {s.license_key ? s.license_key.slice(0, 10) + "…" : "—"}
-                    </code>
-                  </td>
                   <td className="px-4 py-3 text-sm text-secondary tnum">{s.feedback_count}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-xs text-subtle">{formatDate(s.last_seen)}</td>
                   <td className="px-4 py-3">

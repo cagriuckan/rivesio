@@ -62,7 +62,6 @@ export function findSite(projectId: string, domain: string): SiteRow | undefined
 export function upsertSite(args: {
   projectId: string;
   domain: string;
-  licenseKey: string | null;
   meta: Record<string, unknown>;
   defaultStatus: SiteStatus;
 }): SiteRow {
@@ -73,20 +72,19 @@ export function upsertSite(args: {
   if (existing) {
     // Preserve admin decision (approved/blocked); only refresh metadata + last seen.
     db.prepare(
-      "UPDATE sites SET license_key = ?, meta_json = ?, last_seen = ? WHERE id = ?"
-    ).run(args.licenseKey, JSON.stringify(args.meta), now, existing.id);
+      "UPDATE sites SET meta_json = ?, last_seen = ? WHERE id = ?"
+    ).run(JSON.stringify(args.meta), now, existing.id);
     return findSite(args.projectId, args.domain)!;
   }
 
   const id = generateId();
   db.prepare(
-    `INSERT INTO sites (id, project_id, domain, license_key, status, meta_json, first_seen, last_seen)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    `INSERT INTO sites (id, project_id, domain, status, meta_json, first_seen, last_seen)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`
   ).run(
     id,
     args.projectId,
     args.domain,
-    args.licenseKey,
     args.defaultStatus,
     JSON.stringify(args.meta),
     now,

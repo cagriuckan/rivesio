@@ -5,7 +5,6 @@ import type { ProjectRow, SiteRow } from "./types";
 export type GuardError =
   | "invalid_widget"
   | "theme_mismatch"
-  | "missing_license"
   | "not_registered"
   | "pending"
   | "blocked";
@@ -23,7 +22,6 @@ export interface GuardFail {
 interface Input {
   widgetKey: string;
   domain: string;
-  licenseKey?: string | null;
   theme?: string | null;
   meta?: Record<string, unknown>;
 }
@@ -40,14 +38,10 @@ export function guardRegister(input: Input): GuardFail | GuardOk {
     return { ok: false, error: "theme_mismatch" };
   }
 
-  const license = (input.licenseKey ?? "").trim();
-  if (!license) return { ok: false, error: "missing_license" };
-
   const domain = normalizeDomain(input.domain);
   const site = upsertSite({
     projectId: project.id,
     domain,
-    licenseKey: license,
     meta: input.meta ?? {},
     defaultStatus: env.autoApproveSites ? "approved" : "pending",
   });
@@ -59,7 +53,7 @@ export function guardRegister(input: Input): GuardFail | GuardOk {
 
 /**
  * Authorize a feedback submission. The site must already exist (registered) and be
- * approved; license + theme must match. Does not create new sites.
+ * approved; theme must match. Does not create new sites.
  */
 export function guardSubmission(input: Input): GuardFail | GuardOk {
   const project = getProjectByWidgetKey(input.widgetKey);
@@ -69,20 +63,16 @@ export function guardSubmission(input: Input): GuardFail | GuardOk {
     return { ok: false, error: "theme_mismatch" };
   }
 
-  const license = (input.licenseKey ?? "").trim();
-  if (!license) return { ok: false, error: "missing_license" };
-
   const domain = normalizeDomain(input.domain);
   const site = findSite(project.id, domain);
   if (!site) return { ok: false, error: "not_registered" };
   if (site.status === "blocked") return { ok: false, error: "blocked" };
   if (site.status === "pending") return { ok: false, error: "pending" };
 
-  // Refresh last_seen + license/meta on each submission.
+  // Refresh last_seen + meta on each submission.
   const refreshed = upsertSite({
     projectId: project.id,
     domain,
-    licenseKey: license,
     meta: input.meta ?? {},
     defaultStatus: "approved",
   });
