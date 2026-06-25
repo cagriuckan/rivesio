@@ -28,7 +28,7 @@ export async function POST(req: Request) {
   const ip = clientIp(req);
   const meta = { ...(parsed.data.meta ?? {}), ip, theme: parsed.data.theme ?? undefined };
 
-  const result = guardRegister({
+  const result = await guardRegister({
     widgetKey: parsed.data.widget_key,
     domain: parsed.data.domain,
     theme: parsed.data.theme,

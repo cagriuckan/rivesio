@@ -10,17 +10,20 @@ import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
-export default function ProjectsPage() {
-  const projects = listProjects();
+export default async function ProjectsPage() {
+  const projects = await listProjects();
 
   // Per-project counts for the card stats.
   const counts = new Map<string, { feedbacks: number; sites: number }>();
-  for (const p of projects) {
-    counts.set(p.id, {
-      feedbacks: listFeedbacks({ projectId: p.id }).length,
-      sites: listSites({ projectId: p.id }).length,
-    });
-  }
+  await Promise.all(
+    projects.map(async (p) => {
+      const [feedbacks, sites] = await Promise.all([
+        listFeedbacks({ projectId: p.id }),
+        listSites({ projectId: p.id }),
+      ]);
+      counts.set(p.id, { feedbacks: feedbacks.length, sites: sites.length });
+    }),
+  );
 
   return (
     <Shell>

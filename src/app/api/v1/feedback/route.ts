@@ -35,7 +35,7 @@ export async function POST(req: Request) {
   if (!parsed.success) return corsJson({ error: "invalid_input" }, 400);
   const data = parsed.data;
 
-  const result = guardSubmission({
+  const result = await guardSubmission({
     widgetKey: data.widget_key,
     domain: data.domain,
     theme: data.theme,
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
     return corsJson({ error: result.error }, 403);
   }
 
-  const feedbackId = createFeedback({
+  const feedbackId = await createFeedback({
     projectId: result.project.id,
     siteId: result.site.id,
     category: data.category?.trim() || "Öneri",

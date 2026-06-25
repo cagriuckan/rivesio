@@ -34,7 +34,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
   const raw = (await ctx.params).key;
   const key = raw.replace(/\.js$/i, "");
 
-  const project = getProjectByWidgetKey(key);
+  const project = await getProjectByWidgetKey(key);
   if (!project) {
     // Unknown key: serve a no-op so a stale embed never throws on the host page.
     return js("/* revisto: unknown widget key */", 404);

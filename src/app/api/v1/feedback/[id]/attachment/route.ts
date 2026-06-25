@@ -29,16 +29,16 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
   const file = form.get("file");
 
   // Authorize against the same theme/approval rules as feedback submission.
-  const guard = guardSubmission({ widgetKey, domain, theme, meta: { ip } });
+  const guard = await guardSubmission({ widgetKey, domain, theme, meta: { ip } });
   if (!guard.ok) return corsJson({ error: guard.error }, 403);
 
   // The feedback must exist and belong to this guarded project.
-  const feedback = getFeedback(id);
+  const feedback = await getFeedback(id);
   if (!feedback || feedback.project_id !== guard.project.id) {
     return corsJson({ error: "not_found" }, 404);
   }
 
-  if (countAttachments(id) >= limits.maxAttachments) {
+  if ((await countAttachments(id)) >= limits.maxAttachments) {
     return corsJson({ error: "too_many_attachments" }, 400);
   }
 
@@ -52,8 +52,8 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
   const buf = Buffer.from(await file.arrayBuffer());
   const fileId = generateId();
-  const relPath = saveAttachment(id, fileId, file.type, buf);
-  const row = addAttachment({
+  const relPath = await saveAttachment(id, fileId, file.type, buf);
+  const row = await addAttachment({
     feedbackId: id,
     kind,
     filePath: relPath,

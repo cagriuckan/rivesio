@@ -12,17 +12,17 @@ const schema = z.object({
 
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const fb = getFeedbackWithMeta(id);
+  const fb = await getFeedbackWithMeta(id);
   if (!fb) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  const attachments = listAttachments(id);
+  const attachments = await listAttachments(id);
   return NextResponse.json({ ...fb, attachments });
 }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  if (!getFeedbackWithMeta(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  deleteAttachmentDir(id);
-  deleteFeedback(id);
+  if (!(await getFeedbackWithMeta(id))) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  await deleteAttachmentDir(id);
+  await deleteFeedback(id);
   return NextResponse.json({ ok: true });
 }
 
@@ -31,6 +31,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
-  updateFeedback(id, parsed.data);
+  await updateFeedback(id, parsed.data);
   return NextResponse.json({ ok: true });
 }

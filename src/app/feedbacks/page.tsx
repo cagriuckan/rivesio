@@ -20,8 +20,8 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
   const status = (FEEDBACK_STATUSES as string[]).includes(sp.status ?? "")
     ? (sp.status as FeedbackStatus)
     : undefined;
-  const project = sp.w ? getProjectById(sp.w) : undefined;
-  const feedbacks = listFeedbacks({ status, projectId: project?.id });
+  const project = sp.w ? await getProjectById(sp.w) : undefined;
+  const feedbacks = await listFeedbacks({ status, projectId: project?.id });
 
   const buildHref = (s?: string) => {
     const p = new URLSearchParams();
