@@ -52,7 +52,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
   const buf = Buffer.from(await file.arrayBuffer());
   const fileId = generateId();
-  const relPath = saveAttachment(id, fileId, file.type, buf);
+  const relPath = await saveAttachment(id, fileId, file.type, buf);
   const row = addAttachment({
     feedbackId: id,
     kind,

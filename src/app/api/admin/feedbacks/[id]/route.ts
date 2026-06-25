@@ -21,7 +21,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
   if (!getFeedbackWithMeta(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  deleteAttachmentDir(id);
+  await deleteAttachmentDir(id);
   deleteFeedback(id);
   return NextResponse.json({ ok: true });
 }

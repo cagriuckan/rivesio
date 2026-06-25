@@ -15,6 +15,7 @@
     "hash": "node scripts/hash-password.mjs"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1075.0",
     "@tailwindcss/postcss": "^4.3.1",
     "better-sqlite3": "^11.8.1",
     "jose": "^5.9.6",
