@@ -9,6 +9,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: "invalid_input" }, { status: 400 });
-  setSiteStatus(id, parsed.data.status);
+  await setSiteStatus(id, parsed.data.status);
   return NextResponse.json({ ok: true });
 }

@@ -4,8 +4,8 @@ import { env } from "@/lib/env";
 import ShellClient from "./ShellClient";
 import type { WidgetOption } from "./WidgetSwitcher";
 
-export default function Shell({ children }: { children: React.ReactNode }) {
-  const widgets: WidgetOption[] = listProjects().map((p) => ({
+export default async function Shell({ children }: { children: React.ReactNode }) {
+  const widgets: WidgetOption[] = (await listProjects()).map((p) => ({
     id: p.id,
     name: p.name,
     themeSlug: p.theme_slug,

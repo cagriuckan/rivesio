@@ -20,7 +20,7 @@ export async function POST(req: Request) {
   }
   const d = parsed.data;
   try {
-    const project = createProject({
+    const project = await createProject({
       slug: d.slug,
       name: d.name,
       themeSlug: d.themeSlug,

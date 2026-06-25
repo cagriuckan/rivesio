@@ -7,7 +7,7 @@ import { readAttachment } from "@/lib/storage";
 // enforces the session).
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const att = getAttachmentById(id);
+  const att = await getAttachmentById(id);
   if (!att) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const buf = await readAttachment(att.file_path);

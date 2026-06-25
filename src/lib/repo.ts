@@ -1,4 +1,4 @@
-import { getDb } from "./db";
+import { queryAll, queryOne, execute } from "./db";
 import { generateId } from "./ids";
 import type {
   AttachmentRow,
@@ -23,22 +23,16 @@ export function parseSettings(project: ProjectRow): ProjectSettings {
   }
 }
 
-export function getProjectByWidgetKey(widgetKey: string): ProjectRow | undefined {
-  return getDb()
-    .prepare("SELECT * FROM projects WHERE widget_key = ?")
-    .get(widgetKey) as ProjectRow | undefined;
+export function getProjectByWidgetKey(widgetKey: string): Promise<ProjectRow | undefined> {
+  return queryOne<ProjectRow>("SELECT * FROM projects WHERE widget_key = ?", [widgetKey]);
 }
 
-export function getProjectById(id: string): ProjectRow | undefined {
-  return getDb().prepare("SELECT * FROM projects WHERE id = ?").get(id) as
-    | ProjectRow
-    | undefined;
+export function getProjectById(id: string): Promise<ProjectRow | undefined> {
+  return queryOne<ProjectRow>("SELECT * FROM projects WHERE id = ?", [id]);
 }
 
-export function listProjects(): ProjectRow[] {
-  return getDb()
-    .prepare("SELECT * FROM projects ORDER BY created_at DESC")
-    .all() as ProjectRow[];
+export function listProjects(): Promise<ProjectRow[]> {
+  return queryAll<ProjectRow>("SELECT * FROM projects ORDER BY created_at DESC");
 }
 
 /** Normalize a domain to host only (no scheme, no path, no www). */
@@ -53,47 +47,42 @@ export function normalizeDomain(input: string): string {
   }
 }
 
-export function findSite(projectId: string, domain: string): SiteRow | undefined {
-  return getDb()
-    .prepare("SELECT * FROM sites WHERE project_id = ? AND domain = ?")
-    .get(projectId, domain) as SiteRow | undefined;
+export function findSite(projectId: string, domain: string): Promise<SiteRow | undefined> {
+  return queryOne<SiteRow>(
+    "SELECT * FROM sites WHERE project_id = ? AND domain = ?",
+    [projectId, domain],
+  );
 }
 
-export function upsertSite(args: {
+export async function upsertSite(args: {
   projectId: string;
   domain: string;
   meta: Record<string, unknown>;
   defaultStatus: SiteStatus;
-}): SiteRow {
-  const db = getDb();
+}): Promise<SiteRow> {
   const now = Date.now();
-  const existing = findSite(args.projectId, args.domain);
+  const existing = await findSite(args.projectId, args.domain);
 
   if (existing) {
     // Preserve admin decision (approved/blocked); only refresh metadata + last seen.
-    db.prepare(
-      "UPDATE sites SET meta_json = ?, last_seen = ? WHERE id = ?"
-    ).run(JSON.stringify(args.meta), now, existing.id);
-    return findSite(args.projectId, args.domain)!;
+    await execute("UPDATE sites SET meta_json = ?, last_seen = ? WHERE id = ?", [
+      JSON.stringify(args.meta),
+      now,
+      existing.id,
+    ]);
+    return (await findSite(args.projectId, args.domain))!;
   }
 
   const id = generateId();
-  db.prepare(
+  await execute(
     `INSERT INTO sites (id, project_id, domain, status, meta_json, first_seen, last_seen)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    args.projectId,
-    args.domain,
-    args.defaultStatus,
-    JSON.stringify(args.meta),
-    now,
-    now
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, args.projectId, args.domain, args.defaultStatus, JSON.stringify(args.meta), now, now],
   );
-  return findSite(args.projectId, args.domain)!;
+  return (await findSite(args.projectId, args.domain))!;
 }
 
-export function createFeedback(args: {
+export async function createFeedback(args: {
   projectId: string;
   siteId: string;
   category: string;
@@ -102,15 +91,13 @@ export function createFeedback(args: {
   userAgent: string | null;
   viewport: string | null;
   wpUser: string | null;
-}): string {
+}): Promise<string> {
   const id = generateId();
-  getDb()
-    .prepare(
-      `INSERT INTO feedbacks
-        (id, project_id, site_id, category, message, page_url, user_agent, viewport, wp_user, status, priority, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'normal', ?)`
-    )
-    .run(
+  await execute(
+    `INSERT INTO feedbacks
+      (id, project_id, site_id, category, message, page_url, user_agent, viewport, wp_user, status, priority, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'normal', ?)`,
+    [
       id,
       args.projectId,
       args.siteId,
@@ -120,43 +107,43 @@ export function createFeedback(args: {
       args.userAgent,
       args.viewport,
       args.wpUser,
-      Date.now()
-    );
+      Date.now(),
+    ],
+  );
   return id;
 }
 
-export function getFeedback(id: string): FeedbackRow | undefined {
-  return getDb().prepare("SELECT * FROM feedbacks WHERE id = ?").get(id) as
-    | FeedbackRow
-    | undefined;
+export function getFeedback(id: string): Promise<FeedbackRow | undefined> {
+  return queryOne<FeedbackRow>("SELECT * FROM feedbacks WHERE id = ?", [id]);
 }
 
-export function countAttachments(feedbackId: string): number {
-  const row = getDb()
-    .prepare("SELECT COUNT(*) AS c FROM attachments WHERE feedback_id = ?")
-    .get(feedbackId) as { c: number };
-  return row.c;
+export async function countAttachments(feedbackId: string): Promise<number> {
+  const row = await queryOne<{ c: number }>(
+    "SELECT COUNT(*) AS c FROM attachments WHERE feedback_id = ?",
+    [feedbackId],
+  );
+  return row?.c ?? 0;
 }
 
-export function addAttachment(args: {
+export async function addAttachment(args: {
   feedbackId: string;
   kind: "screenshot" | "upload";
   filePath: string;
   mime: string;
   size: number;
-}): AttachmentRow {
+}): Promise<AttachmentRow> {
   const id = generateId();
-  getDb()
-    .prepare(
-      `INSERT INTO attachments (id, feedback_id, kind, file_path, mime, size, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`
-    )
-    .run(id, args.feedbackId, args.kind, args.filePath, args.mime, args.size, Date.now());
-  return getDb().prepare("SELECT * FROM attachments WHERE id = ?").get(id) as AttachmentRow;
+  await execute(
+    `INSERT INTO attachments (id, feedback_id, kind, file_path, mime, size, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    [id, args.feedbackId, args.kind, args.filePath, args.mime, args.size, Date.now()],
+  );
+  return (await queryOne<AttachmentRow>("SELECT * FROM attachments WHERE id = ?", [id]))!;
 }
 
-export function listAttachments(feedbackId: string): AttachmentRow[] {
-  return getDb()
-    .prepare("SELECT * FROM attachments WHERE feedback_id = ? ORDER BY created_at ASC")
-    .all(feedbackId) as AttachmentRow[];
+export function listAttachments(feedbackId: string): Promise<AttachmentRow[]> {
+  return queryAll<AttachmentRow>(
+    "SELECT * FROM attachments WHERE feedback_id = ? ORDER BY created_at ASC",
+    [feedbackId],
+  );
 }

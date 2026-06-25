@@ -35,17 +35,20 @@ function pctChange(current: number, previous: number): number {
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const { w, period } = await searchParams;
   const days = period === "7" ? 7 : period === "90" ? 90 : 30;
-  const project = w ? getProjectById(w) : undefined;
+  const project = w ? await getProjectById(w) : undefined;
   const projectId = project?.id;
-  const projects = listProjects();
+  const projects = await listProjects();
 
-  const stats = getStats(projectId);
-  const trend = getStatsWithTrend(projectId, days);
-  const dailyTrend = getDailyTrend(projectId, days);
-  const statusBd = getStatusBreakdown(projectId);
-  const priorityBd = getPriorityBreakdown(projectId);
-  const categories = getCategoryBreakdown(projectId);
-  const recent = listFeedbacks({ projectId }).slice(0, 6);
+  const [stats, trend, dailyTrend, statusBd, priorityBd, categories, recentAll] = await Promise.all([
+    getStats(projectId),
+    getStatsWithTrend(projectId, days),
+    getDailyTrend(projectId, days),
+    getStatusBreakdown(projectId),
+    getPriorityBreakdown(projectId),
+    getCategoryBreakdown(projectId),
+    listFeedbacks({ projectId }),
+  ]);
+  const recent = recentAll.slice(0, 6);
 
   const wq = projectId ? `?w=${projectId}` : "";
   const feedbacksHref = `/feedbacks${wq}`;

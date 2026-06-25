@@ -21,8 +21,14 @@ export const env = {
   adminPasswordHash: required("ADMIN_PASSWORD_HASH"),
   jwtSecret: required("JWT_SECRET", "dev-insecure-secret-change-me"),
   publicBaseUrl: (process.env.PUBLIC_BASE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
-  dbPath: resolvePath(process.env.DB_PATH ?? "./data/feedback.db"),
   uploadDir: resolvePath(process.env.UPLOAD_DIR ?? "./data/uploads"),
+  db: {
+    host: process.env.DB_HOST ?? "127.0.0.1",
+    port: parseInt(process.env.DB_PORT ?? "3306", 10),
+    user: required("DB_USER", "root"),
+    password: process.env.DB_PASSWORD ?? "",
+    database: required("DB_NAME", "revisto"),
+  },
   autoApproveSites: process.env.AUTO_APPROVE_SITES === "1",
   r2: {
     accountId: process.env.R2_ACCOUNT_ID ?? "",

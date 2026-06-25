@@ -14,7 +14,7 @@ const schema = z.object({
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  const project = getProjectById(id);
+  const project = await getProjectById(id);
   if (!project) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const body = await req.json().catch(() => null);
@@ -23,7 +23,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const d = parsed.data;
 
   const current = parseSettings(project);
-  updateProject(id, {
+  await updateProject(id, {
     name: d.name,
     themeSlug: d.themeSlug,
     settings: {
@@ -34,14 +34,14 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   });
 
   let widget_key = project.widget_key;
-  if (d.rotateKey) widget_key = rotateWidgetKey(id);
+  if (d.rotateKey) widget_key = await rotateWidgetKey(id);
 
   return NextResponse.json({ ok: true, widget_key });
 }
 
 export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
-  if (!getProjectById(id)) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  deleteProject(id);
+  if (!(await getProjectById(id))) return NextResponse.json({ error: "not_found" }, { status: 404 });
+  await deleteProject(id);
   return NextResponse.json({ ok: true });
 }

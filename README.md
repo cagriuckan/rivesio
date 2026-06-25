@@ -20,10 +20,10 @@ Kanthemes temaları için merkezi geri bildirim sistemi. İki parçadan oluşur:
 
 ## Teknoloji
 
-Next.js 15 (App Router) · better-sqlite3 · Tailwind · jose (JWT) · zod · esbuild + html2canvas (widget).
+Next.js 15 (App Router) · MySQL (mysql2) · Cloudflare R2 (ekler) · Tailwind · jose (JWT) · zod · esbuild + html2canvas (widget).
 
-> **Node sürümü:** 20–22 kullanın (`.nvmrc` → 22). `better-sqlite3` yerel bir modüldür ve
-> kurulum sırasında çalışan Node sürümüne derlenir.
+> **Node sürümü:** 20–22 kullanın (`.nvmrc` → 22).
+> **Veritabanı:** MySQL/MariaDB (Hostinger uyumlu). Şema ilk açılışta otomatik oluşturulur.
 
 ## Yerel geliştirme
 
@@ -56,8 +56,11 @@ adresini kendi değerlerinle değiştir. Site ilk yüklemede **pending** gelir; 
 | `ADMIN_PASSWORD_HASH` | `npm run hash -- "..."` çıktısı (scrypt) |
 | `JWT_SECRET` | Oturum çerezini imzalayan uzun rastgele dizi |
 | `PUBLIC_BASE_URL` | Sunucunun herkese açık adresi (sonunda `/` yok) |
-| `DB_PATH` | SQLite dosyası (kalıcı diskte) |
-| `UPLOAD_DIR` | Yüklenen eklerin dizini (kalıcı diskte) |
+| `DB_HOST` / `DB_PORT` | MySQL sunucusu (Hostinger'da genelde `127.0.0.1:3306`) |
+| `DB_USER` / `DB_PASSWORD` | MySQL kullanıcı bilgileri |
+| `DB_NAME` | MySQL veritabanı adı |
+| `UPLOAD_DIR` | Ekler için yerel fallback dizini (R2 ayarlıysa kullanılmaz) |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 (ekler) |
 | `AUTO_APPROVE_SITES` | `1` → yeni siteler otomatik onaylı; `0` (önerilen) → panelden onaylarsın |
 
 ## Hostinger Node.js'e kurulum
@@ -80,13 +83,14 @@ ortam değişkeninden alır).
    indirir — derlemeyi aşağıdaki adımda sen tetiklersin.
 3. **Bağımlılıklar + derleme** (SSH ya da Node.js panelindeki "Run NPM install" / script):
    ```bash
-   npm install        # better-sqlite3 buradaki Node sürümüne derlenir
-   npm run build      # önce widget (esbuild), sonra next build → .next
+   npm install --include=dev   # build için devDependencies (esbuild, typescript) gerekli
+   npm run build               # önce widget (esbuild), sonra next build → .next
    ```
-4. **Ortam değişkenleri:** Node.js panelinin "Environment variables" bölümünden yukarıdaki
-   tabloyu gir. `DB_PATH`/`UPLOAD_DIR` için **kalıcı** bir yol seç (ör. `./data/...`),
-   yoksa her deploy'da veriler silinir. `PORT` GİRME (Passenger atar).
-5. **Restart App** ile uygulamayı yeniden başlat. `PUBLIC_BASE_URL`'i alan adına eşitle.
+4. **MySQL veritabanı:** hPanel → Veritabanları → MySQL'den bir veritabanı + kullanıcı
+   oluştur ve `DB_*` değişkenlerine gir. Tablolar uygulama ilk açıldığında otomatik kurulur.
+5. **Ortam değişkenleri:** Node.js panelinin "Environment variables" bölümünden yukarıdaki
+   tabloyu gir. Ekler R2'ye gittiği için yerel kalıcı disk gerekmez. `PORT` GİRME (Passenger atar).
+6. **Restart App** ile uygulamayı yeniden başlat. `PUBLIC_BASE_URL`'i alan adına eşitle.
 
 ### Her güncellemede (Git push sonrası)
 
@@ -100,8 +104,9 @@ npm run build
 ardından panelden **Restart App**. (İstersen bu iki komutu Hostinger'ın deploy hook'una
 ekleyebilirsin.)
 
-> Tek instance varsayılır (rate limit ve SQLite bellek-içi sayaçlar buna göre). Yatay
-> ölçeklemede paylaşımlı bir veri deposu gerekir.
+> Rate limit sayaçları bellek-içidir (tek instance varsayılır). MySQL paylaşımlı
+> olduğundan veritabanı yatay ölçeklemede sorun değildir; yalnızca rate limit için
+> ortak bir depo (ör. Redis) gerekir.
 
 ## Tema entegrasyonu
 

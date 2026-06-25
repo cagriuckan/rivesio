@@ -20,8 +20,8 @@ const STATUSES: SiteStatus[] = ["pending", "approved", "blocked"];
 export default async function SitesPage({ searchParams }: { searchParams: Promise<{ status?: string; w?: string }> }) {
   const sp = await searchParams;
   const status = (STATUSES as string[]).includes(sp.status ?? "") ? (sp.status as SiteStatus) : undefined;
-  const project = sp.w ? getProjectById(sp.w) : undefined;
-  const sites = listSites({ status, projectId: project?.id });
+  const project = sp.w ? await getProjectById(sp.w) : undefined;
+  const sites = await listSites({ status, projectId: project?.id });
 
   const buildHref = (s?: string) => {
     const p = new URLSearchParams();
