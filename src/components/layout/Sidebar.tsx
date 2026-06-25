@@ -1,17 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import WidgetSwitcher, { type WidgetOption } from "./WidgetSwitcher";
 
 const NAV = [
-  { href: "/",          label: "Genel Bakış",      icon: Icon.dashboard },
-  { href: "/feedbacks", label: "Geri Bildirimler", icon: Icon.feedback },
-  { href: "/sites",     label: "Siteler",          icon: Icon.globe },
-  { href: "/projects",  label: "Widget'lar",       icon: Icon.code },
-];
+  { href: "/",          key: "overview",  icon: Icon.dashboard },
+  { href: "/feedbacks", key: "feedbacks", icon: Icon.feedback },
+  { href: "/sites",     key: "sites",     icon: Icon.globe },
+  { href: "/projects",  key: "widgets",   icon: Icon.code },
+] as const;
 
 export default function Sidebar({
   widgets,
@@ -20,6 +21,7 @@ export default function Sidebar({
   widgets: WidgetOption[];
   onClose?: () => void;
 }) {
+  const t = useTranslations("nav");
   const pathname = usePathname();
   const params = useSearchParams();
   const w = params.get("w");
@@ -40,8 +42,8 @@ export default function Sidebar({
       <div className="mx-3 h-px bg-line" />
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-3 pt-2" aria-label="Ana menü">
-        <div className="mb-2 px-1 text-2xs font-medium uppercase tracking-wider text-faint">Menü</div>
+      <nav className="flex-1 overflow-y-auto p-3 pt-2" aria-label={t("mainMenu")}>
+        <div className="mb-2 px-1 text-2xs font-medium uppercase tracking-wider text-faint">{t("menu")}</div>
         <ul className="space-y-0.5" role="list">
           {NAV.map((n) => {
             const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
@@ -65,7 +67,7 @@ export default function Sidebar({
                       active ? "text-accent" : "text-subtle group-hover:text-muted"
                     )}
                   />
-                  {n.label}
+                  {t(n.key)}
                 </Link>
               </li>
             );

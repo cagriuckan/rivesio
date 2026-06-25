@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
+import createIntlMiddleware from "next-intl/middleware";
+import { routing } from "./i18n/routing";
 
 // Edge-compatible auth gate. Cannot import ./lib/env here (uses node:path),
 // so read the secret directly from process.env.
 const COOKIE_NAME = "kf_session";
+
+const intlMiddleware = createIntlMiddleware(routing);
 
 async function isValid(token: string | undefined): Promise<boolean> {
   if (!token) return false;
@@ -18,40 +22,53 @@ async function isValid(token: string | undefined): Promise<boolean> {
   }
 }
 
+/** Strips a leading /en or /tr, returning the locale and the locale-less path. */
+function splitLocale(pathname: string): { locale: string; rest: string } {
+  const match = pathname.match(/^\/(en|tr)(\/.*)?$/);
+  if (match) return { locale: match[1], rest: match[2] || "/" };
+  return { locale: routing.defaultLocale, rest: pathname };
+}
+
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get(COOKIE_NAME)?.value;
   const authed = await isValid(token);
 
-  const isAdminApi = pathname.startsWith("/api/admin") && pathname !== "/api/admin/login";
-
-  if (isAdminApi && !authed) {
-    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  // API routes are not localized: guard admin endpoints and skip intl routing.
+  if (pathname.startsWith("/api")) {
+    const isAdminApi = pathname.startsWith("/api/admin") && pathname !== "/api/admin/login";
+    if (isAdminApi && !authed) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+    return NextResponse.next();
   }
 
-  // Protected admin pages.
+  const { locale, rest } = splitLocale(pathname);
+
   const isProtectedPage =
-    pathname === "/" ||
-    pathname.startsWith("/feedbacks") ||
-    pathname.startsWith("/sites") ||
-    pathname.startsWith("/projects");
+    rest === "/" ||
+    rest.startsWith("/feedbacks") ||
+    rest.startsWith("/sites") ||
+    rest.startsWith("/projects");
 
   if (isProtectedPage && !authed) {
     const url = req.nextUrl.clone();
-    url.pathname = "/login";
+    url.pathname = `/${locale}/login`;
     return NextResponse.redirect(url);
   }
 
   // Already logged in: keep them out of the login page.
-  if (pathname === "/login" && authed) {
+  if (rest === "/login" && authed) {
     const url = req.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = `/${locale}`;
     return NextResponse.redirect(url);
   }
 
-  return NextResponse.next();
+  // Let next-intl handle locale detection, prefixing and rewrites.
+  return intlMiddleware(req);
 }
 
 export const config = {
-  matcher: ["/", "/login", "/feedbacks/:path*", "/sites/:path*", "/projects/:path*", "/api/admin/:path*"],
+  // Run on everything except Next internals and static files (with a dot).
+  matcher: ["/((?!_next|_vercel|.*\\..*).*)"],
 };

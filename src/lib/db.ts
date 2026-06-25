@@ -1,6 +1,5 @@
 import mysql from "mysql2/promise";
 import { env } from "./env";
-import { generateId, generateWidgetKey } from "./ids";
 
 declare global {
   // Reuse the pool + migration promise across Next.js hot reloads in development.
@@ -103,28 +102,7 @@ async function migrate(p: mysql.Pool): Promise<void> {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
-  // Seed the default project on first run so the panel is usable immediately.
-  const [rows] = await p.query("SELECT COUNT(*) AS c FROM projects");
-  const count = (rows as { c: number }[])[0].c;
-  if (count === 0) {
-    await p.query(
-      `INSERT INTO projects (id, slug, name, theme_slug, widget_key, settings_json, created_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [
-        generateId(),
-        "revisto",
-        "Revisto",
-        "revisto",
-        generateWidgetKey(),
-        JSON.stringify({
-          accentColor: "#4f46e5",
-          position: "bottom-right",
-          categories: DEFAULT_CATEGORIES,
-        }),
-        Date.now(),
-      ],
-    );
-  }
+  // No default project is seeded; projects are created explicitly from the panel.
 }
 
 /** Returns a ready pool, running migrations exactly once per process. */

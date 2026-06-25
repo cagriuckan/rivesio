@@ -1,0 +1,191 @@
+{
+  "common": {
+    "brand": "Revisto",
+    "save": "Kaydet",
+    "saving": "Kaydediliyor…",
+    "saved": "Kaydedildi",
+    "cancel": "Vazgeç",
+    "create": "Oluştur",
+    "creating": "Oluşturuluyor…",
+    "delete": "Sil",
+    "deleting": "Siliniyor…",
+    "copy": "Kopyala",
+    "copied": "Kopyalandı",
+    "back": "Geri",
+    "close": "Kapat",
+    "all": "Tümü",
+    "loading": "Yükleniyor…",
+    "connectionError": "Bağlantı hatası.",
+    "invalidInput": "Geçersiz bilgi.",
+    "none": "—"
+  },
+  "language": {
+    "label": "Dil",
+    "en": "English",
+    "tr": "Türkçe"
+  },
+  "nav": {
+    "overview": "Genel Bakış",
+    "feedbacks": "Geri Bildirimler",
+    "sites": "Siteler",
+    "widgets": "Widget'lar",
+    "menu": "Menü",
+    "mainMenu": "Ana menü",
+    "bottomNav": "Alt navigasyon",
+    "overviewShort": "Bakış",
+    "feedbacksShort": "Bildirimler",
+    "openMenu": "Menüyü aç",
+    "closeMenu": "Menüyü kapat",
+    "logout": "Çıkış yap"
+  },
+  "login": {
+    "welcome": "Tekrar hoş geldin",
+    "subtitle": "Yönetim paneline erişmek için giriş yap.",
+    "username": "Kullanıcı adı",
+    "password": "Parola",
+    "signIn": "Giriş yap",
+    "signingIn": "Giriş yapılıyor…",
+    "invalidCredentials": "Giriş bilgileri hatalı.",
+    "tooManyAttempts": "Çok fazla deneme. Biraz bekle."
+  },
+  "theme": {
+    "toLight": "Açık temaya geç",
+    "toDark": "Koyu temaya geç",
+    "light": "Açık tema",
+    "dark": "Koyu tema"
+  },
+  "widgetSwitcher": {
+    "all": "Tüm widget'lar",
+    "allMerged": "{count} widget birleşik",
+    "count": "{count} widget",
+    "label": "Widgets"
+  },
+  "status": {
+    "new": "Yeni",
+    "planned": "Planlandı",
+    "in_progress": "Üzerinde",
+    "resolved": "Çözüldü",
+    "wontfix": "Yapılmayacak"
+  },
+  "priority": {
+    "low": "Düşük",
+    "normal": "Normal",
+    "high": "Yüksek"
+  },
+  "siteStatus": {
+    "pending": "Onay bekliyor",
+    "approved": "Onaylı",
+    "blocked": "Engelli"
+  },
+  "time": {
+    "justNow": "az önce",
+    "minutes": "{value}dk",
+    "hours": "{value}sa",
+    "days": "{value}g",
+    "months": "{value}ay"
+  },
+  "dashboard": {
+    "title": "Genel Bakış",
+    "subtitle": "Geri bildirim kontrol paneli",
+    "subtitleProject": "{name} · {theme}",
+    "subtitleAll": "Tüm widget'lar birleşik",
+    "emptyTitle": "İlk widget'ını oluştur",
+    "emptyBody": "Bir widget oluşturduğunda burada geri bildirim istatistiklerini göreceksin.",
+    "createWidget": "Widget oluştur",
+    "feedbacksLink": "Geri bildirimler",
+    "totalAllTime": "Toplam (tüm zamanlar)",
+    "new": "Yeni",
+    "resolved": "Çözüldü",
+    "highPriority": "Yüksek öncelik",
+    "previousPeriod": "Önceki {period}: {value}",
+    "previous": "Önceki: {value}",
+    "resolutionRate": "Çözüm oranı",
+    "activeSites": "Aktif site",
+    "pendingApproval": "{count} onay bekliyor",
+    "widgetCount": "Widget sayısı",
+    "totalSites": "Toplam site",
+    "blockedCount": "{count} engelli",
+    "trendLabel": "Son {period} — günlük geri bildirimler",
+    "statusBreakdown": "Durum dağılımı",
+    "priorityBreakdown": "Öncelik dağılımı",
+    "periodDays": "{days} gün",
+    "recentTitle": "Son geri bildirimler",
+    "recentEmpty": "Henüz geri bildirim yok.",
+    "categories": "Kategoriler",
+    "noData": "Veri yok."
+  },
+  "trend": {
+    "defaultLabel": "Günlük geri bildirimler",
+    "days": "{count} gün"
+  },
+  "siteSummary": {
+    "title": "Siteler",
+    "manage": "Yönet",
+    "approved": "Onaylı",
+    "pending": "Bekleyen",
+    "blocked": "Engelli",
+    "totalRegistered": "Toplam kayıtlı site"
+  },
+  "feedbacks": {
+    "title": "Geri Bildirimler",
+    "subtitle": "{name} · {count} kayıt",
+    "allWidgets": "Tüm widget'lar",
+    "searchPlaceholder": "ID ile ara…",
+    "searchLabel": "ID ile ara",
+    "noMatch": "\"{query}\" ile eşleşen geri bildirim yok.",
+    "noneForFilter": "Bu filtreye uygun geri bildirim yok.",
+    "listLabel": "Geri bildirimler",
+    "detailRegion": "Geri bildirim detayı",
+    "anonymous": "Anonim",
+    "category": "Kategori",
+    "screen": "Ekran",
+    "attachments": "Ekler ({count})",
+    "screenshot": "Ekran görüntüsü",
+    "image": "Görsel",
+    "attachmentAlt": "Ek",
+    "fieldStatus": "Durum",
+    "fieldPriority": "Öncelik",
+    "resolutionNote": "Çözüm notu",
+    "resolutionPlaceholder": "Çözüm planı, ilgili kişi, sürüm…",
+    "deletePermanently": "Kalıcı olarak sil",
+    "confirmDelete": "Bu geri bildirim ve ekleri kalıcı olarak silinecek. Emin misin?"
+  },
+  "sites": {
+    "title": "Siteler",
+    "subtitle": "{count} kayıtlı site",
+    "empty": "Kayıtlı site yok.",
+    "colDomain": "Domain",
+    "colWidget": "Widget",
+    "colFeedback": "Bildirim",
+    "colLastSeen": "Son görülme",
+    "colStatus": "Durum",
+    "approve": "Onayla",
+    "block": "Engelle",
+    "unblock": "Engeli kaldır"
+  },
+  "projects": {
+    "title": "Widget'lar",
+    "subtitle": "{count} widget",
+    "newWidget": "Yeni widget",
+    "emptyTitle": "Henüz widget yok",
+    "emptyBody": "İlk widget'ını oluştur ve gömme kodunu sitene ekle.",
+    "modalTitle": "Yeni widget / tema",
+    "fieldName": "Ad",
+    "fieldSlug": "Slug",
+    "fieldThemeSlug": "Tema slug",
+    "accentColor": "Vurgu rengi",
+    "slugTaken": "Bu slug zaten kullanımda.",
+    "panel": "Panel",
+    "feedbackStat": "Geri bildirim",
+    "siteStat": "Site",
+    "widgetKey": "Widget anahtarı",
+    "embedCode": "Gömme kodu",
+    "rotateKey": "Anahtarı yenile",
+    "confirmRotate": "Anahtarı yenilemek mevcut gömülü kodları bozar. Devam edilsin mi?",
+    "confirmDelete": "\"{name}\" widget'ı ve tüm geri bildirimleri silinecek. Devam edilsin mi?"
+  },
+  "metadata": {
+    "title": "Revisto Feedback",
+    "description": "Revisto geri bildirim yönetim paneli"
+  }
+}

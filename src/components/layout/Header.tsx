@@ -1,16 +1,17 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/Avatar";
 import ThemeToggle from "./ThemeToggle";
+import LanguageSwitcher from "./LanguageSwitcher";
 import { Icon } from "@/components/ui/Icons";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 
-const PAGE_TITLE: Record<string, string> = {
-  "/": "Genel Bakış",
-  "/feedbacks": "Geri Bildirimler",
-  "/sites": "Siteler",
-  "/projects": "Widget'lar",
+const TITLE_KEY: Record<string, string> = {
+  "/": "overview",
+  "/feedbacks": "feedbacks",
+  "/sites": "sites",
+  "/projects": "widgets",
 };
 
 export default function Header({
@@ -22,9 +23,11 @@ export default function Header({
   onMenuToggle?: () => void;
   sidebarOpen?: boolean;
 }) {
+  const t = useTranslations("nav");
+  const tc = useTranslations("common");
   const pathname = usePathname();
   const router = useRouter();
-  const title = PAGE_TITLE[pathname] ?? PAGE_TITLE["/"];
+  const title = t(TITLE_KEY[pathname] ?? "overview");
 
   async function logout() {
     await fetch("/api/admin/logout", { method: "POST" });
@@ -44,7 +47,7 @@ export default function Header({
           <button
             onClick={onMenuToggle}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent md:hidden"
-            aria-label={sidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+            aria-label={sidebarOpen ? t("closeMenu") : t("openMenu")}
             aria-expanded={sidebarOpen}
           >
             {sidebarOpen ? (
@@ -64,7 +67,7 @@ export default function Header({
               <polyline points="31,46 43,58 69,32" fill="none" stroke="#5b63d3" strokeWidth="8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </span>
-          <span className="text-sm font-semibold tracking-tight text-strong">Revisto</span>
+          <span className="text-sm font-semibold tracking-tight text-strong">{tc("brand")}</span>
           <span className="hidden h-4 w-px bg-line-strong sm:block" aria-hidden />
           <span className="hidden text-sm text-secondary sm:block">{title}</span>
         </div>
@@ -72,6 +75,7 @@ export default function Header({
 
       {/* Right: theme + user */}
       <div className="flex items-center gap-1">
+        <LanguageSwitcher className="mr-1" />
         <ThemeToggle />
         <div className="mx-1 h-4 w-px bg-line-strong" aria-hidden />
         <div className="hidden items-center gap-2 rounded-md px-2 py-1 sm:flex">
@@ -84,8 +88,8 @@ export default function Header({
         <button
           onClick={logout}
           className="inline-flex h-8 w-8 items-center justify-center rounded-md text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          aria-label="Çıkış yap"
-          title="Çıkış yap"
+          aria-label={t("logout")}
+          title={t("logout")}
         >
           <Icon.logout className="h-3.5 w-3.5" />
         </button>
