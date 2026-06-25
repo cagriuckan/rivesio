@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
@@ -7,7 +8,6 @@ import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import { listFeedbacks } from "@/lib/admin-repo";
 import { getProjectById } from "@/lib/repo";
-import { FEEDBACK_STATUS_LABEL } from "@/lib/labels";
 import { FEEDBACK_STATUSES } from "@/lib/types";
 import type { FeedbackStatus } from "@/lib/types";
 
@@ -22,6 +22,9 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
     : undefined;
   const project = sp.w ? await getProjectById(sp.w) : undefined;
   const feedbacks = await listFeedbacks({ status, projectId: project?.id });
+  const t = await getTranslations("feedbacks");
+  const tc = await getTranslations("common");
+  const ts = await getTranslations("status");
 
   const buildHref = (s?: string) => {
     const p = new URLSearchParams();
@@ -36,18 +39,18 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
       <PageContent>
         <PageHeader
           icon={Icon.feedback}
-          title="Geri Bildirimler"
-          subtitle={`${project ? project.name : "Tüm widget'lar"} · ${feedbacks.length} kayıt`}
+          title={t("title")}
+          subtitle={t("subtitle", { name: project ? project.name : t("allWidgets"), count: feedbacks.length })}
         />
         <FeedbacksList
           feedbacks={feedbacks}
           initialId={sp.f ?? null}
           filterBar={
             <div className="flex items-center gap-1 rounded-md border border-line bg-raised p-0.5 w-fit">
-              <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
+              <FilterTab href={buildHref()} active={!status}>{tc("all")}</FilterTab>
               {FEEDBACK_STATUSES.map((s) => (
                 <FilterTab key={s} href={buildHref(s)} active={status === s}>
-                  {FEEDBACK_STATUS_LABEL[s]}
+                  {ts(s)}
                 </FilterTab>
               ))}
             </div>

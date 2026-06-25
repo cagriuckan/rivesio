@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
@@ -10,7 +11,7 @@ import { cn } from "@/components/ui/cn";
 import { Icon } from "@/components/ui/Icons";
 import { listSites } from "@/lib/admin-repo";
 import { getProjectById } from "@/lib/repo";
-import { SITE_STATUS_LABEL, formatDate } from "@/lib/labels";
+import { formatDate } from "@/lib/labels";
 import type { SiteStatus } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,9 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   const status = (STATUSES as string[]).includes(sp.status ?? "") ? (sp.status as SiteStatus) : undefined;
   const project = sp.w ? await getProjectById(sp.w) : undefined;
   const sites = await listSites({ status, projectId: project?.id });
+  const t = await getTranslations("sites");
+  const tc = await getTranslations("common");
+  const ts = await getTranslations("siteStatus");
 
   const buildHref = (s?: string) => {
     const p = new URLSearchParams();
@@ -34,13 +38,13 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   return (
     <Shell>
       <PageContent>
-      <PageHeader icon={Icon.globe} title="Siteler" subtitle={`${sites.length} kayıtlı site`} />
+      <PageHeader icon={Icon.globe} title={t("title")} subtitle={t("subtitle", { count: sites.length })} />
 
       <div className="mb-5 inline-flex items-center gap-0.5 rounded-lg border border-line bg-base p-1">
-        <FilterTab href={buildHref()} active={!status}>Tümü</FilterTab>
+        <FilterTab href={buildHref()} active={!status}>{tc("all")}</FilterTab>
         {STATUSES.map((s) => (
           <FilterTab key={s} href={buildHref(s)} active={status === s}>
-            {SITE_STATUS_LABEL[s]}
+            {ts(s)}
           </FilterTab>
         ))}
       </div>
@@ -50,14 +54,14 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
           <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-raised">
             <Icon.globe className="h-5 w-5 text-subtle" />
           </div>
-          <p className="text-sm font-medium text-secondary">Kayıtlı site yok.</p>
+          <p className="text-sm font-medium text-secondary">{t("empty")}</p>
         </div>
       ) : (
         <Card className="overflow-hidden">
           <table className="w-full">
             <thead>
               <tr className="border-b border-line">
-                {["Domain", "Widget", "Bildirim", "Son görülme", "Durum", ""].map((h, i) => (
+                {[t("colDomain"), t("colWidget"), t("colFeedback"), t("colLastSeen"), t("colStatus"), ""].map((h, i) => (
                   <th key={i} className="px-4 py-3 text-left text-2xs font-semibold uppercase tracking-wider text-subtle">
                     {h}
                   </th>
@@ -77,7 +81,7 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
                   <td className="px-4 py-3 text-sm text-secondary tnum">{s.feedback_count}</td>
                   <td className="whitespace-nowrap px-4 py-3 text-xs text-subtle">{formatDate(s.last_seen)}</td>
                   <td className="px-4 py-3">
-                    <Badge tone={SITE_TONE[s.status]} dot>{SITE_STATUS_LABEL[s.status]}</Badge>
+                    <Badge tone={SITE_TONE[s.status]} dot>{ts(s.status)}</Badge>
                   </td>
                   <td className="px-4 py-3"><SiteActions id={s.id} status={s.status} /></td>
                 </tr>
