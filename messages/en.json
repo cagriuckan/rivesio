@@ -1,0 +1,191 @@
+{
+  "common": {
+    "brand": "Revisto",
+    "save": "Save",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "cancel": "Cancel",
+    "create": "Create",
+    "creating": "Creating…",
+    "delete": "Delete",
+    "deleting": "Deleting…",
+    "copy": "Copy",
+    "copied": "Copied",
+    "back": "Back",
+    "close": "Close",
+    "all": "All",
+    "loading": "Loading…",
+    "connectionError": "Connection error.",
+    "invalidInput": "Invalid data.",
+    "none": "—"
+  },
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "tr": "Türkçe"
+  },
+  "nav": {
+    "overview": "Overview",
+    "feedbacks": "Feedback",
+    "sites": "Sites",
+    "widgets": "Widgets",
+    "menu": "Menu",
+    "mainMenu": "Main menu",
+    "bottomNav": "Bottom navigation",
+    "overviewShort": "Overview",
+    "feedbacksShort": "Feedback",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu",
+    "logout": "Log out"
+  },
+  "login": {
+    "welcome": "Welcome back",
+    "subtitle": "Sign in to access the admin panel.",
+    "username": "Username",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signingIn": "Signing in…",
+    "invalidCredentials": "Invalid login credentials.",
+    "tooManyAttempts": "Too many attempts. Please wait a moment."
+  },
+  "theme": {
+    "toLight": "Switch to light theme",
+    "toDark": "Switch to dark theme",
+    "light": "Light theme",
+    "dark": "Dark theme"
+  },
+  "widgetSwitcher": {
+    "all": "All widgets",
+    "allMerged": "{count} widgets merged",
+    "count": "{count} widgets",
+    "label": "Widgets"
+  },
+  "status": {
+    "new": "New",
+    "planned": "Planned",
+    "in_progress": "In progress",
+    "resolved": "Resolved",
+    "wontfix": "Won't fix"
+  },
+  "priority": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High"
+  },
+  "siteStatus": {
+    "pending": "Pending approval",
+    "approved": "Approved",
+    "blocked": "Blocked"
+  },
+  "time": {
+    "justNow": "just now",
+    "minutes": "{value}m",
+    "hours": "{value}h",
+    "days": "{value}d",
+    "months": "{value}mo"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "subtitle": "Feedback dashboard",
+    "subtitleProject": "{name} · {theme}",
+    "subtitleAll": "All widgets combined",
+    "emptyTitle": "Create your first widget",
+    "emptyBody": "Once you create a widget, you'll see feedback stats here.",
+    "createWidget": "Create widget",
+    "feedbacksLink": "Feedback",
+    "totalAllTime": "Total (all time)",
+    "new": "New",
+    "resolved": "Resolved",
+    "highPriority": "High priority",
+    "previousPeriod": "Previous {period}: {value}",
+    "previous": "Previous: {value}",
+    "resolutionRate": "Resolution rate",
+    "activeSites": "Active sites",
+    "pendingApproval": "{count} pending approval",
+    "widgetCount": "Widget count",
+    "totalSites": "Total sites",
+    "blockedCount": "{count} blocked",
+    "trendLabel": "Last {period} — daily feedback",
+    "statusBreakdown": "Status breakdown",
+    "priorityBreakdown": "Priority breakdown",
+    "periodDays": "{days} days",
+    "recentTitle": "Recent feedback",
+    "recentEmpty": "No feedback yet.",
+    "categories": "Categories",
+    "noData": "No data."
+  },
+  "trend": {
+    "defaultLabel": "Daily feedback",
+    "days": "{count} days"
+  },
+  "siteSummary": {
+    "title": "Sites",
+    "manage": "Manage",
+    "approved": "Approved",
+    "pending": "Pending",
+    "blocked": "Blocked",
+    "totalRegistered": "Total registered sites"
+  },
+  "feedbacks": {
+    "title": "Feedback",
+    "subtitle": "{name} · {count} records",
+    "allWidgets": "All widgets",
+    "searchPlaceholder": "Search by ID…",
+    "searchLabel": "Search by ID",
+    "noMatch": "No feedback matches \"{query}\".",
+    "noneForFilter": "No feedback for this filter.",
+    "listLabel": "Feedback",
+    "detailRegion": "Feedback detail",
+    "anonymous": "Anonymous",
+    "category": "Category",
+    "screen": "Screen",
+    "attachments": "Attachments ({count})",
+    "screenshot": "Screenshot",
+    "image": "Image",
+    "attachmentAlt": "Attachment",
+    "fieldStatus": "Status",
+    "fieldPriority": "Priority",
+    "resolutionNote": "Resolution note",
+    "resolutionPlaceholder": "Resolution plan, owner, version…",
+    "deletePermanently": "Delete permanently",
+    "confirmDelete": "This feedback and its attachments will be permanently deleted. Are you sure?"
+  },
+  "sites": {
+    "title": "Sites",
+    "subtitle": "{count} registered sites",
+    "empty": "No registered sites.",
+    "colDomain": "Domain",
+    "colWidget": "Widget",
+    "colFeedback": "Feedback",
+    "colLastSeen": "Last seen",
+    "colStatus": "Status",
+    "approve": "Approve",
+    "block": "Block",
+    "unblock": "Unblock"
+  },
+  "projects": {
+    "title": "Widgets",
+    "subtitle": "{count} widgets",
+    "newWidget": "New widget",
+    "emptyTitle": "No widgets yet",
+    "emptyBody": "Create your first widget and add the embed code to your site.",
+    "modalTitle": "New widget / theme",
+    "fieldName": "Name",
+    "fieldSlug": "Slug",
+    "fieldThemeSlug": "Theme slug",
+    "accentColor": "Accent color",
+    "slugTaken": "This slug is already in use.",
+    "panel": "Panel",
+    "feedbackStat": "Feedback",
+    "siteStat": "Site",
+    "widgetKey": "Widget key",
+    "embedCode": "Embed code",
+    "rotateKey": "Rotate key",
+    "confirmRotate": "Rotating the key breaks existing embeds. Continue?",
+    "confirmDelete": "The \"{name}\" widget and all its feedback will be deleted. Continue?"
+  },
+  "metadata": {
+    "title": "Revisto Feedback",
+    "description": "Revisto feedback management panel"
+  }
+}

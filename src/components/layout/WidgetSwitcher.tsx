@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 

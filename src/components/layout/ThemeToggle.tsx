@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 
 export default function ThemeToggle({ className }: { className?: string }) {
+  const t = useTranslations("theme");
   const [dark, setDark] = useState(true);
 
   useEffect(() => {
@@ -32,8 +34,8 @@ export default function ThemeToggle({ className }: { className?: string }) {
         "focus-visible:ring-2 focus-visible:ring-accent",
         className
       )}
-      aria-label={dark ? "Açık temaya geç" : "Koyu temaya geç"}
-      title={dark ? "Açık tema" : "Koyu tema"}
+      aria-label={dark ? t("toLight") : t("toDark")}
+      title={dark ? t("light") : t("dark")}
     >
       {dark ? <Icon.sun className="h-4 w-4" /> : <Icon.moon className="h-4 w-4" />}
     </button>
