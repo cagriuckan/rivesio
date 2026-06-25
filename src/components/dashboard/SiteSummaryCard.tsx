@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { getTranslations } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
@@ -25,7 +26,7 @@ function StatRow({
   );
 }
 
-export default function SiteSummaryCard({
+export default async function SiteSummaryCard({
   approved, pending, blocked, total, baseHref,
 }: {
   approved: number;
@@ -34,25 +35,26 @@ export default function SiteSummaryCard({
   total: number;
   baseHref: string;
 }) {
+  const t = await getTranslations("siteSummary");
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Siteler</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <Link
           href={baseHref}
           className="flex items-center gap-1 text-xs font-medium text-accent-text hover:underline"
         >
-          Yönet <Icon.chevronRight className="h-3 w-3" />
+          {t("manage")} <Icon.chevronRight className="h-3 w-3" />
         </Link>
       </CardHeader>
       <CardBody>
         <div className="divide-y divide-line-soft">
-          <StatRow label="Onaylı" value={approved} dot="bg-success" href={`${baseHref}?status=approved`} />
-          <StatRow label="Bekleyen" value={pending} dot="bg-warning" href={`${baseHref}?status=pending`} />
-          <StatRow label="Engelli" value={blocked} dot="bg-danger" href={`${baseHref}?status=blocked`} />
+          <StatRow label={t("approved")} value={approved} dot="bg-success" href={`${baseHref}?status=approved`} />
+          <StatRow label={t("pending")} value={pending} dot="bg-warning" href={`${baseHref}?status=pending`} />
+          <StatRow label={t("blocked")} value={blocked} dot="bg-danger" href={`${baseHref}?status=blocked`} />
         </div>
         <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
-          <span className="text-xs text-faint">Toplam kayıtlı site</span>
+          <span className="text-xs text-faint">{t("totalRegistered")}</span>
           <span className="text-sm font-semibold text-secondary tnum">{total}</span>
         </div>
       </CardBody>

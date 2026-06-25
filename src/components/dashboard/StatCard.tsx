@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/components/ui/cn";
 import { Icon } from "@/components/ui/Icons";
 import type { Tone } from "@/components/ui/Badge";

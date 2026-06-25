@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icons";
 import FeedbackCard from "./FeedbackCard";
@@ -16,6 +17,7 @@ export default function FeedbacksList({
   initialId: string | null;
   filterBar?: React.ReactNode;
 }) {
+  const t = useTranslations("feedbacks");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -55,7 +57,7 @@ export default function FeedbacksList({
 
   if (open && selectedId) {
     return (
-      <div className="ds-fade-in" role="region" aria-label="Geri bildirim detayı">
+      <div className="ds-fade-in" role="region" aria-label={t("detailRegion")}>
         <FeedbackDetail
           key={selectedId}
           id={selectedId}
@@ -76,9 +78,9 @@ export default function FeedbacksList({
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="ID ile ara…"
+            placeholder={t("searchPlaceholder")}
             className="h-8 w-48 rounded-md border border-line bg-surface pl-8 pr-3 text-xs text-primary placeholder:text-faint outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
-            aria-label="ID ile ara"
+            aria-label={t("searchLabel")}
           />
         </div>
       </div>
@@ -89,11 +91,11 @@ export default function FeedbacksList({
             <Icon.inbox className="h-5 w-5 text-subtle" />
           </div>
           <p className="text-sm text-secondary">
-            {query ? `"${query}" ile eşleşen geri bildirim yok.` : "Bu filtreye uygun geri bildirim yok."}
+            {query ? t("noMatch", { query }) : t("noneForFilter")}
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3" role="list" aria-label="Geri bildirimler">
+        <div className="flex flex-col gap-3" role="list" aria-label={t("listLabel")}>
           {filtered.map((f) => (
             <div key={f.id} role="listitem">
               <FeedbackCard

@@ -1,27 +1,17 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Badge, FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
-import { FEEDBACK_STATUS_LABEL, PRIORITY_LABEL } from "@/lib/labels";
+import { relativeTime } from "@/lib/time";
 import type { FeedbackWithMeta } from "@/lib/admin-repo";
-
-function relativeTime(ts: number): string {
-  const m = Math.floor((Date.now() - ts) / 60000);
-  if (m < 1) return "az önce";
-  if (m < 60) return `${m}dk`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}sa`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `${d}g`;
-  return `${Math.floor(d / 30)}ay`;
-}
 
 export default function FeedbackCard({
   feedback,
   selected,
-  compact,
+  compact: _compact,
   onClick,
 }: {
   feedback: FeedbackWithMeta;
@@ -29,6 +19,10 @@ export default function FeedbackCard({
   compact: boolean;
   onClick: () => void;
 }) {
+  const ts = useTranslations("status");
+  const tp = useTranslations("priority");
+  const tt = useTranslations("time");
+  const tf = useTranslations("feedbacks");
   return (
     <button
       onClick={onClick}
@@ -44,15 +38,15 @@ export default function FeedbackCard({
       {/* Top: status + time */}
       <div className="flex items-center gap-2">
         <Badge tone={FEEDBACK_TONE[feedback.status]} dot>
-          {FEEDBACK_STATUS_LABEL[feedback.status]}
+          {ts(feedback.status)}
         </Badge>
         {feedback.priority === "high" && (
           <Badge tone={PRIORITY_TONE[feedback.priority]}>
-            {PRIORITY_LABEL[feedback.priority]}
+            {tp(feedback.priority)}
           </Badge>
         )}
         <span className="ml-auto shrink-0 text-2xs text-faint tnum">
-          {relativeTime(feedback.created_at)}
+          {relativeTime(feedback.created_at, tt)}
         </span>
       </div>
 
@@ -65,7 +59,7 @@ export default function FeedbackCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img
             src={`/api/admin/attachments/${feedback.first_attachment_id}`}
-            alt="Ek"
+            alt={tf("attachmentAlt")}
             className="h-14 w-20 shrink-0 rounded-md border border-line object-cover"
           />
         )}

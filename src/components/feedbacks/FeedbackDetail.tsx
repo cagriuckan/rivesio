@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Badge, FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Select, Textarea, Label } from "@/components/ui/Field";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icons";
-import { FEEDBACK_STATUS_LABEL, PRIORITY_LABEL, formatDate } from "@/lib/labels";
+import { formatDate } from "@/lib/labels";
 import { FEEDBACK_STATUSES, PRIORITIES } from "@/lib/types";
 import type { FeedbackStatus, Priority } from "@/lib/types";
 import type { FeedbackWithMeta } from "@/lib/admin-repo";
@@ -25,6 +26,11 @@ export default function FeedbackDetail({
   onClose: () => void;
   onDeleted: () => void;
 }) {
+  const t = useTranslations("feedbacks");
+  const tc = useTranslations("common");
+  const ts = useTranslations("status");
+  const tp = useTranslations("priority");
+  const locale = useLocale();
   const router = useRouter();
   const [detail, setDetail] = useState<DetailData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -71,7 +77,7 @@ export default function FeedbackDetail({
   }
 
   async function remove() {
-    if (!confirm("Bu geri bildirim ve ekleri kalıcı olarak silinecek. Emin misin?")) return;
+    if (!confirm(t("confirmDelete"))) return;
     setDeleting(true);
     try {
       const res = await fetch(`/api/admin/feedbacks/${id}`, { method: "DELETE" });
@@ -91,22 +97,22 @@ export default function FeedbackDetail({
           className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-sm text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <Icon.chevronLeft className="h-4 w-4" />
-          Geri
+          {tc("back")}
         </button>
         <span className="h-4 w-px bg-line-strong" />
         <span className="font-mono text-xs text-faint">#{id.slice(0, 8)}</span>
 
-        {loading && <span className="ml-auto text-xs text-subtle">Yükleniyor…</span>}
+        {loading && <span className="ml-auto text-xs text-subtle">{tc("loading")}</span>}
         {detail && (
           <div className="ml-auto flex items-center gap-2">
             <Badge tone={FEEDBACK_TONE[detail.status]} dot>
-              {FEEDBACK_STATUS_LABEL[detail.status]}
+              {ts(detail.status)}
             </Badge>
             <Badge tone={PRIORITY_TONE[detail.priority]}>
-              {PRIORITY_LABEL[detail.priority]}
+              {tp(detail.priority)}
             </Badge>
             <time className="text-xs text-subtle" dateTime={new Date(detail.created_at).toISOString()}>
-              {formatDate(detail.created_at)}
+              {formatDate(detail.created_at, locale)}
             </time>
           </div>
         )}
@@ -132,7 +138,7 @@ export default function FeedbackDetail({
             <div className="flex items-center gap-3 border-b border-line px-5 py-3">
               <Avatar name={detail.wp_user || detail.domain} size="sm" />
               <div className="min-w-0">
-                <p className="text-sm font-medium text-primary">{detail.wp_user || "Anonim"}</p>
+                <p className="text-sm font-medium text-primary">{detail.wp_user || t("anonymous")}</p>
                 <p className="text-xs text-subtle">{detail.domain}</p>
               </div>
               {detail.page_url && (
@@ -157,8 +163,8 @@ export default function FeedbackDetail({
 
             {/* Meta row */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line px-5 py-3 text-xs text-subtle">
-              <span><span className="text-faint">Kategori</span> · {detail.category}</span>
-              <span><span className="text-faint">Ekran</span> · {detail.viewport || "—"}</span>
+              <span><span className="text-faint">{t("category")}</span> · {detail.category}</span>
+              <span><span className="text-faint">{t("screen")}</span> · {detail.viewport || "—"}</span>
               <span className="font-mono text-faint" title={detail.id}>#{detail.id.slice(0, 8)}</span>
             </div>
 
@@ -166,7 +172,7 @@ export default function FeedbackDetail({
             {detail.attachments.length > 0 && (
               <div className="border-t border-line px-5 py-4">
                 <p className="mb-3 text-xs font-medium text-subtle">
-                  Ekler ({detail.attachments.length})
+                  {t("attachments", { count: detail.attachments.length })}
                 </p>
                 <div className="flex flex-wrap gap-3">
                   {detail.attachments.map((a) => (
@@ -180,11 +186,11 @@ export default function FeedbackDetail({
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={`/api/admin/attachments/${a.id}`}
-                        alt={a.kind === "screenshot" ? "Ekran görüntüsü" : "Görsel"}
+                        alt={a.kind === "screenshot" ? t("screenshot") : t("image")}
                         className="h-24 w-40 object-cover"
                       />
                       <div className="bg-raised px-2 py-1.5 text-xs text-subtle">
-                        {a.kind === "screenshot" ? "Ekran görüntüsü" : "Görsel"}
+                        {a.kind === "screenshot" ? t("screenshot") : t("image")}
                       </div>
                     </a>
                   ))}
@@ -196,46 +202,46 @@ export default function FeedbackDetail({
           {/* Right — actions */}
           <div className="flex flex-col gap-5 px-5 py-5">
             <div>
-              <Label>Durum</Label>
+              <Label>{t("fieldStatus")}</Label>
               <Select value={status} onChange={(e) => setStatus(e.target.value as FeedbackStatus)}>
                 {FEEDBACK_STATUSES.map((s) => (
-                  <option key={s} value={s}>{FEEDBACK_STATUS_LABEL[s]}</option>
+                  <option key={s} value={s}>{ts(s)}</option>
                 ))}
               </Select>
             </div>
             <div>
-              <Label>Öncelik</Label>
+              <Label>{t("fieldPriority")}</Label>
               <Select value={priority} onChange={(e) => setPriority(e.target.value as Priority)}>
                 {PRIORITIES.map((p) => (
-                  <option key={p} value={p}>{PRIORITY_LABEL[p]}</option>
+                  <option key={p} value={p}>{tp(p)}</option>
                 ))}
               </Select>
             </div>
             <div className="flex-1">
-              <Label>Çözüm notu</Label>
+              <Label>{t("resolutionNote")}</Label>
               <Textarea
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 rows={5}
-                placeholder="Çözüm planı, ilgili kişi, sürüm…"
+                placeholder={t("resolutionPlaceholder")}
               />
             </div>
 
             <div className="flex flex-col gap-2">
               <div className="flex items-center gap-2">
                 <Button variant="primary" onClick={save} disabled={saving}>
-                  {saving ? "Kaydediliyor…" : "Kaydet"}
+                  {saving ? tc("saving") : tc("save")}
                 </Button>
                 {saved && (
                   <span className="flex items-center gap-1.5 text-xs text-success-text">
                     <Icon.check className="h-3.5 w-3.5" />
-                    Kaydedildi
+                    {tc("saved")}
                   </span>
                 )}
               </div>
               <Button variant="danger" size="sm" onClick={remove} disabled={deleting}>
                 <Icon.trash className="h-3.5 w-3.5" />
-                {deleting ? "Siliniyor…" : "Kalıcı olarak sil"}
+                {deleting ? tc("deleting") : t("deletePermanently")}
               </Button>
             </div>
           </div>

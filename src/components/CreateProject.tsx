@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icons";
@@ -9,6 +10,8 @@ import { Icon } from "@/components/ui/Icons";
 const ACCENTS = ["#6e79d6", "#3ecf8e", "#f5a623", "#f5535b", "#4aa8ff", "#a78bfa"];
 
 export default function CreateProject() {
+  const t = useTranslations("projects");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
@@ -29,7 +32,7 @@ export default function CreateProject() {
       });
       const data = await res.json();
       if (!res.ok) {
-        setError(data.error === "slug_taken" ? "Bu slug zaten kullanımda." : "Geçersiz bilgi.");
+        setError(data.error === "slug_taken" ? t("slugTaken") : tc("invalidInput"));
         return;
       }
       setOpen(false);
@@ -44,7 +47,7 @@ export default function CreateProject() {
     return (
       <Button variant="primary" onClick={() => setOpen(true)}>
         <Icon.plus className="h-4 w-4" />
-        Yeni widget
+        {t("newWidget")}
       </Button>
     );
   }
@@ -57,11 +60,11 @@ export default function CreateProject() {
       {/* Modal */}
       <div className="fixed left-1/2 top-1/2 z-50 w-[440px] max-w-[calc(100vw-32px)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-xl border border-line bg-surface">
         <div className="flex items-center justify-between border-b border-line px-5 py-4">
-          <h3 className="text-sm font-semibold text-strong">Yeni widget / tema</h3>
+          <h3 className="text-sm font-semibold text-strong">{t("modalTitle")}</h3>
           <button
             onClick={() => setOpen(false)}
             className="inline-flex h-8 w-8 items-center justify-center rounded-md text-subtle transition-colors hover:bg-raised hover:text-primary"
-            aria-label="Kapat"
+            aria-label={tc("close")}
           >
             <Icon.close className="h-4 w-4" />
           </button>
@@ -69,20 +72,20 @@ export default function CreateProject() {
 
         <div className="space-y-4 p-5">
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Ad">
+            <Field label={t("fieldName")}>
               <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Revisto" autoFocus />
             </Field>
-            <Field label="Slug">
+            <Field label={t("fieldSlug")}>
               <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder="revisto" />
             </Field>
           </div>
 
-          <Field label="Tema slug">
+          <Field label={t("fieldThemeSlug")}>
             <Input value={themeSlug} onChange={(e) => setThemeSlug(e.target.value)} placeholder="revisto" />
           </Field>
 
           <div>
-            <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-subtle">Vurgu rengi</div>
+            <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-subtle">{t("accentColor")}</div>
             <div className="flex items-center gap-2">
               {ACCENTS.map((c) => (
                 <button
@@ -108,9 +111,9 @@ export default function CreateProject() {
         </div>
 
         <div className="flex justify-end gap-2 border-t border-line px-5 py-4">
-          <Button variant="ghost" onClick={() => setOpen(false)}>Vazgeç</Button>
+          <Button variant="ghost" onClick={() => setOpen(false)}>{tc("cancel")}</Button>
           <Button variant="primary" onClick={create} disabled={busy || !name || !slug || !themeSlug}>
-            {busy ? "Oluşturuluyor…" : "Oluştur"}
+            {busy ? tc("creating") : tc("create")}
           </Button>
         </div>
       </div>

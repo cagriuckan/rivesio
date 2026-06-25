@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+import { useRouter, usePathname } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 
@@ -13,6 +15,7 @@ export interface WidgetOption {
 }
 
 export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] }) {
+  const t = useTranslations("widgetSwitcher");
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
@@ -73,10 +76,10 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate text-sm font-semibold text-primary">
-            {active ? active.name : "Tüm widget'lar"}
+            {active ? active.name : t("all")}
           </span>
           <span className="block truncate text-2xs text-subtle">
-            {active ? active.themeSlug : `${widgets.length} widget`}
+            {active ? active.themeSlug : t("count", { count: widgets.length })}
           </span>
         </span>
         <Icon.chevronDown className={cn("h-3.5 w-3.5 shrink-0 text-subtle transition-transform", open && "rotate-180")} />
@@ -88,8 +91,8 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
           role="listbox"
         >
           <OptionRow
-            label="Tüm widget'lar"
-            sub={`${widgets.length} widget birleşik`}
+            label={t("all")}
+            sub={t("allMerged", { count: widgets.length })}
             selected={!active}
             onClick={() => select(null)}
             icon={<Icon.layers className="h-3.5 w-3.5 text-subtle" />}

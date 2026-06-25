@@ -1,20 +1,22 @@
+import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
 
-export default function CategoryCard({
+export default async function CategoryCard({
   categories,
 }: {
   categories: { category: string; count: number }[];
 }) {
+  const t = await getTranslations("dashboard");
   const max = Math.max(1, ...categories.map((c) => c.count));
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Kategoriler</CardTitle>
+        <CardTitle>{t("categories")}</CardTitle>
       </CardHeader>
       <CardBody>
         {categories.length === 0 ? (
-          <p className="py-6 text-center text-sm text-subtle">Veri yok.</p>
+          <p className="py-6 text-center text-sm text-subtle">{t("noData")}</p>
         ) : (
           <ul className="space-y-3">
             {categories.map((c) => (

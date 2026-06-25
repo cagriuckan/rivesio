@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icons";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function LoginPage() {
+  const t = useTranslations("login");
+  const tc = useTranslations("common");
   const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -25,13 +28,13 @@ export default function LoginPage() {
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) {
-        setError(res.status === 429 ? "Çok fazla deneme. Biraz bekle." : "Giriş bilgileri hatalı.");
+        setError(res.status === 429 ? t("tooManyAttempts") : t("invalidCredentials"));
         return;
       }
       router.replace("/");
       router.refresh();
     } catch {
-      setError("Bağlantı hatası.");
+      setError(tc("connectionError"));
     } finally {
       setLoading(false);
     }
@@ -50,19 +53,19 @@ export default function LoginPage() {
               <Icon.feedback className="h-4 w-4 text-white" strokeWidth={2.25} />
             </div>
             <div className="leading-tight">
-              <div className="text-sm font-bold text-strong">Revisto</div>
+              <div className="text-sm font-bold text-strong">{tc("brand")}</div>
               <div className="text-2xs font-medium text-subtle">Feedback</div>
             </div>
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-strong">Tekrar hoş geldin</h1>
-          <p className="mt-1 text-sm text-subtle">Yönetim paneline erişmek için giriş yap.</p>
+          <h1 className="text-xl font-bold tracking-tight text-strong">{t("welcome")}</h1>
+          <p className="mt-1 text-sm text-subtle">{t("subtitle")}</p>
         </div>
 
         <div className="space-y-4">
-          <Field label="Kullanıcı adı">
+          <Field label={t("username")}>
             <Input value={username} onChange={(e) => setUsername(e.target.value)} autoFocus autoComplete="username" />
           </Field>
-          <Field label="Parola">
+          <Field label={t("password")}>
             <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="current-password" />
           </Field>
         </div>
@@ -77,7 +80,7 @@ export default function LoginPage() {
         )}
 
         <Button type="submit" variant="primary" disabled={loading} className="mt-6 h-10 w-full">
-          {loading ? <><Spinner /> Giriş yapılıyor…</> : "Giriş yap"}
+          {loading ? <><Spinner /> {t("signingIn")}</> : t("signIn")}
         </Button>
       </form>
     </div>
