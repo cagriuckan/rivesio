@@ -7,20 +7,20 @@ import { cn } from "@/components/ui/cn";
 
 export default function ThemeToggle({ className }: { className?: string }) {
   const t = useTranslations("theme");
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
 
   useEffect(() => {
-    setDark(localStorage.getItem("kf_theme") !== "light");
+    setDark(localStorage.getItem("kf_theme") === "dark");
   }, []);
 
   function toggle() {
     const next = !dark;
     setDark(next);
     if (next) {
-      document.documentElement.removeAttribute("data-theme");
+      document.documentElement.setAttribute("data-theme", "dark");
       localStorage.setItem("kf_theme", "dark");
     } else {
-      document.documentElement.setAttribute("data-theme", "light");
+      document.documentElement.removeAttribute("data-theme");
       localStorage.setItem("kf_theme", "light");
     }
   }
@@ -29,8 +29,8 @@ export default function ThemeToggle({ className }: { className?: string }) {
     <button
       onClick={toggle}
       className={cn(
-        "inline-flex h-8 w-8 items-center justify-center rounded-md text-subtle",
-        "transition-colors hover:bg-raised hover:text-primary outline-none",
+        "inline-flex h-9 w-9 items-center justify-center rounded-full text-subtle bg-raised",
+        "transition-colors hover:bg-line hover:text-primary outline-none",
         "focus-visible:ring-2 focus-visible:ring-accent",
         className
       )}

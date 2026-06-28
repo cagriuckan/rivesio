@@ -14,16 +14,16 @@ export default function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex shrink-0 items-center justify-between border-b border-line pb-5">
-      <div className="flex items-center gap-3">
+    <div className="mb-7 flex shrink-0 flex-wrap items-center justify-between gap-4">
+      <div className="flex items-center gap-3.5">
         {IconComp && (
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line bg-raised">
-            <IconComp className="h-[18px] w-[18px] text-secondary" />
+          <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-grad-accent text-white shadow-accent">
+            <IconComp className="h-5 w-5" />
           </span>
         )}
         <div>
-          <h1 className="text-xl font-semibold tracking-tight text-strong">{title}</h1>
-          {subtitle && <p className="mt-0.5 text-xs text-subtle">{subtitle}</p>}
+          <h1 className="text-2xl font-bold tracking-tight text-strong">{title}</h1>
+          {subtitle && <p className="mt-1 text-sm text-muted">{subtitle}</p>}
         </div>
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}

@@ -1,33 +1,36 @@
 import { forwardRef } from "react";
 import { cn } from "./cn";
 
-type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline";
-type Size = "sm" | "md" | "icon";
+type Variant = "primary" | "secondary" | "ghost" | "danger" | "outline" | "gradient";
+type Size = "sm" | "md" | "lg" | "icon";
 
 const BASE =
   "inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap " +
-  "rounded-md transition-all duration-150 outline-none cursor-pointer " +
+  "rounded-full transition-all duration-150 outline-none cursor-pointer " +
   "focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 " +
-  "focus-visible:ring-offset-canvas active:scale-[.98] " +
+  "focus-visible:ring-offset-canvas active:scale-[.97] " +
   "disabled:pointer-events-none disabled:opacity-45 select-none";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-accent text-white hover:bg-accent-hover",
+    "bg-accent text-white hover:bg-accent-hover shadow-sm",
+  gradient:
+    "bg-grad-accent text-white shadow-accent hover:brightness-[1.06]",
   secondary:
-    "bg-raised text-primary border border-line hover:bg-overlay hover:border-line-strong",
+    "bg-raised text-primary ring-1 ring-line hover:bg-line",
   ghost:
     "bg-transparent text-secondary hover:bg-raised hover:text-primary",
   danger:
-    "bg-danger-soft text-danger-text hover:brightness-110",
+    "bg-danger-soft text-danger-text hover:brightness-105",
   outline:
-    "bg-transparent text-secondary border border-line hover:bg-raised hover:text-primary hover:border-line-strong",
+    "bg-surface text-secondary ring-1 ring-line-strong hover:bg-raised hover:text-primary shadow-xs",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-8 px-3 text-xs",
-  md: "h-9 px-4 text-sm",
-  icon: "h-8 w-8 p-0 text-sm",
+  sm: "h-8 px-3.5 text-xs",
+  md: "h-10 px-4 text-sm",
+  lg: "h-11 px-5 text-sm",
+  icon: "h-10 w-10 p-0 text-sm",
 };
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

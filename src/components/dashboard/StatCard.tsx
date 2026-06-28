@@ -13,12 +13,21 @@ const TONE_ICON: Record<Tone, { bg: string; text: string }> = {
   violet:  { bg: "bg-violet-soft",  text: "text-violet-text" },
 };
 
-function TrendBadge({ change }: { change: number }) {
-  if (change === 0) return <span className="text-xs text-subtle">—</span>;
+function TrendPill({ change }: { change: number }) {
+  if (change === 0)
+    return (
+      <span className="rounded-full bg-raised px-2 py-1 text-2xs font-semibold text-subtle">—</span>
+    );
   const up = change > 0;
   return (
-    <span className={cn("inline-flex items-center gap-0.5 text-xs font-medium", up ? "text-success-text" : "text-danger-text")}>
-      {up ? <Icon.chevronRight className="h-3 w-3 rotate-[-90deg]" /> : <Icon.chevronRight className="h-3 w-3 rotate-90" />}
+    <span
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-semibold",
+        up ? "bg-success-soft text-success-text" : "bg-danger-soft text-danger-text"
+      )}
+    >
+      <Icon.trendUp className={cn("h-3 w-3", !up && "rotate-180 -scale-x-100")} />
+      {up ? "+" : "−"}
       {Math.abs(change)}%
     </span>
   );
@@ -48,32 +57,36 @@ export default function StatCard({
 
   const inner = (
     <>
-      <div className="mb-4 flex items-start justify-between">
-        <div className="flex flex-col items-start gap-1.5">
-          <span className={cn("flex h-8 w-8 items-center justify-center rounded-lg", t.bg)}>
-            <Ico className={cn("h-4 w-4", t.text)} />
+      <div className="mb-5 flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", t.bg)}>
+            <Ico className={cn("h-[18px] w-[18px]", t.text)} />
           </span>
-          <span className="text-xs font-medium text-subtle">{label}</span>
+          <span className="text-sm font-medium text-muted">{label}</span>
         </div>
-        {change !== undefined && <TrendBadge change={change} />}
-        {change === undefined && href && (
-          <Icon.arrowRight className="h-4 w-4 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
-        )}
+        <Icon.dots className="h-4 w-4 text-faint" />
       </div>
 
-      <div className="text-2xl font-bold tracking-tight text-strong tnum">{value}</div>
-      {hint && <div className="mt-1 text-xs text-subtle">{hint}</div>}
-      {changeLabel && <div className="mt-1 text-xs text-subtle">{changeLabel}</div>}
+      <div className="flex items-end justify-between gap-2">
+        <div className="text-3xl font-bold tracking-tight text-strong tnum leading-none">
+          {value}
+        </div>
+        {change !== undefined && <TrendPill change={change} />}
+      </div>
+      {hint && <div className="mt-2 text-xs text-subtle">{hint}</div>}
+      {changeLabel && <div className="mt-2 text-xs text-subtle">{changeLabel}</div>}
     </>
   );
 
   const className = cn(
-    "group block rounded-xl border border-line bg-surface p-4 transition-colors",
-    href && "hover:border-line-strong"
+    "group block rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line transition-all duration-200",
+    href && "hover:shadow-md hover:-translate-y-0.5"
   );
 
   return href ? (
-    <Link href={href} className={className}>{inner}</Link>
+    <Link href={href} className={className}>
+      {inner}
+    </Link>
   ) : (
     <div className={className}>{inner}</div>
   );
