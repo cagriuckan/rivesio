@@ -37,7 +37,8 @@ export default function CreateProject() {
       }
       setOpen(false);
       setName(""); setSlug(""); setThemeSlug("");
-      router.refresh();
+      // Open the new widget's settings so text/fields/categories can be set up right away.
+      router.push(`/projects/${data.id}/settings`);
     } finally {
       setBusy(false);
     }
