@@ -1,6 +1,28 @@
 import { widgetCss } from "./styles";
 import { captureViewport, selectAndCapture } from "./capture";
 
+interface WidgetText {
+  fabLabel: string;
+  title: string;
+  categoryLabel: string;
+  messageLabel: string;
+  messagePlaceholder: string;
+  submitLabel: string;
+  successMessage: string;
+  errorMessage: string;
+}
+
+type WidgetLocale = "tr" | "en";
+
+interface FormField {
+  id: string;
+  type: "text" | "textarea" | "select" | "checkbox" | "email";
+  label: string;
+  placeholder?: string;
+  required: boolean;
+  options?: string[];
+}
+
 interface ServerConfig {
   base: string;
   widgetKey: string;
@@ -9,7 +31,38 @@ interface ServerConfig {
     accentColor: string;
     position: "bottom-right" | "bottom-left";
     categories: string[];
+    text?: Record<WidgetLocale, WidgetText>;
+    fields?: FormField[];
   };
+}
+
+const DEFAULT_TEXT: Record<WidgetLocale, WidgetText> = {
+  tr: {
+    fabLabel: "Geri bildirim",
+    title: "Geri bildirim",
+    categoryLabel: "Kategori",
+    messageLabel: "Açıklama",
+    messagePlaceholder: "Ne eklensin ya da nerede bir sorun var?",
+    submitLabel: "Gönder",
+    successMessage: "Teşekkürler! Geri bildirimin alındı.",
+    errorMessage: "Gönderilemedi. Lütfen tekrar dene.",
+  },
+  en: {
+    fabLabel: "Feedback",
+    title: "Feedback",
+    categoryLabel: "Category",
+    messageLabel: "Description",
+    messagePlaceholder: "What should be added, or where is the problem?",
+    submitLabel: "Send",
+    successMessage: "Thanks! Your feedback was received.",
+    errorMessage: "Couldn't send. Please try again.",
+  },
+};
+
+/** Pick widget locale from the host page's <html lang>, default tr. */
+function detectLocale(): WidgetLocale {
+  const lang = (document.documentElement.lang || "").toLowerCase();
+  return lang.startsWith("en") ? "en" : "tr";
 }
 
 interface HostConfig {
@@ -110,21 +163,48 @@ function mount(
   const pageTheme = document.documentElement.getAttribute("data-theme");
   if (pageTheme === "light") root.dataset.theme = "light";
 
+  const locale = detectLocale();
+  const txt: WidgetText = { ...DEFAULT_TEXT[locale], ...(project.text?.[locale]) };
+  const fields = project.fields ?? [];
+
   const categoryOptions = (project.categories ?? ["Öneri"])
     .map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)
     .join("");
 
+  const customFieldsHtml = fields
+    .map((f) => {
+      const req = f.required ? "required" : "";
+      const ph = f.placeholder ? `placeholder="${esc(f.placeholder)}"` : "";
+      const label = `<label class="kf-label">${esc(f.label)}${f.required ? " *" : ""}</label>`;
+      let control = "";
+      if (f.type === "textarea") {
+        control = `<textarea class="kf-textarea kf-cf" data-cf="${esc(f.id)}" data-cf-label="${esc(f.label)}" ${ph} ${req}></textarea>`;
+      } else if (f.type === "select") {
+        const opts = (f.options ?? [])
+          .map((o) => `<option value="${esc(o)}">${esc(o)}</option>`)
+          .join("");
+        control = `<select class="kf-select kf-cf" data-cf="${esc(f.id)}" data-cf-label="${esc(f.label)}" ${req}>${opts}</select>`;
+      } else if (f.type === "checkbox") {
+        return `<label class="kf-cf-check"><input type="checkbox" class="kf-cf" data-cf="${esc(f.id)}" data-cf-label="${esc(f.label)}" data-cf-type="checkbox" ${req}> ${esc(f.label)}</label>`;
+      } else {
+        const inputType = f.type === "email" ? "email" : "text";
+        control = `<input type="${inputType}" class="kf-input kf-cf" data-cf="${esc(f.id)}" data-cf-label="${esc(f.label)}" ${ph} ${req}>`;
+      }
+      return `<div>${label}${control}</div>`;
+    })
+    .join("");
+
   root.innerHTML = `
-    <button class="kf-fab" type="button" aria-label="Geri bildirim">
-      ${ICONS.chat}<span>Geri bildirim</span>
+    <button class="kf-fab" type="button" aria-label="${esc(txt.fabLabel)}">
+      ${ICONS.chat}<span>${esc(txt.fabLabel)}</span>
     </button>
 
-    <div class="kf-panel" role="dialog" aria-label="Geri bildirim formu">
+    <div class="kf-panel" role="dialog" aria-label="${esc(txt.title)}">
 
       <div class="kf-head">
         <div class="kf-title-wrap">
           <div class="kf-title-icon">${ICONS.chat}</div>
-          <span class="kf-title">Geri bildirim</span>
+          <span class="kf-title">${esc(txt.title)}</span>
         </div>
         <div class="kf-head-actions">
           <button class="kf-icon-btn kf-history-toggle" type="button" aria-label="Geçmiş">${ICONS.history}</button>
@@ -144,14 +224,16 @@ function mount(
       <div class="kf-body">
 
         <div>
-          <label class="kf-label">Kategori</label>
-          <select class="kf-select" aria-label="Kategori">${categoryOptions}</select>
+          <label class="kf-label">${esc(txt.categoryLabel)}</label>
+          <select class="kf-select" aria-label="${esc(txt.categoryLabel)}">${categoryOptions}</select>
         </div>
 
         <div>
-          <label class="kf-label">Açıklama</label>
-          <textarea class="kf-textarea" placeholder="Ne eklensin ya da nerede bir sorun var?"></textarea>
+          <label class="kf-label">${esc(txt.messageLabel)}</label>
+          <textarea class="kf-textarea" placeholder="${esc(txt.messagePlaceholder)}"></textarea>
         </div>
+
+        ${customFieldsHtml}
 
         <div class="kf-capture-row">
           <button class="kf-chip kf-capture-full" type="button">
@@ -178,8 +260,8 @@ function mount(
       </div> <!-- /kf-view-form -->
 
       <div class="kf-foot">
-        <button class="kf-btn kf-btn-ghost kf-cancel" type="button">Vazgeç</button>
-        <button class="kf-btn kf-btn-primary kf-submit" type="button">Gönder</button>
+        <button class="kf-btn kf-btn-ghost kf-cancel" type="button">${esc(locale === "en" ? "Cancel" : "Vazgeç")}</button>
+        <button class="kf-btn kf-btn-primary kf-submit" type="button">${esc(txt.submitLabel)}</button>
       </div>
 
     </div>
@@ -383,15 +465,38 @@ function mount(
 
   // ── Submit ────────────────────────────────────────────────────────
 
+  function collectCustomFields(): { ok: boolean; values: { label: string; value: string }[] } {
+    const els = root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(".kf-cf");
+    const values: { label: string; value: string }[] = [];
+    for (const el of Array.from(els)) {
+      const label = el.dataset.cfLabel || "";
+      const isCheckbox = el.dataset.cfType === "checkbox";
+      const value = isCheckbox
+        ? ((el as HTMLInputElement).checked ? (locale === "en" ? "Yes" : "Evet") : "")
+        : el.value.trim();
+      if (el.hasAttribute("required") && !value) {
+        (el as HTMLElement).focus();
+        return { ok: false, values: [] };
+      }
+      if (value) values.push({ label, value });
+    }
+    return { ok: true, values };
+  }
+
   async function submit() {
     const message = textarea.value.trim();
     if (!message) {
-      setMessage("Lütfen bir açıklama yaz.", "err");
+      setMessage(locale === "en" ? "Please write a description." : "Lütfen bir açıklama yaz.", "err");
       textarea.focus();
       return;
     }
+    const custom = collectCustomFields();
+    if (!custom.ok) {
+      setMessage(locale === "en" ? "Please fill required fields." : "Lütfen zorunlu alanları doldur.", "err");
+      return;
+    }
     submitBtn.disabled = true;
-    submitBtn.textContent = "Gönderiliyor…";
+    submitBtn.textContent = locale === "en" ? "Sending…" : "Gönderiliyor…";
     setMessage("", null);
 
     try {
@@ -407,12 +512,13 @@ function mount(
           page_url: location.href,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
           wp_user: host.user,
+          custom_fields: custom.values,
           meta: { themeVersion: host.themeVersion },
         }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setMessage("Gönderilemedi. Lütfen tekrar dene.", "err");
+        setMessage(txt.errorMessage, "err");
         return;
       }
 
@@ -437,9 +543,9 @@ function mount(
       msg.hidden = false;
       msg.className = "kf-msg kf-ok";
       msg.innerHTML = `
-        ${ICONS.check} Teşekkürler! Geri bildirimin alındı.
+        ${ICONS.check} ${esc(txt.successMessage)}
         <div class="kf-ref-box">
-          <span class="kf-ref-label">Referans no</span>
+          <span class="kf-ref-label">${esc(locale === "en" ? "Reference" : "Referans no")}</span>
           <span class="kf-ref-id" title="${esc(fid)}">#${esc(fid.slice(0, 8))}</span>
           <button class="kf-ref-copy" type="button" aria-label="Kopyala">${ICONS.copy}</button>
         </div>`;
@@ -448,14 +554,18 @@ function mount(
       );
 
       textarea.value = "";
+      root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(".kf-cf").forEach((el) => {
+        if (el.dataset.cfType === "checkbox") (el as HTMLInputElement).checked = false;
+        else el.value = "";
+      });
       attachments.splice(0).forEach((a) => URL.revokeObjectURL(a.url));
       renderAttachments();
       setTimeout(close, 4000);
     } catch {
-      setMessage("Bağlantı hatası. Lütfen tekrar dene.", "err");
+      setMessage(locale === "en" ? "Connection error. Please try again." : "Bağlantı hatası. Lütfen tekrar dene.", "err");
     } finally {
       submitBtn.disabled = false;
-      submitBtn.textContent = "Gönder";
+      submitBtn.textContent = txt.submitLabel;
     }
   }
 

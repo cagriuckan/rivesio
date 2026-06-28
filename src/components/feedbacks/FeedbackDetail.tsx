@@ -11,7 +11,7 @@ import { Avatar } from "@/components/ui/Avatar";
 import { Icon } from "@/components/ui/Icons";
 import { formatDate } from "@/lib/labels";
 import { FEEDBACK_STATUSES, PRIORITIES } from "@/lib/types";
-import type { FeedbackStatus, Priority } from "@/lib/types";
+import type { CustomFieldValue, FeedbackStatus, Priority } from "@/lib/types";
 import type { FeedbackWithMeta } from "@/lib/admin-repo";
 
 interface AttachmentRow { id: string; kind: string; }
@@ -91,10 +91,10 @@ export default function FeedbackDetail({
     <div className="rounded-xl border border-line bg-surface">
 
       {/* ── Top bar ──────────────────────────────────────────── */}
-      <div className="flex items-center gap-2 border-b border-line px-5 py-3">
+      <div className="sticky top-0 z-10 flex items-center gap-2 rounded-t-xl border-b border-line bg-surface px-5 py-3">
         <button
           onClick={onClose}
-          className="inline-flex items-center gap-1 rounded-md px-1.5 py-1 text-sm text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-lg border border-line-strong bg-raised px-3 py-2 text-sm font-medium text-primary transition-colors hover:border-accent-line hover:bg-accent-soft outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <Icon.chevronLeft className="h-4 w-4" />
           {tc("back")}
@@ -160,6 +160,30 @@ export default function FeedbackDetail({
                 {detail.message}
               </p>
             </div>
+
+            {/* Custom form fields */}
+            {(() => {
+              let custom: CustomFieldValue[] = [];
+              try {
+                if (detail.custom_fields_json) custom = JSON.parse(detail.custom_fields_json);
+              } catch {
+                custom = [];
+              }
+              if (!custom.length) return null;
+              return (
+                <div className="border-t border-line px-5 py-4">
+                  <p className="mb-3 text-xs font-medium text-subtle">{t("customFields")}</p>
+                  <dl className="grid gap-2">
+                    {custom.map((f, i) => (
+                      <div key={i} className="flex gap-2 text-sm">
+                        <dt className="min-w-[120px] shrink-0 text-subtle">{f.label}</dt>
+                        <dd className="whitespace-pre-wrap text-primary">{f.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              );
+            })()}
 
             {/* Meta row */}
             <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-t border-line px-5 py-3 text-xs text-subtle">

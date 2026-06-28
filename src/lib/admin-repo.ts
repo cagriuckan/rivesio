@@ -181,6 +181,15 @@ export async function updateFeedback(
   await execute(`UPDATE feedbacks SET ${sets.join(", ")} WHERE id = ?`, vals);
 }
 
+export async function bulkUpdateStatus(ids: string[], status: FeedbackStatus): Promise<void> {
+  if (!ids.length) return;
+  const placeholders = ids.map(() => "?").join(", ");
+  await execute(
+    `UPDATE feedbacks SET status = ? WHERE id IN (${placeholders})`,
+    [status, ...ids],
+  );
+}
+
 export async function deleteFeedback(id: string): Promise<void> {
   // FK cascade removes attachments rows.
   await execute("DELETE FROM feedbacks WHERE id = ?", [id]);

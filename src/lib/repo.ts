@@ -1,23 +1,37 @@
 import { queryAll, queryOne, execute } from "./db";
 import { generateId } from "./ids";
-import type {
-  AttachmentRow,
-  FeedbackRow,
-  ProjectRow,
-  ProjectSettings,
-  SiteRow,
-  SiteStatus,
+import {
+  DEFAULT_WIDGET_TEXT,
+  type AttachmentRow,
+  type CustomFieldValue,
+  type FeedbackRow,
+  type ProjectRow,
+  type ProjectSettings,
+  type SiteRow,
+  type SiteStatus,
 } from "./types";
 
 const FALLBACK_SETTINGS: ProjectSettings = {
   accentColor: "#4f46e5",
   position: "bottom-right",
   categories: ["Öneri", "Hata", "Tasarım", "Diğer"],
+  text: DEFAULT_WIDGET_TEXT,
+  fields: [],
 };
 
 export function parseSettings(project: ProjectRow): ProjectSettings {
   try {
-    return { ...FALLBACK_SETTINGS, ...JSON.parse(project.settings_json) };
+    const stored = JSON.parse(project.settings_json) as Partial<ProjectSettings>;
+    return {
+      ...FALLBACK_SETTINGS,
+      ...stored,
+      // Deep-merge text so partially-customized projects keep defaults per key.
+      text: {
+        tr: { ...DEFAULT_WIDGET_TEXT.tr, ...stored.text?.tr },
+        en: { ...DEFAULT_WIDGET_TEXT.en, ...stored.text?.en },
+      },
+      fields: stored.fields ?? [],
+    };
   } catch {
     return FALLBACK_SETTINGS;
   }
@@ -91,12 +105,16 @@ export async function createFeedback(args: {
   userAgent: string | null;
   viewport: string | null;
   wpUser: string | null;
+  customFields?: CustomFieldValue[];
 }): Promise<string> {
   const id = generateId();
+  const customFieldsJson = args.customFields?.length
+    ? JSON.stringify(args.customFields)
+    : null;
   await execute(
     `INSERT INTO feedbacks
-      (id, project_id, site_id, category, message, page_url, user_agent, viewport, wp_user, status, priority, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'normal', ?)`,
+      (id, project_id, site_id, category, message, page_url, user_agent, viewport, wp_user, status, priority, custom_fields_json, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'new', 'normal', ?, ?)`,
     [
       id,
       args.projectId,
@@ -107,6 +125,7 @@ export async function createFeedback(args: {
       args.userAgent,
       args.viewport,
       args.wpUser,
+      customFieldsJson,
       Date.now(),
     ],
   );

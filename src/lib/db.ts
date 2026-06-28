@@ -77,6 +77,7 @@ async function migrate(p: mysql.Pool): Promise<void> {
       status      VARCHAR(32) NOT NULL DEFAULT 'new',
       priority    VARCHAR(32) NOT NULL DEFAULT 'normal',
       admin_note  TEXT,
+      custom_fields_json TEXT,
       created_at  BIGINT NOT NULL,
       KEY idx_feedbacks_project (project_id, created_at),
       KEY idx_feedbacks_status (status),
@@ -102,7 +103,28 @@ async function migrate(p: mysql.Pool): Promise<void> {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
+  // Idempotent column additions for tables that predate them.
+  await addColumnIfMissing(p, "feedbacks", "custom_fields_json", "TEXT");
+
   // No default project is seeded; projects are created explicitly from the panel.
+}
+
+/** Adds a column only if it isn't already present (ALTER ... ADD COLUMN is not idempotent in MySQL). */
+async function addColumnIfMissing(
+  p: mysql.Pool,
+  table: string,
+  column: string,
+  definition: string,
+): Promise<void> {
+  const [rows] = await p.query(
+    `SELECT COUNT(*) AS c FROM information_schema.columns
+     WHERE table_schema = DATABASE() AND table_name = ? AND column_name = ?`,
+    [table, column],
+  );
+  const exists = (rows as { c: number }[])[0]?.c > 0;
+  if (!exists) {
+    await p.query(`ALTER TABLE \`${table}\` ADD COLUMN \`${column}\` ${definition}`);
+  }
 }
 
 /** Returns a ready pool, running migrations exactly once per process. */

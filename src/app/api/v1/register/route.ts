@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { corsJson, corsPreflight } from "@/lib/cors";
 import { guardRegister } from "@/lib/guard";
+import { parseSettings } from "@/lib/repo";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
@@ -40,15 +41,17 @@ export async function POST(req: Request) {
     return corsJson({ enabled: false, status: result.error }, 200);
   }
 
-  const settings = JSON.parse(result.project.settings_json || "{}");
+  const settings = parseSettings(result.project);
   return corsJson({
     enabled: true,
     status: result.site.status,
     project: {
       name: result.project.name,
-      accentColor: settings.accentColor ?? "#4f46e5",
-      position: settings.position ?? "bottom-right",
-      categories: settings.categories ?? ["Öneri", "Hata", "Tasarım", "Diğer"],
+      accentColor: settings.accentColor,
+      position: settings.position,
+      categories: settings.categories,
+      text: settings.text,
+      fields: settings.fields,
     },
   });
 }

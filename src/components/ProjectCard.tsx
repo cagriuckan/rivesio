@@ -132,6 +132,13 @@ export default function ProjectCard({
 
         {/* Actions */}
         <div className="flex items-center gap-2 pt-1">
+          <Link
+            href={`/projects/${project.id}/settings`}
+            className="inline-flex h-8 items-center gap-2 rounded-md border border-line bg-transparent px-3 text-xs font-semibold text-secondary transition-all hover:bg-raised hover:text-primary hover:border-line-strong"
+          >
+            <Icon.code className="h-3.5 w-3.5" />
+            {t("settings")}
+          </Link>
           <Button size="sm" variant="outline" onClick={rotate} disabled={busy}>
             <Icon.refresh className="h-3.5 w-3.5" />
             {t("rotateKey")}
