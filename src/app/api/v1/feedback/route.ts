@@ -16,6 +16,10 @@ const schema = z.object({
   page_url: z.string().max(2000).optional().nullable(),
   viewport: z.string().max(50).optional().nullable(),
   wp_user: z.string().max(300).optional().nullable(),
+  custom_fields: z
+    .array(z.object({ label: z.string().max(80), value: z.string().max(2000) }))
+    .max(20)
+    .optional(),
   meta: z.record(z.unknown()).optional(),
 });
 
@@ -56,6 +60,9 @@ export async function POST(req: Request) {
     userAgent: req.headers.get("user-agent"),
     viewport: data.viewport ?? null,
     wpUser: data.wp_user ?? null,
+    customFields: data.custom_fields
+      ?.map((f) => ({ label: f.label.trim(), value: f.value.trim() }))
+      .filter((f) => f.value),
   });
 
   return corsJson({ ok: true, feedback_id: feedbackId, max_attachments: limits.maxAttachments });

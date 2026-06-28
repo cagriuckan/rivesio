@@ -49,6 +49,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
       accentColor: settings.accentColor,
       position: settings.position,
       categories: settings.categories,
+      text: settings.text,
+      fields: settings.fields,
     },
   };
 

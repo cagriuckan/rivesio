@@ -1,4 +1,4 @@
-"use strict";(()=>{var Z=`
+"use strict";(()=>{var ie=`
 :host { all: initial; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -240,6 +240,37 @@
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+/* \u2500\u2500 Custom text/email input \u2500\u2500 */
+.kf-input {
+  width: 100%;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--txt);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color .14s, box-shadow .14s;
+}
+.kf-input::placeholder { color: var(--txt-faint); }
+.kf-input:focus {
+  border-color: var(--kf-accent, #6366f1);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* \u2500\u2500 Custom checkbox field \u2500\u2500 */
+.kf-cf-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--txt);
+  font-family: var(--font);
+  cursor: pointer;
+}
+.kf-cf-check input { width: 16px; height: 16px; accent-color: var(--kf-accent, #6366f1); cursor: pointer; }
+
 /* \u2500\u2500 Capture row \u2500\u2500 */
 .kf-capture-row {
   display: flex;
@@ -462,21 +493,21 @@
   .kf-fab { padding: 12px; border-radius: 50%; }
   .kf-fab svg { width: 18px; height: 18px; }
 }
-`;async function te(t){let a;try{a=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser",frameRate:1},audio:!1,preferCurrentTab:!0,selfBrowserSurface:"include"})}catch(e){return null}let[l]=a.getVideoTracks();t&&(t.style.visibility="hidden");let o=document.createElement("video");o.muted=!0,o.playsInline=!0,o.srcObject=a,await new Promise(e=>{o.onloadedmetadata=()=>e()}),await o.play(),await new Promise(e=>requestAnimationFrame(()=>requestAnimationFrame(()=>e())));let{videoWidth:s,videoHeight:p}=o,k=document.createElement("canvas");return k.width=s,k.height=p,k.getContext("2d").drawImage(o,0,0,s,p),o.pause(),o.srcObject=null,l.stop(),t&&(t.style.visibility=""),{bitmap:await createImageBitmap(k),scaleX:s/window.innerWidth,scaleY:p/window.innerHeight}}function ee(t,a,l,o,s,p){t.beginPath(),t.moveTo(a+p,l),t.arcTo(a+o,l,a+o,l+s,p),t.arcTo(a+o,l+s,a,l+s,p),t.arcTo(a,l+s,a,l,p),t.arcTo(a,l,a+o,l,p),t.closePath()}async function ne(t){let a=await te(t);if(!a)return null;let{bitmap:l}=a,o=document.createElement("canvas");return o.width=l.width,o.height=l.height,o.getContext("2d").drawImage(l,0,0),l.close(),new Promise(s=>o.toBlob(s,"image/png"))}async function ae(t){let a=await te(t);return a?pe(a):null}function pe({bitmap:t,scaleX:a,scaleY:l}){return new Promise(o=>{let s=window.innerWidth,p=window.innerHeight,k=Math.min(window.devicePixelRatio||1,2),d=document.createElement("canvas");d.width=s*k,d.height=p*k,Object.assign(d.style,{position:"fixed",top:"0",left:"0",width:"100vw",height:"100vh",zIndex:"2147483646",cursor:"crosshair",userSelect:"none"}),document.body.appendChild(d);let e=d.getContext("2d");e.scale(k,k);function V(){e.drawImage(t,0,0,t.width,t.height,0,0,s,p),e.fillStyle="rgba(0,0,0,0.38)",e.fillRect(0,0,s,p)}function f(){let r="S\xFCr\xFCkle: alan se\xE7   \u2022   B\u0131rak: onayla   \u2022   Esc: iptal";e.font="13px -apple-system, system-ui, sans-serif";let h=e.measureText(r).width+24,u=36,m=(s-h)/2,v=p-u-20;e.fillStyle="rgba(15,23,42,0.72)",ee(e,m,v,h,u,10),e.fill(),e.fillStyle="#f1f5f9",e.textAlign="center",e.textBaseline="middle",e.fillText(r,s/2,v+u/2),e.textAlign="left",e.textBaseline="alphabetic"}function G(r,c,h,u){e.save(),e.beginPath(),e.rect(r,c,h,u),e.clip(),e.drawImage(t,0,0,t.width,t.height,0,0,s,p),e.restore(),e.strokeStyle="#6366f1",e.lineWidth=2,e.setLineDash([6,3]),e.strokeRect(r+1,c+1,h-2,u-2),e.setLineDash([]);let m=7;e.fillStyle="#6366f1",[[r,c],[r+h-m,c],[r,c+u-m],[r+h-m,c+u-m]].forEach(([N,O])=>e.fillRect(N,O,m,m)),e.font="bold 12px -apple-system, system-ui, sans-serif";let v=`${Math.round(h)} \xD7 ${Math.round(u)}`,g=e.measureText(v).width+14,y=22,T=Math.min(r,s-g-4),A=c>y+8?c-y-4:c+u+4;e.fillStyle="#6366f1",ee(e,T,A,g,y,5),e.fill(),e.fillStyle="#fff",e.textBaseline="middle",e.fillText(v,T+7,A+y/2),e.textBaseline="alphabetic"}let I=0,z=0,w=!1;function R(r,c){if(V(),f(),r===void 0||c===void 0)return;let h=Math.min(I,r),u=Math.min(z,c),m=Math.abs(r-I),v=Math.abs(c-z);m>1&&v>1&&G(h,u,m,v)}R(),d.addEventListener("mousedown",r=>{r.preventDefault(),I=r.clientX,z=r.clientY,w=!0}),d.addEventListener("mousemove",r=>{w&&R(r.clientX,r.clientY)}),d.addEventListener("mouseup",r=>{if(!w)return;w=!1;let c=Math.min(I,r.clientX),h=Math.min(z,r.clientY),u=Math.abs(r.clientX-I),m=Math.abs(r.clientY-z);if(C(),u<10||m<10){t.close(),o(null);return}j(c,h,u,m)});function S(r){r.key==="Escape"&&(C(),t.close(),o(null))}window.addEventListener("keydown",S,!0);function C(){d.remove(),window.removeEventListener("keydown",S,!0)}function j(r,c,h,u){let m=Math.round(r*a),v=Math.round(c*l),g=Math.round(h*a),y=Math.round(u*l),T=document.createElement("canvas");T.width=g,T.height=y,T.getContext("2d").drawImage(t,m,v,g,y,0,0,g,y),t.close(),T.toBlob(A=>o(A),"image/png")}})}var K=4;function E(t){return`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${t}</svg>`}var b={chat:E('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),history:E('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),copy:E('<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),camera:E('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),crop:E('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'),upload:E('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),close:E('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),check:E('<polyline points="20 6 9 17 4 12"/>'),alert:E('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'),x:E('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>')};async function re(){var k,d;let t=window.__KF_CONFIG__;if(!t)return;let a=(k=window.RevistoFeedback)!=null?k:{},l=a.domain||location.host,o=a.theme||"",s;try{s=await(await fetch(`${t.base}/api/v1/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_key:t.widgetKey,domain:l,theme:o,meta:{themeVersion:a.themeVersion,user:a.user,href:location.href}})})).json()}catch(e){return}if(!s.enabled)return;let p={...t.project,...(d=s.project)!=null?d:{}};ue(t,a,p,{domain:l,theme:o})}function ue(t,a,l,o){var Q;let s=document.createElement("div");s.id="revisto-widget",document.body.appendChild(s);let p=s.attachShadow({mode:"open"}),k=document.createElement("style");k.textContent=Z,p.appendChild(k);let d=document.createElement("div");d.className="kf-root",d.dataset.pos=l.position||"bottom-right",d.style.setProperty("--kf-accent",l.accentColor||"#6366f1"),document.documentElement.getAttribute("data-theme")==="light"&&(d.dataset.theme="light");let V=((Q=l.categories)!=null?Q:["\xD6neri"]).map(n=>`<option value="${H(n)}">${H(n)}</option>`).join("");d.innerHTML=`
-    <button class="kf-fab" type="button" aria-label="Geri bildirim">
-      ${b.chat}<span>Geri bildirim</span>
+`;async function le(a){let o;try{o=await navigator.mediaDevices.getDisplayMedia({video:{displaySurface:"browser",frameRate:1},audio:!1,preferCurrentTab:!0,selfBrowserSurface:"include"})}catch(t){return null}let[l]=o.getVideoTracks();a&&(a.style.visibility="hidden");let i=document.createElement("video");i.muted=!0,i.playsInline=!0,i.srcObject=o,await new Promise(t=>{i.onloadedmetadata=()=>t()}),await i.play(),await new Promise(t=>requestAnimationFrame(()=>requestAnimationFrame(()=>t())));let{videoWidth:c,videoHeight:h}=i,v=document.createElement("canvas");return v.width=c,v.height=h,v.getContext("2d").drawImage(i,0,0,c,h),i.pause(),i.srcObject=null,l.stop(),a&&(a.style.visibility=""),{bitmap:await createImageBitmap(v),scaleX:c/window.innerWidth,scaleY:h/window.innerHeight}}function se(a,o,l,i,c,h){a.beginPath(),a.moveTo(o+h,l),a.arcTo(o+i,l,o+i,l+c,h),a.arcTo(o+i,l+c,o,l+c,h),a.arcTo(o,l+c,o,l,h),a.arcTo(o,l,o+i,l,h),a.closePath()}async function ce(a){let o=await le(a);if(!o)return null;let{bitmap:l}=o,i=document.createElement("canvas");return i.width=l.width,i.height=l.height,i.getContext("2d").drawImage(l,0,0),l.close(),new Promise(c=>i.toBlob(c,"image/png"))}async function de(a){let o=await le(a);return o?ve(o):null}function ve({bitmap:a,scaleX:o,scaleY:l}){return new Promise(i=>{let c=window.innerWidth,h=window.innerHeight,v=Math.min(window.devicePixelRatio||1,2),d=document.createElement("canvas");d.width=c*v,d.height=h*v,Object.assign(d.style,{position:"fixed",top:"0",left:"0",width:"100vw",height:"100vh",zIndex:"2147483646",cursor:"crosshair",userSelect:"none"}),document.body.appendChild(d);let t=d.getContext("2d");t.scale(v,v);function T(){t.drawImage(a,0,0,a.width,a.height,0,0,c,h),t.fillStyle="rgba(0,0,0,0.38)",t.fillRect(0,0,c,h)}function w(){let s="S\xFCr\xFCkle: alan se\xE7   \u2022   B\u0131rak: onayla   \u2022   Esc: iptal";t.font="13px -apple-system, system-ui, sans-serif";let m=t.measureText(s).width+24,u=36,k=(c-m)/2,y=h-u-20;t.fillStyle="rgba(15,23,42,0.72)",se(t,k,y,m,u,10),t.fill(),t.fillStyle="#f1f5f9",t.textAlign="center",t.textBaseline="middle",t.fillText(s,c/2,y+u/2),t.textAlign="left",t.textBaseline="alphabetic"}function N(s,p,m,u){t.save(),t.beginPath(),t.rect(s,p,m,u),t.clip(),t.drawImage(a,0,0,a.width,a.height,0,0,c,h),t.restore(),t.strokeStyle="#6366f1",t.lineWidth=2,t.setLineDash([6,3]),t.strokeRect(s+1,p+1,m-2,u-2),t.setLineDash([]);let k=7;t.fillStyle="#6366f1",[[s,p],[s+m-k,p],[s,p+u-k],[s+m-k,p+u-k]].forEach(([H,W])=>t.fillRect(H,W,k,k)),t.font="bold 12px -apple-system, system-ui, sans-serif";let y=`${Math.round(m)} \xD7 ${Math.round(u)}`,E=t.measureText(y).width+14,M=22,C=Math.min(s,c-E-4),I=p>M+8?p-M-4:p+u+4;t.fillStyle="#6366f1",se(t,C,I,E,M,5),t.fill(),t.fillStyle="#fff",t.textBaseline="middle",t.fillText(y,C+7,I+M/2),t.textBaseline="alphabetic"}let F=0,j=0,f=!1;function D(s,p){if(T(),w(),s===void 0||p===void 0)return;let m=Math.min(F,s),u=Math.min(j,p),k=Math.abs(s-F),y=Math.abs(p-j);k>1&&y>1&&N(m,u,k,y)}D(),d.addEventListener("mousedown",s=>{s.preventDefault(),F=s.clientX,j=s.clientY,f=!0}),d.addEventListener("mousemove",s=>{f&&D(s.clientX,s.clientY)}),d.addEventListener("mouseup",s=>{if(!f)return;f=!1;let p=Math.min(F,s.clientX),m=Math.min(j,s.clientY),u=Math.abs(s.clientX-F),k=Math.abs(s.clientY-j);if(O(),u<10||k<10){a.close(),i(null);return}P(p,m,u,k)});function Y(s){s.key==="Escape"&&(O(),a.close(),i(null))}window.addEventListener("keydown",Y,!0);function O(){d.remove(),window.removeEventListener("keydown",Y,!0)}function P(s,p,m,u){let k=Math.round(s*o),y=Math.round(p*l),E=Math.round(m*o),M=Math.round(u*l),C=document.createElement("canvas");C.width=E,C.height=M,C.getContext("2d").drawImage(a,k,y,E,M,0,0,E,M),a.close(),C.toBlob(I=>i(I),"image/png")}})}var ye={tr:{fabLabel:"Geri bildirim",title:"Geri bildirim",categoryLabel:"Kategori",messageLabel:"A\xE7\u0131klama",messagePlaceholder:"Ne eklensin ya da nerede bir sorun var?",submitLabel:"G\xF6nder",successMessage:"Te\u015Fekk\xFCrler! Geri bildirimin al\u0131nd\u0131.",errorMessage:"G\xF6nderilemedi. L\xFCtfen tekrar dene."},en:{fabLabel:"Feedback",title:"Feedback",categoryLabel:"Category",messageLabel:"Description",messagePlaceholder:"What should be added, or where is the problem?",submitLabel:"Send",successMessage:"Thanks! Your feedback was received.",errorMessage:"Couldn't send. Please try again."}};function we(){return(document.documentElement.lang||"").toLowerCase().startsWith("en")?"en":"tr"}var V=4;function B(a){return`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${a}</svg>`}var g={chat:B('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),history:B('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),copy:B('<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),camera:B('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),crop:B('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'),upload:B('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),close:B('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),check:B('<polyline points="20 6 9 17 4 12"/>'),alert:B('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'),x:B('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>')};async function fe(){var v,d;let a=window.__KF_CONFIG__;if(!a)return;let o=(v=window.RevistoFeedback)!=null?v:{},l=o.domain||location.host,i=o.theme||"",c;try{c=await(await fetch(`${a.base}/api/v1/register`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_key:a.widgetKey,domain:l,theme:i,meta:{themeVersion:o.themeVersion,user:o.user,href:location.href}})})).json()}catch(t){return}if(!c.enabled)return;let h={...a.project,...(d=c.project)!=null?d:{}};Le(a,o,h,{domain:l,theme:i})}function Le(a,o,l,i){var ne,re,oe;let c=document.createElement("div");c.id="revisto-widget",document.body.appendChild(c);let h=c.attachShadow({mode:"open"}),v=document.createElement("style");v.textContent=ie,h.appendChild(v);let d=document.createElement("div");d.className="kf-root",d.dataset.pos=l.position||"bottom-right",d.style.setProperty("--kf-accent",l.accentColor||"#6366f1"),document.documentElement.getAttribute("data-theme")==="light"&&(d.dataset.theme="light");let T=we(),w={...ye[T],...(ne=l.text)==null?void 0:ne[T]},N=(re=l.fields)!=null?re:[],F=((oe=l.categories)!=null?oe:["\xD6neri"]).map(e=>`<option value="${r(e)}">${r(e)}</option>`).join(""),j=N.map(e=>{var x;let n=e.required?"required":"",b=e.placeholder?`placeholder="${r(e.placeholder)}"`:"",L=`<label class="kf-label">${r(e.label)}${e.required?" *":""}</label>`,S="";if(e.type==="textarea")S=`<textarea class="kf-textarea kf-cf" data-cf="${r(e.id)}" data-cf-label="${r(e.label)}" ${b} ${n}></textarea>`;else if(e.type==="select"){let z=((x=e.options)!=null?x:[]).map(q=>`<option value="${r(q)}">${r(q)}</option>`).join("");S=`<select class="kf-select kf-cf" data-cf="${r(e.id)}" data-cf-label="${r(e.label)}" ${n}>${z}</select>`}else{if(e.type==="checkbox")return`<label class="kf-cf-check"><input type="checkbox" class="kf-cf" data-cf="${r(e.id)}" data-cf-label="${r(e.label)}" data-cf-type="checkbox" ${n}> ${r(e.label)}</label>`;S=`<input type="${e.type==="email"?"email":"text"}" class="kf-input kf-cf" data-cf="${r(e.id)}" data-cf-label="${r(e.label)}" ${b} ${n}>`}return`<div>${L}${S}</div>`}).join("");d.innerHTML=`
+    <button class="kf-fab" type="button" aria-label="${r(w.fabLabel)}">
+      ${g.chat}<span>${r(w.fabLabel)}</span>
     </button>
 
-    <div class="kf-panel" role="dialog" aria-label="Geri bildirim formu">
+    <div class="kf-panel" role="dialog" aria-label="${r(w.title)}">
 
       <div class="kf-head">
         <div class="kf-title-wrap">
-          <div class="kf-title-icon">${b.chat}</div>
-          <span class="kf-title">Geri bildirim</span>
+          <div class="kf-title-icon">${g.chat}</div>
+          <span class="kf-title">${r(w.title)}</span>
         </div>
         <div class="kf-head-actions">
-          <button class="kf-icon-btn kf-history-toggle" type="button" aria-label="Ge\xE7mi\u015F">${b.history}</button>
-          <button class="kf-icon-btn kf-close-btn" type="button" aria-label="Kapat">${b.close}</button>
+          <button class="kf-icon-btn kf-history-toggle" type="button" aria-label="Ge\xE7mi\u015F">${g.history}</button>
+          <button class="kf-icon-btn kf-close-btn" type="button" aria-label="Kapat">${g.close}</button>
         </div>
       </div>
 
@@ -492,29 +523,31 @@
       <div class="kf-body">
 
         <div>
-          <label class="kf-label">Kategori</label>
-          <select class="kf-select" aria-label="Kategori">${V}</select>
+          <label class="kf-label">${r(w.categoryLabel)}</label>
+          <select class="kf-select" aria-label="${r(w.categoryLabel)}">${F}</select>
         </div>
 
         <div>
-          <label class="kf-label">A\xE7\u0131klama</label>
-          <textarea class="kf-textarea" placeholder="Ne eklensin ya da nerede bir sorun var?"></textarea>
+          <label class="kf-label">${r(w.messageLabel)}</label>
+          <textarea class="kf-textarea" placeholder="${r(w.messagePlaceholder)}"></textarea>
         </div>
+
+        ${j}
 
         <div class="kf-capture-row">
           <button class="kf-chip kf-capture-full" type="button">
-            ${b.camera} T\xFCm ekran
+            ${g.camera} T\xFCm ekran
           </button>
           <button class="kf-chip kf-capture-area" type="button">
-            ${b.crop} Alan se\xE7
+            ${g.crop} Alan se\xE7
           </button>
           <button class="kf-chip kf-chip-upload kf-upload" type="button" aria-label="G\xF6rsel y\xFCkle">
-            ${b.upload}
+            ${g.upload}
           </button>
         </div>
 
         <div class="kf-attach-row">
-          <span class="kf-counter">0 / ${K}</span>
+          <span class="kf-counter">0 / ${V}</span>
         </div>
 
         <div class="kf-thumbs"></div>
@@ -526,23 +559,23 @@
       </div> <!-- /kf-view-form -->
 
       <div class="kf-foot">
-        <button class="kf-btn kf-btn-ghost kf-cancel" type="button">Vazge\xE7</button>
-        <button class="kf-btn kf-btn-primary kf-submit" type="button">G\xF6nder</button>
+        <button class="kf-btn kf-btn-ghost kf-cancel" type="button">${r(T==="en"?"Cancel":"Vazge\xE7")}</button>
+        <button class="kf-btn kf-btn-primary kf-submit" type="button">${r(w.submitLabel)}</button>
       </div>
 
     </div>
-  `,p.appendChild(d);let f=n=>d.querySelector(n),G=f(".kf-fab"),I=f(".kf-panel"),z=f(".kf-close-btn"),w=f(".kf-history-toggle"),R=f(".kf-cancel"),S=f(".kf-submit"),C=f(".kf-capture-full"),j=f(".kf-capture-area"),r=f(".kf-upload"),c=f(".kf-file"),h=f(".kf-textarea"),u=f(".kf-select"),m=f(".kf-thumbs"),v=f(".kf-counter"),g=f(".kf-msg"),y=f(".kf-view-form"),T=f(".kf-view-history"),A=f(".kf-history-list"),N=f(".kf-history-empty"),O=f(".kf-foot"),$=[],U=`kf_history_${t.widgetKey}`;function W(){try{return JSON.parse(localStorage.getItem(U)||"[]")}catch(n){return[]}}function oe(n){let i=W();i.unshift(n),localStorage.setItem(U,JSON.stringify(i.slice(0,50)))}function ie(n){return new Date(n).toLocaleDateString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}function se(){let n=W();A.innerHTML="",N.hidden=n.length>0,n.forEach(i=>{let x=document.createElement("li");x.className="kf-history-item",x.innerHTML=`
+  `,h.appendChild(d);let f=e=>d.querySelector(e),D=f(".kf-fab"),Y=f(".kf-panel"),O=f(".kf-close-btn"),P=f(".kf-history-toggle"),s=f(".kf-cancel"),p=f(".kf-submit"),m=f(".kf-capture-full"),u=f(".kf-capture-area"),k=f(".kf-upload"),y=f(".kf-file"),E=f(".kf-textarea"),M=f(".kf-select"),C=f(".kf-thumbs"),I=f(".kf-counter"),H=f(".kf-msg"),W=f(".kf-view-form"),U=f(".kf-view-history"),X=f(".kf-history-list"),pe=f(".kf-history-empty"),J=f(".kf-foot"),A=[],Q=`kf_history_${a.widgetKey}`;function Z(){try{return JSON.parse(localStorage.getItem(Q)||"[]")}catch(e){return[]}}function ue(e){let n=Z();n.unshift(e),localStorage.setItem(Q,JSON.stringify(n.slice(0,50)))}function be(e){return new Date(e).toLocaleDateString("tr-TR",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})}function he(){let e=Z();X.innerHTML="",pe.hidden=e.length>0,e.forEach(n=>{let b=document.createElement("li");b.className="kf-history-item",b.innerHTML=`
         <div class="kf-hi-left">
-          <span class="kf-hi-cat">${H(i.category)}</span>
-          <span class="kf-hi-page">${H(i.page)}</span>
+          <span class="kf-hi-cat">${r(n.category)}</span>
+          <span class="kf-hi-page">${r(n.page)}</span>
         </div>
         <div class="kf-hi-right">
-          <span class="kf-hi-id" title="Kopyala">#${H(i.id.slice(0,8))}</span>
-          <span class="kf-hi-date">${H(ie(i.date))}</span>
-        </div>`,x.querySelector(".kf-hi-id").addEventListener("click",()=>X(i.id)),A.appendChild(x)})}let P=!1;function q(){P=!1,y.hidden=!1,T.hidden=!0,O.hidden=!1,w.title="Ge\xE7mi\u015F",w.innerHTML=b.history,L("",null)}function le(){P=!0,y.hidden=!0,T.hidden=!1,O.hidden=!0,w.title="Forma d\xF6n",w.innerHTML=b.close,se(),L("",null)}w.addEventListener("click",()=>P?q():le());function X(n,i){var x;(x=navigator.clipboard)==null||x.writeText(n).catch(()=>{}),i&&(i.classList.add("copied"),i.innerHTML=b.check,setTimeout(()=>{i.classList.remove("copied"),i.innerHTML=b.copy},1800))}function L(n,i){if(!i){g.hidden=!0,g.innerHTML="";return}g.hidden=!1,g.className=`kf-msg kf-${i}`,g.innerHTML=`${i==="ok"?b.check:b.alert} ${H(n)}`}function F(){let n=$.length>=K;v.textContent=`${$.length} / ${K}`,C.disabled=n,j.disabled=n,r.disabled=n,m.innerHTML="",$.forEach((i,x)=>{let M=document.createElement("div");M.className="kf-thumb",M.innerHTML=`<img src="${i.url}" alt="ek"><button class="kf-thumb-del" type="button" aria-label="Kald\u0131r">${b.x}</button>`,M.querySelector("button").addEventListener("click",()=>{URL.revokeObjectURL(i.url),$.splice(x,1),F()}),m.appendChild(M)})}function Y(n,i){$.length>=K||($.push({blob:n,kind:i,url:URL.createObjectURL(n)}),F())}function de(){d.dataset.open="1",P||setTimeout(()=>h.focus(),60)}function D(){d.dataset.open="0",q()}function J(){d.dataset.open==="1"?D():de()}G.addEventListener("click",J),z.addEventListener("click",D),R.addEventListener("click",D),r.addEventListener("click",()=>c.click()),c.addEventListener("change",()=>{var n;Array.from((n=c.files)!=null?n:[]).filter(i=>i.type.startsWith("image/")).forEach(i=>Y(i,"upload")),c.value=""}),C.addEventListener("click",async()=>{C.disabled=!0,C.innerHTML=`${b.camera} Bekleniyor\u2026`;try{let n=await ne(s);n?Y(n,"screenshot"):L("Ekran payla\u015F\u0131m\u0131 iptal edildi.","err")}catch(n){L("Ekran yakalanamad\u0131.","err")}finally{C.innerHTML=`${b.camera} T\xFCm ekran`,F()}}),j.addEventListener("click",async()=>{j.disabled=!0,j.innerHTML=`${b.crop} Bekleniyor\u2026`;try{let n=await ae(s);n?Y(n,"screenshot"):L("Alan se\xE7imi iptal edildi.","err")}catch(n){L("Ekran yakalanamad\u0131.","err")}finally{j.innerHTML=`${b.crop} Alan se\xE7`,F()}});async function ce(){let n=h.value.trim();if(!n){L("L\xFCtfen bir a\xE7\u0131klama yaz.","err"),h.focus();return}S.disabled=!0,S.textContent="G\xF6nderiliyor\u2026",L("",null);try{let i=await fetch(`${t.base}/api/v1/feedback`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_key:t.widgetKey,domain:o.domain,theme:o.theme,category:u.value,message:n,page_url:location.href,viewport:`${window.innerWidth}x${window.innerHeight}`,wp_user:a.user,meta:{themeVersion:a.themeVersion}})}),x=await i.json();if(!i.ok||!x.ok){L("G\xF6nderilemedi. L\xFCtfen tekrar dene.","err");return}for(let B of $){let _=new FormData;_.append("widget_key",t.widgetKey),_.append("domain",o.domain),o.theme&&_.append("theme",o.theme),_.append("kind",B.kind);let fe=B.blob.type==="image/png"?"png":"jpg";_.append("file",B.blob,`${B.kind}.${fe}`),await fetch(`${t.base}/api/v1/feedback/${x.feedback_id}/attachment`,{method:"POST",body:_}).catch(()=>{})}let M=x.feedback_id;oe({id:M,category:u.value,page:location.pathname,date:Date.now()}),g.hidden=!1,g.className="kf-msg kf-ok",g.innerHTML=`
-        ${b.check} Te\u015Fekk\xFCrler! Geri bildirimin al\u0131nd\u0131.
+          <span class="kf-hi-id" title="Kopyala">#${r(n.id.slice(0,8))}</span>
+          <span class="kf-hi-date">${r(be(n.date))}</span>
+        </div>`,b.querySelector(".kf-hi-id").addEventListener("click",()=>te(n.id)),X.appendChild(b)})}let K=!1;function ee(){K=!1,W.hidden=!1,U.hidden=!0,J.hidden=!1,P.title="Ge\xE7mi\u015F",P.innerHTML=g.history,$("",null)}function me(){K=!0,W.hidden=!0,U.hidden=!1,J.hidden=!0,P.title="Forma d\xF6n",P.innerHTML=g.close,he(),$("",null)}P.addEventListener("click",()=>K?ee():me());function te(e,n){var b;(b=navigator.clipboard)==null||b.writeText(e).catch(()=>{}),n&&(n.classList.add("copied"),n.innerHTML=g.check,setTimeout(()=>{n.classList.remove("copied"),n.innerHTML=g.copy},1800))}function $(e,n){if(!n){H.hidden=!0,H.innerHTML="";return}H.hidden=!1,H.className=`kf-msg kf-${n}`,H.innerHTML=`${n==="ok"?g.check:g.alert} ${r(e)}`}function R(){let e=A.length>=V;I.textContent=`${A.length} / ${V}`,m.disabled=e,u.disabled=e,k.disabled=e,C.innerHTML="",A.forEach((n,b)=>{let L=document.createElement("div");L.className="kf-thumb",L.innerHTML=`<img src="${n.url}" alt="ek"><button class="kf-thumb-del" type="button" aria-label="Kald\u0131r">${g.x}</button>`,L.querySelector("button").addEventListener("click",()=>{URL.revokeObjectURL(n.url),A.splice(b,1),R()}),C.appendChild(L)})}function G(e,n){A.length>=V||(A.push({blob:e,kind:n,url:URL.createObjectURL(e)}),R())}function ge(){d.dataset.open="1",K||setTimeout(()=>E.focus(),60)}function _(){d.dataset.open="0",ee()}function ae(){d.dataset.open==="1"?_():ge()}D.addEventListener("click",ae),O.addEventListener("click",_),s.addEventListener("click",_),k.addEventListener("click",()=>y.click()),y.addEventListener("change",()=>{var e;Array.from((e=y.files)!=null?e:[]).filter(n=>n.type.startsWith("image/")).forEach(n=>G(n,"upload")),y.value=""}),m.addEventListener("click",async()=>{m.disabled=!0,m.innerHTML=`${g.camera} Bekleniyor\u2026`;try{let e=await ce(c);e?G(e,"screenshot"):$("Ekran payla\u015F\u0131m\u0131 iptal edildi.","err")}catch(e){$("Ekran yakalanamad\u0131.","err")}finally{m.innerHTML=`${g.camera} T\xFCm ekran`,R()}}),u.addEventListener("click",async()=>{u.disabled=!0,u.innerHTML=`${g.crop} Bekleniyor\u2026`;try{let e=await de(c);e?G(e,"screenshot"):$("Alan se\xE7imi iptal edildi.","err")}catch(e){$("Ekran yakalanamad\u0131.","err")}finally{u.innerHTML=`${g.crop} Alan se\xE7`,R()}});function ke(){let e=d.querySelectorAll(".kf-cf"),n=[];for(let b of Array.from(e)){let L=b.dataset.cfLabel||"",x=b.dataset.cfType==="checkbox"?b.checked?T==="en"?"Yes":"Evet":"":b.value.trim();if(b.hasAttribute("required")&&!x)return b.focus(),{ok:!1,values:[]};x&&n.push({label:L,value:x})}return{ok:!0,values:n}}async function xe(){let e=E.value.trim();if(!e){$(T==="en"?"Please write a description.":"L\xFCtfen bir a\xE7\u0131klama yaz.","err"),E.focus();return}let n=ke();if(!n.ok){$(T==="en"?"Please fill required fields.":"L\xFCtfen zorunlu alanlar\u0131 doldur.","err");return}p.disabled=!0,p.textContent=T==="en"?"Sending\u2026":"G\xF6nderiliyor\u2026",$("",null);try{let b=await fetch(`${a.base}/api/v1/feedback`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({widget_key:a.widgetKey,domain:i.domain,theme:i.theme,category:M.value,message:e,page_url:location.href,viewport:`${window.innerWidth}x${window.innerHeight}`,wp_user:o.user,custom_fields:n.values,meta:{themeVersion:o.themeVersion}})}),L=await b.json();if(!b.ok||!L.ok){$(w.errorMessage,"err");return}for(let x of A){let z=new FormData;z.append("widget_key",a.widgetKey),z.append("domain",i.domain),i.theme&&z.append("theme",i.theme),z.append("kind",x.kind);let q=x.blob.type==="image/png"?"png":"jpg";z.append("file",x.blob,`${x.kind}.${q}`),await fetch(`${a.base}/api/v1/feedback/${L.feedback_id}/attachment`,{method:"POST",body:z}).catch(()=>{})}let S=L.feedback_id;ue({id:S,category:M.value,page:location.pathname,date:Date.now()}),H.hidden=!1,H.className="kf-msg kf-ok",H.innerHTML=`
+        ${g.check} ${r(w.successMessage)}
         <div class="kf-ref-box">
-          <span class="kf-ref-label">Referans no</span>
-          <span class="kf-ref-id" title="${H(M)}">#${H(M.slice(0,8))}</span>
-          <button class="kf-ref-copy" type="button" aria-label="Kopyala">${b.copy}</button>
-        </div>`,g.querySelector(".kf-ref-copy").addEventListener("click",B=>X(M,B.currentTarget)),h.value="",$.splice(0).forEach(B=>URL.revokeObjectURL(B.url)),F(),setTimeout(D,4e3)}catch(i){L("Ba\u011Flant\u0131 hatas\u0131. L\xFCtfen tekrar dene.","err")}finally{S.disabled=!1,S.textContent="G\xF6nder"}}S.addEventListener("click",ce),window.addEventListener("keydown",n=>{(n.metaKey||n.ctrlKey)&&n.key==="/"&&(n.preventDefault(),J()),n.key==="Escape"&&d.dataset.open==="1"&&D()}),F()}function H(t){return t.replace(/[&<>"']/g,a=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[a])}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",re):re();})();
+          <span class="kf-ref-label">${r(T==="en"?"Reference":"Referans no")}</span>
+          <span class="kf-ref-id" title="${r(S)}">#${r(S.slice(0,8))}</span>
+          <button class="kf-ref-copy" type="button" aria-label="Kopyala">${g.copy}</button>
+        </div>`,H.querySelector(".kf-ref-copy").addEventListener("click",x=>te(S,x.currentTarget)),E.value="",d.querySelectorAll(".kf-cf").forEach(x=>{x.dataset.cfType==="checkbox"?x.checked=!1:x.value=""}),A.splice(0).forEach(x=>URL.revokeObjectURL(x.url)),R(),setTimeout(_,4e3)}catch(b){$(T==="en"?"Connection error. Please try again.":"Ba\u011Flant\u0131 hatas\u0131. L\xFCtfen tekrar dene.","err")}finally{p.disabled=!1,p.textContent=w.submitLabel}}p.addEventListener("click",xe),window.addEventListener("keydown",e=>{(e.metaKey||e.ctrlKey)&&e.key==="/"&&(e.preventDefault(),ae()),e.key==="Escape"&&d.dataset.open==="1"&&_()}),R()}function r(a){return a.replace(/[&<>"']/g,o=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[o])}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",fe):fe();})();

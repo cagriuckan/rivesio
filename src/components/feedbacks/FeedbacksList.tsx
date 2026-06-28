@@ -4,6 +4,8 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icons";
+import { FEEDBACK_STATUSES } from "@/lib/types";
+import type { FeedbackStatus } from "@/lib/types";
 import FeedbackCard from "./FeedbackCard";
 import FeedbackDetail from "./FeedbackDetail";
 import type { FeedbackWithMeta } from "@/lib/admin-repo";
@@ -18,6 +20,7 @@ export default function FeedbacksList({
   filterBar?: React.ReactNode;
 }) {
   const t = useTranslations("feedbacks");
+  const ts = useTranslations("status");
   const router = useRouter();
   const pathname = usePathname();
 
@@ -25,6 +28,8 @@ export default function FeedbacksList({
     initialId && feedbacks.some((f) => f.id === initialId) ? initialId : null
   );
   const [query, setQuery] = useState("");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [applying, setApplying] = useState(false);
 
   function openFeedback(id: string) {
     setSelectedId(id);
@@ -55,6 +60,53 @@ export default function FeedbacksList({
     ? feedbacks.filter((f) => f.id.startsWith(query.trim().replace(/^#/, "")))
     : feedbacks;
 
+  function toggle(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  const allSelected = filtered.length > 0 && filtered.every((f) => selectedIds.has(f.id));
+
+  function toggleAll() {
+    setSelectedIds((prev) => {
+      if (filtered.every((f) => prev.has(f.id))) {
+        const next = new Set(prev);
+        for (const f of filtered) next.delete(f.id);
+        return next;
+      }
+      const next = new Set(prev);
+      for (const f of filtered) next.add(f.id);
+      return next;
+    });
+  }
+
+  function clearSelection() {
+    setSelectedIds(new Set());
+  }
+
+  async function applyStatus(status: FeedbackStatus) {
+    const ids = [...selectedIds];
+    if (!ids.length) return;
+    setApplying(true);
+    try {
+      const res = await fetch("/api/admin/feedbacks", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids, status }),
+      });
+      if (res.ok) {
+        clearSelection();
+        router.refresh();
+      }
+    } finally {
+      setApplying(false);
+    }
+  }
+
   if (open && selectedId) {
     return (
       <div className="ds-fade-in" role="region" aria-label={t("detailRegion")}>
@@ -71,6 +123,18 @@ export default function FeedbacksList({
   return (
     <>
       <div className="mb-5 flex flex-wrap items-center gap-3">
+        {filtered.length > 0 && (
+          <label className="flex cursor-pointer items-center gap-2 text-xs text-subtle">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={toggleAll}
+              className="h-4 w-4 cursor-pointer accent-accent"
+              aria-label={t("selectAll")}
+            />
+            {t("selectAll")}
+          </label>
+        )}
         {filterBar}
         <div className="relative ml-auto">
           <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle" />
@@ -97,15 +161,58 @@ export default function FeedbacksList({
       ) : (
         <div className="flex flex-col gap-3" role="list" aria-label={t("listLabel")}>
           {filtered.map((f) => (
-            <div key={f.id} role="listitem">
-              <FeedbackCard
-                feedback={f}
-                selected={false}
-                compact={false}
-                onClick={() => openFeedback(f.id)}
+            <div key={f.id} role="listitem" className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={selectedIds.has(f.id)}
+                onChange={() => toggle(f.id)}
+                className="mt-5 h-4 w-4 shrink-0 cursor-pointer accent-accent"
+                aria-label={t("selectItem")}
               />
+              <div className="min-w-0 flex-1">
+                <FeedbackCard
+                  feedback={f}
+                  selected={false}
+                  compact={false}
+                  onClick={() => openFeedback(f.id)}
+                />
+              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {selectedIds.size > 0 && (
+        <div className="sticky bottom-4 mt-4 flex items-center gap-3 rounded-xl border border-line-strong bg-raised px-4 py-3 shadow-lg">
+          <span className="text-sm font-medium text-primary">
+            {t("selectedCount", { count: selectedIds.size })}
+          </span>
+          <select
+            defaultValue=""
+            disabled={applying}
+            onChange={(e) => {
+              if (e.target.value) applyStatus(e.target.value as FeedbackStatus);
+              e.target.value = "";
+            }}
+            className="ml-auto h-9 rounded-md border border-line bg-surface px-3 text-sm text-primary outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-50"
+            aria-label={t("changeStatus")}
+          >
+            <option value="" disabled>
+              {applying ? t("applying") : t("changeStatus")}
+            </option>
+            {FEEDBACK_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {ts(s)}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={clearSelection}
+            disabled={applying}
+            className="rounded-md px-2 py-1.5 text-xs text-subtle transition-colors hover:bg-surface hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent disabled:opacity-50"
+          >
+            {t("clearSelection")}
+          </button>
         </div>
       )}
     </>

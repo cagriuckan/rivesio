@@ -240,6 +240,37 @@ export const widgetCss = `
   box-shadow: 0 0 0 3px var(--ring);
 }
 
+/* ── Custom text/email input ── */
+.kf-input {
+  width: 100%;
+  background: var(--elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 8px 12px;
+  font-size: 13px;
+  color: var(--txt);
+  font-family: var(--font);
+  outline: none;
+  transition: border-color .14s, box-shadow .14s;
+}
+.kf-input::placeholder { color: var(--txt-faint); }
+.kf-input:focus {
+  border-color: var(--kf-accent, #6366f1);
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+/* ── Custom checkbox field ── */
+.kf-cf-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--txt);
+  font-family: var(--font);
+  cursor: pointer;
+}
+.kf-cf-check input { width: 16px; height: 16px; accent-color: var(--kf-accent, #6366f1); cursor: pointer; }
+
 /* ── Capture row ── */
 .kf-capture-row {
   display: flex;
