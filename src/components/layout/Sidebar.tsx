@@ -36,7 +36,6 @@ export default function Sidebar({
   const pathname = usePathname();
   const params = useSearchParams();
   const w = params.get("w");
-  const activeWidget = widgets.find((wg) => wg.id === w) ?? null;
 
   const withWidget = (href: string) => (w ? `${href}?w=${w}` : href);
 
@@ -86,26 +85,11 @@ export default function Sidebar({
       <div className="mx-3 h-px bg-line" />
 
       {/* Widget switcher */}
-      {collapsed ? (
-        <div className="flex justify-center py-2.5">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-80"
-            style={{ background: activeWidget ? activeWidget.accentColor : "var(--color-subtle)" }}
-          >
-            {activeWidget ? (
-              activeWidget.name.slice(0, 1).toUpperCase()
-            ) : (
-              <Icon.layers className="h-4 w-4" />
-            )}
-          </button>
-        </div>
-      ) : (
-        <div className="p-3 pb-2">
-          <Suspense>
-            <WidgetSwitcher widgets={widgets} />
-          </Suspense>
-        </div>
-      )}
+      <div className={collapsed ? "flex justify-center py-2" : "p-3 pb-2"}>
+        <Suspense>
+          <WidgetSwitcher widgets={widgets} collapsed={collapsed} />
+        </Suspense>
+      </div>
 
       <div className="mx-3 h-px bg-line" />
 
@@ -122,14 +106,34 @@ export default function Sidebar({
             const NavIcon = n.icon;
             return (
               <li key={n.href}>
-                <Tooltip label={t(n.key)} side="right" className={cn(!collapsed && "hidden")}>
+                {collapsed ? (
+                  <Tooltip label={t(n.key)} side="right" className="w-full">
+                    <Link
+                      href={withWidget(n.href)}
+                      aria-current={active ? "page" : undefined}
+                      onClick={onClose}
+                      className={cn(
+                        "group flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
+                        active
+                          ? "bg-surface text-strong shadow-sm ring-1 ring-line"
+                          : "text-muted hover:bg-raised hover:text-primary"
+                      )}
+                    >
+                      <NavIcon
+                        className={cn(
+                          "h-[18px] w-[18px] shrink-0 transition-colors",
+                          active ? "text-accent" : "text-subtle group-hover:text-muted"
+                        )}
+                      />
+                    </Link>
+                  </Tooltip>
+                ) : (
                   <Link
                     href={withWidget(n.href)}
                     aria-current={active ? "page" : undefined}
                     onClick={onClose}
                     className={cn(
-                      "group flex items-center rounded-xl py-2 text-sm font-medium transition-all",
-                      collapsed ? "justify-center px-0" : "gap-3 px-2.5",
+                      "group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
                       active
                         ? "bg-surface text-strong shadow-sm ring-1 ring-line"
                         : "text-muted hover:bg-raised hover:text-primary"
@@ -141,9 +145,9 @@ export default function Sidebar({
                         active ? "text-accent" : "text-subtle group-hover:text-muted"
                       )}
                     />
-                    {!collapsed && t(n.key)}
+                    {t(n.key)}
                   </Link>
-                </Tooltip>
+                )}
               </li>
             );
           })}
