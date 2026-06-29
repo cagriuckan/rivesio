@@ -10,7 +10,6 @@ export const runtime = "nodejs";
 const schema = z.object({
   widget_key: z.string().min(1).max(200),
   domain: z.string().min(1).max(300),
-  theme: z.string().max(100).optional().nullable(),
   category: z.string().max(100).optional(),
   message: z.string().min(1).max(limits.maxMessageLength),
   page_url: z.string().max(2000).optional().nullable(),
@@ -42,12 +41,11 @@ export async function POST(req: Request) {
   const result = await guardSubmission({
     widgetKey: data.widget_key,
     domain: data.domain,
-    theme: data.theme,
     meta: { ...(data.meta ?? {}), ip },
   });
 
   if (!result.ok) {
-    // All guard failures are authorization problems (license/theme/approval).
+    // All guard failures are authorization problems (registration/approval).
     return corsJson({ error: result.error }, 403);
   }
 

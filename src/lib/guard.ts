@@ -4,7 +4,6 @@ import type { ProjectRow, SiteRow } from "./types";
 
 export type GuardError =
   | "invalid_widget"
-  | "theme_mismatch"
   | "not_registered"
   | "pending"
   | "blocked";
@@ -22,21 +21,16 @@ export interface GuardFail {
 interface Input {
   widgetKey: string;
   domain: string;
-  theme?: string | null;
   meta?: Record<string, unknown>;
 }
 
 /**
  * Register/refresh a site on widget load. Resolves the project from the widget key,
- * enforces the theme match, and upserts the site row (status decided by AUTO_APPROVE).
+ * and upserts the site row (status decided by AUTO_APPROVE).
  */
 export async function guardRegister(input: Input): Promise<GuardFail | GuardOk> {
   const project = await getProjectByWidgetKey(input.widgetKey);
   if (!project) return { ok: false, error: "invalid_widget" };
-
-  if (input.theme && input.theme !== project.theme_slug) {
-    return { ok: false, error: "theme_mismatch" };
-  }
 
   const domain = normalizeDomain(input.domain);
   const site = await upsertSite({
@@ -53,15 +47,11 @@ export async function guardRegister(input: Input): Promise<GuardFail | GuardOk> 
 
 /**
  * Authorize a feedback submission. The site must already exist (registered) and be
- * approved; theme must match. Does not create new sites.
+ * approved. Does not create new sites.
  */
 export async function guardSubmission(input: Input): Promise<GuardFail | GuardOk> {
   const project = await getProjectByWidgetKey(input.widgetKey);
   if (!project) return { ok: false, error: "invalid_widget" };
-
-  if (input.theme && input.theme !== project.theme_slug) {
-    return { ok: false, error: "theme_mismatch" };
-  }
 
   const domain = normalizeDomain(input.domain);
   const site = await findSite(project.id, domain);

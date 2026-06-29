@@ -8,7 +8,7 @@ export default async function Shell({ children }: { children: React.ReactNode })
   const widgets: WidgetOption[] = (await listProjects()).map((p) => ({
     id: p.id,
     name: p.name,
-    themeSlug: p.theme_slug,
+    slug: p.slug,
     accentColor: parseSettings(p).accentColor,
   }));
 

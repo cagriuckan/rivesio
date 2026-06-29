@@ -19,6 +19,8 @@ const NAV = [
   { href: "/projects",  key: "widgets",   icon: Icon.code },
 ] as const;
 
+const FOOTER_LINKS = ["Lorem", "Ipsum", "Dolor"] as const;
+
 export default function Sidebar({
   widgets,
   user,
@@ -45,23 +47,30 @@ export default function Sidebar({
       style={{ width: collapsed ? "72px" : "var(--sidebar-w)" }}
     >
       {/* Brand */}
-      <div className={cn("flex items-center py-3", collapsed ? "justify-center px-2" : "gap-2.5 px-4")}>
+      <div className={cn("flex items-center pt-3 pb-0", collapsed ? "justify-center px-2" : "gap-2.5 px-4")}>
         {/* Logo + toggle overlay when collapsed */}
         <div className="relative group/brand shrink-0">
-          <Image
-            src="/icon.png"
-            alt="Revisto"
-            width={48}
-            height={48}
-            className="rounded-xl"
-          />
+          <Link
+            href={withWidget("/")}
+            onClick={onClose}
+            aria-label="Dashboard"
+            className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <Image
+              src="/icon.png"
+              alt="Revisto"
+              width={48}
+              height={48}
+              className="rounded-xl"
+            />
+          </Link>
           {collapsed && (
             <button
               onClick={onToggleCollapse}
-              className="absolute inset-0 flex items-center justify-center rounded-xl bg-black/50 opacity-0 group-hover/brand:opacity-100 transition-opacity"
+              className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-md bg-black/60 opacity-0 shadow-sm transition-opacity group-hover/brand:opacity-100"
               aria-label="Expand sidebar"
             >
-              <Icon.panelLeft className="h-5 w-5 text-white" />
+              <Icon.panelLeft className="h-3.5 w-3.5 text-white" />
             </button>
           )}
         </div>
@@ -82,16 +91,12 @@ export default function Sidebar({
         )}
       </div>
 
-      <div className="mx-3 h-px bg-line" />
-
       {/* Widget switcher */}
       <div className={collapsed ? "flex justify-center py-2" : "p-3 pb-2"}>
         <Suspense>
           <WidgetSwitcher widgets={widgets} collapsed={collapsed} />
         </Suspense>
       </div>
-
-      <div className="mx-3 h-px bg-line" />
 
       {/* Nav */}
       <nav className="flex-1 overflow-y-auto p-2" aria-label={t("mainMenu")}>
@@ -115,7 +120,7 @@ export default function Sidebar({
                       className={cn(
                         "group flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
                         active
-                          ? "bg-surface text-strong shadow-sm ring-1 ring-line"
+                          ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong"
                           : "text-muted hover:bg-raised hover:text-primary"
                       )}
                     >
@@ -135,7 +140,7 @@ export default function Sidebar({
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
                       active
-                        ? "bg-surface text-strong shadow-sm ring-1 ring-line"
+                        ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong"
                         : "text-muted hover:bg-raised hover:text-primary"
                     )}
                   >
@@ -155,7 +160,6 @@ export default function Sidebar({
       </nav>
 
       {/* Footer */}
-      <div className="mx-3 h-px bg-line" />
       <div className={cn("p-3", collapsed && "flex justify-center")}>
         {collapsed ? (
           <button
@@ -166,7 +170,23 @@ export default function Sidebar({
             <Avatar name={user} size="md" />
           </button>
         ) : (
-          <UserMenu user={user} />
+          <div className="space-y-3">
+            <UserMenu user={user} />
+            <div className="px-1.5">
+              <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-2xs font-medium text-subtle">
+                {FOOTER_LINKS.map((label) => (
+                  <a
+                    key={label}
+                    href="#"
+                    className="transition-colors hover:text-primary"
+                  >
+                    {label}
+                  </a>
+                ))}
+              </div>
+              <p className="text-2xs text-faint">&copy; 2026 Revisto</p>
+            </div>
+          </div>
         )}
       </div>
     </aside>

@@ -46,7 +46,6 @@ export interface ProjectRow {
   id: string;
   slug: string;
   name: string;
-  theme_slug: string;
   widget_key: string;
   settings_json: string;
   created_at: number;

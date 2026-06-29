@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Card } from "@/components/ui/Card";
-import { Button } from "@/components/ui/Button";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 
@@ -12,7 +11,6 @@ export interface ProjectView {
   id: string;
   name: string;
   slug: string;
-  themeSlug: string;
   widgetKey: string;
   accentColor: string;
 }
@@ -31,6 +29,7 @@ export default function ProjectCard({
   const router = useRouter();
   const [widgetKey, setWidgetKey] = useState(project.widgetKey);
   const [copied, setCopied] = useState<"key" | "snippet" | null>(null);
+  const [actionOpen, setActionOpen] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const scriptUrl = `${baseUrl}/api/widget/${widgetKey}.js`;
@@ -43,6 +42,7 @@ export default function ProjectCard({
   }
 
   async function rotate() {
+    setActionOpen(false);
     if (!confirm(t("confirmRotate"))) return;
     setBusy(true);
     try {
@@ -57,6 +57,7 @@ export default function ProjectCard({
   }
 
   async function remove() {
+    setActionOpen(false);
     if (!confirm(t("confirmDelete", { name: project.name }))) return;
     setBusy(true);
     try {
@@ -77,14 +78,57 @@ export default function ProjectCard({
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
-          <span className="text-2xs text-subtle">{project.themeSlug}</span>
+          <span className="text-2xs text-subtle">{project.slug}</span>
         </div>
-        <Link
-          href={`/?w=${project.id}`}
-          className="flex items-center gap-1 text-xs font-medium text-accent-text hover:underline"
-        >
-          {t("panel")} <Icon.chevronRight className="h-3 w-3" />
-        </Link>
+        <div className="relative flex items-center gap-1.5">
+          <Link
+            href={`/projects/${project.id}/settings`}
+            className="inline-flex h-8 items-center gap-2 rounded-md border border-line bg-transparent px-3 text-xs font-semibold text-secondary transition-all hover:border-line-strong hover:bg-raised hover:text-primary"
+          >
+            <Icon.settings className="h-3.5 w-3.5" />
+            {t("settings")}
+          </Link>
+          <button
+            type="button"
+            onClick={() => setActionOpen((v) => !v)}
+            aria-label="Widget actions"
+            aria-expanded={actionOpen}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-line bg-transparent text-subtle transition-all hover:border-line-strong hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          >
+            <Icon.dots className="h-4 w-4" />
+          </button>
+
+          {actionOpen && (
+            <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-40 rounded-xl border border-line bg-surface p-1.5 shadow-lg">
+              <Link
+                href={`/?w=${project.id}`}
+                onClick={() => setActionOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-secondary transition-colors hover:bg-raised hover:text-primary"
+              >
+                <Icon.dashboard className="h-3.5 w-3.5" />
+                {t("panel")}
+              </Link>
+              <button
+                type="button"
+                onClick={rotate}
+                disabled={busy}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-secondary transition-colors hover:bg-raised hover:text-primary disabled:opacity-50"
+              >
+                <Icon.refresh className="h-3.5 w-3.5" />
+                {t("rotateKey")}
+              </button>
+              <button
+                type="button"
+                onClick={remove}
+                disabled={busy}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-danger-text transition-colors hover:bg-danger-soft disabled:opacity-50"
+              >
+                <Icon.trash className="h-3.5 w-3.5" />
+                {tc("delete")}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -103,14 +147,18 @@ export default function ProjectCard({
         {/* Widget key */}
         <div>
           <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-faint">{t("widgetKey")}</div>
-          <div className="flex items-center gap-2">
-            <code className="flex-1 truncate rounded-md border border-line bg-inset px-2.5 py-2 text-2xs text-secondary">
+          <div className="relative">
+            <code className="block truncate rounded-md border border-line bg-inset py-2 pl-2.5 pr-20 text-2xs text-secondary">
               {widgetKey}
             </code>
-            <Button size="sm" variant="secondary" onClick={() => copy(widgetKey, "key")}>
-              {copied === "key" ? <Icon.check className="h-3.5 w-3.5 text-success-text" /> : <Icon.copy className="h-3.5 w-3.5" />}
+            <button
+              type="button"
+              onClick={() => copy(widgetKey, "key")}
+              className="absolute right-1.5 top-1/2 inline-flex h-6 -translate-y-1/2 items-center gap-1 rounded px-2 text-2xs font-semibold text-secondary transition-colors hover:bg-surface hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              {copied === "key" ? <Icon.check className="h-3 w-3 text-success-text" /> : <Icon.copy className="h-3 w-3" />}
               {copied === "key" ? tc("copied") : tc("copy")}
-            </Button>
+            </button>
           </div>
         </div>
 
@@ -128,25 +176,6 @@ export default function ProjectCard({
           <pre className="overflow-x-auto rounded-md border border-line bg-inset px-2.5 py-2.5 text-2xs leading-relaxed text-secondary">
             {snippet}
           </pre>
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center gap-2 pt-1">
-          <Link
-            href={`/projects/${project.id}/settings`}
-            className="inline-flex h-8 items-center gap-2 rounded-md border border-line bg-transparent px-3 text-xs font-semibold text-secondary transition-all hover:bg-raised hover:text-primary hover:border-line-strong"
-          >
-            <Icon.code className="h-3.5 w-3.5" />
-            {t("settings")}
-          </Link>
-          <Button size="sm" variant="outline" onClick={rotate} disabled={busy}>
-            <Icon.refresh className="h-3.5 w-3.5" />
-            {t("rotateKey")}
-          </Button>
-          <Button size="sm" variant="danger" className="ml-auto" onClick={remove} disabled={busy}>
-            <Icon.trash className="h-3.5 w-3.5" />
-            {tc("delete")}
-          </Button>
         </div>
       </div>
     </Card>

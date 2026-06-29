@@ -101,7 +101,7 @@ function FilterTab({ href, active, children }: { href: string; active: boolean; 
       href={href}
       className={cn(
         "rounded-md px-3 py-1.5 text-xs font-semibold transition-all",
-        active ? "bg-surface text-primary" : "text-subtle hover:text-primary"
+        active ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong" : "text-subtle hover:text-primary"
       )}
     >
       {children}

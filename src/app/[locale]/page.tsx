@@ -3,12 +3,12 @@ import { Link } from "@/i18n/navigation";
 import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
-import StatCard from "@/components/dashboard/StatCard";
 import BreakdownCard from "@/components/dashboard/BreakdownCard";
 import RecentFeedbacks from "@/components/dashboard/RecentFeedbacks";
 import CategoryCard from "@/components/dashboard/CategoryCard";
 import SiteSummaryCard from "@/components/dashboard/SiteSummaryCard";
 import TrendChart from "@/components/dashboard/TrendChart";
+import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
 import {
   getStats,
@@ -26,11 +26,6 @@ import { FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
 export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ w?: string; period?: string }>;
-
-function pctChange(current: number, previous: number): number {
-  if (previous === 0) return current > 0 ? 100 : 0;
-  return Math.round(((current - previous) / previous) * 100);
-}
 
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const { w, period } = await searchParams;
@@ -57,6 +52,9 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
   const wq = projectId ? `?w=${projectId}` : "";
   const feedbacksHref = `/feedbacks${wq}`;
+  const sitesHref = `/sites${wq}`;
+  const projectsHref = "/projects";
+  const openFeedbacks = Math.max(0, stats.totalFeedbacks - stats.resolvedFeedbacks);
 
   const buildPeriodHref = (d: number) => {
     const p = new URLSearchParams();
@@ -79,7 +77,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
               {t("emptyBody")}
             </p>
             <Link
-              href="/projects"
+              href="/projects?create=1"
               className="inline-flex h-9 items-center gap-2 rounded-md bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
             >
               <Icon.plus className="h-4 w-4" />
@@ -97,7 +95,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         <PageHeader
           icon={Icon.dashboard}
           title={t("title")}
-          subtitle={project ? t("subtitleProject", { name: project.name, theme: project.theme_slug }) : t("subtitleAll")}
+          subtitle={project ? project.name : t("subtitleAll")}
           actions={
             <div className="flex items-center gap-2">
               {/* Period switcher */}
@@ -125,100 +123,68 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           }
         />
 
-        {/* KPI cards */}
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard
+        <div className="grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.9fr)]">
+          <TrendChart data={dailyTrend} label={t("trendLabel", { period: periodLabel })} />
+          <ActionQueueCard
+            title={t("needsAttention")}
+            items={[
+              {
+                label: t("new"),
+                value: stats.newFeedbacks,
+                href: `${feedbacksHref}${wq ? "&" : "?"}status=new`,
+                icon: Icon.feedback,
+                tone: "info",
+              },
+              {
+                label: t("highPriority"),
+                value: trend.current.highPriority,
+                href: feedbacksHref,
+                icon: Icon.alertTriangle,
+                tone: "warning",
+              },
+              {
+                label: t("pendingSites"),
+                value: stats.pendingSites,
+                href: `${sitesHref}${wq ? "&" : "?"}status=pending`,
+                icon: Icon.globe,
+                tone: "warning",
+              },
+            ]}
+          />
+        </div>
+
+        <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <MetricCard
             label={t("totalAllTime")}
             value={stats.totalFeedbacks}
-            icon={Icon.inbox}
-            tone="accent"
+            meta={t("previousPeriod", { period: periodLabel, value: trend.previous.total })}
             href={feedbacksHref}
-            change={pctChange(trend.current.total, trend.previous.total)}
-            changeLabel={t("previousPeriod", { period: periodLabel, value: trend.previous.total })}
+            icon={Icon.inbox}
           />
-          <StatCard
-            label={t("new")}
-            value={stats.newFeedbacks}
+          <MetricCard
+            label={t("openFeedback")}
+            value={openFeedbacks}
+            meta={`${stats.resolvedFeedbacks} ${t("resolved").toLowerCase()}`}
+            href={feedbacksHref}
             icon={Icon.feedback}
-            tone="info"
-            href={`${feedbacksHref}${wq ? "&" : "?"}status=new`}
-            change={pctChange(trend.current.newCount, trend.previous.newCount)}
-            changeLabel={t("previousPeriod", { period: periodLabel, value: trend.previous.newCount })}
           />
-          <StatCard
-            label={t("resolved")}
-            value={stats.resolvedFeedbacks}
-            icon={Icon.checkCircle}
-            tone="success"
-            change={pctChange(trend.current.resolved, trend.previous.resolved)}
-            changeLabel={t("previousPeriod", { period: periodLabel, value: trend.previous.resolved })}
-          />
-          <StatCard
-            label={t("highPriority")}
-            value={trend.current.highPriority}
-            icon={Icon.alertTriangle}
-            tone="warning"
-            change={pctChange(trend.current.highPriority, trend.previous.highPriority)}
-            changeLabel={t("previousPeriod", { period: periodLabel, value: trend.previous.highPriority })}
-          />
-        </div>
-
-        {/* Secondary KPIs */}
-        <div className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
-          <StatCard
+          <MetricCard
             label={t("resolutionRate")}
             value={`%${trend.current.resolutionRate}`}
+            meta={t("previous", { value: `%${trend.previous.resolutionRate}` })}
+            href={feedbacksHref}
             icon={Icon.checkCircle}
-            tone="success"
-            change={pctChange(trend.current.resolutionRate, trend.previous.resolutionRate)}
-            changeLabel={t("previous", { value: `%${trend.previous.resolutionRate}` })}
           />
-          <StatCard
-            label={t("activeSites")}
-            value={stats.approvedSites}
-            icon={Icon.globe}
-            tone="violet"
-            href="/sites?status=approved"
-            hint={stats.pendingSites > 0 ? <span className="font-medium text-warning-text">{t("pendingApproval", { count: stats.pendingSites })}</span> : undefined}
-          />
-          <StatCard
-            label={t("widgetCount")}
-            value={stats.projects}
+          <MetricCard
+            label={t("coverage")}
+            value={`${stats.approvedSites}/${stats.totalSites}`}
+            meta={`${stats.projects} ${t("widgetCount").toLowerCase()}`}
+            href={projectsHref}
             icon={Icon.code}
-            tone="neutral"
-            href="/projects"
-          />
-          <StatCard
-            label={t("totalSites")}
-            value={stats.totalSites}
-            icon={Icon.globe}
-            tone="neutral"
-            href="/sites"
-            hint={stats.blockedSites > 0 ? <span className="font-medium text-danger-text">{t("blockedCount", { count: stats.blockedSites })}</span> : undefined}
           />
         </div>
 
-        {/* Trend chart */}
-        <div className="mt-4">
-          <TrendChart data={dailyTrend} label={t("trendLabel", { period: periodLabel })} />
-        </div>
-
-        {/* Recent + sites */}
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <RecentFeedbacks feedbacks={recent} detailHref={feedbacksHref} />
-          </div>
-          <SiteSummaryCard
-            approved={stats.approvedSites}
-            pending={stats.pendingSites}
-            blocked={stats.blockedSites}
-            total={stats.totalSites}
-            baseHref="/sites"
-          />
-        </div>
-
-        {/* Breakdowns */}
-        <div className="mt-4 grid gap-4 lg:grid-cols-3">
+        <div className="mt-4 grid gap-4 xl:grid-cols-3">
           <BreakdownCard
             title={t("statusBreakdown")}
             items={FEEDBACK_STATUSES.map((s) => ({
@@ -237,7 +203,96 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           />
           <CategoryCard categories={categories} />
         </div>
+
+        <div className="mt-4 grid gap-4 xl:grid-cols-3">
+          <div className="xl:col-span-2">
+            <RecentFeedbacks feedbacks={recent} detailHref={feedbacksHref} />
+          </div>
+          <SiteSummaryCard
+            approved={stats.approvedSites}
+            pending={stats.pendingSites}
+            blocked={stats.blockedSites}
+            total={stats.totalSites}
+            baseHref={sitesHref}
+          />
+        </div>
       </PageContent>
     </Shell>
+  );
+}
+
+function MetricCard({
+  label,
+  value,
+  meta,
+  href,
+  icon: IconComp,
+}: {
+  label: string;
+  value: number | string;
+  meta: string;
+  href: string;
+  icon: (p: React.SVGProps<SVGSVGElement>) => React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line transition-all hover:-translate-y-0.5 hover:shadow-md"
+    >
+      <div className="mb-5 flex items-center justify-between">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent-soft text-accent">
+          <IconComp className="h-[18px] w-[18px]" />
+        </span>
+        <Icon.chevronRight className="h-4 w-4 text-faint transition-transform group-hover:translate-x-0.5 group-hover:text-subtle" />
+      </div>
+      <p className="text-xs font-medium text-subtle">{label}</p>
+      <div className="mt-2 text-3xl font-bold leading-none tracking-tight text-strong tnum">{value}</div>
+      <p className="mt-3 text-xs text-subtle">{meta}</p>
+    </Link>
+  );
+}
+
+function ActionQueueCard({
+  title,
+  items,
+}: {
+  title: string;
+  items: {
+    label: string;
+    value: number;
+    href: string;
+    icon: (p: React.SVGProps<SVGSVGElement>) => React.ReactNode;
+    tone: "info" | "warning";
+  }[];
+}) {
+  const toneClass = {
+    info: "bg-info-soft text-info-text",
+    warning: "bg-warning-soft text-warning-text",
+  };
+
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle>{title}</CardTitle>
+      </CardHeader>
+      <CardBody className="space-y-3">
+        {items.map((item) => {
+          const ItemIcon = item.icon;
+          return (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="flex items-center gap-3 rounded-xl border border-line bg-surface px-3 py-3 transition-colors hover:bg-raised"
+            >
+              <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${toneClass[item.tone]}`}>
+                <ItemIcon className="h-4 w-4" />
+              </span>
+              <span className="min-w-0 flex-1 text-sm font-medium text-secondary">{item.label}</span>
+              <span className="text-lg font-bold text-strong tnum">{item.value}</span>
+            </Link>
+          );
+        })}
+      </CardBody>
+    </Card>
   );
 }

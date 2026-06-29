@@ -11,9 +11,11 @@ import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
 
-export default async function ProjectsPage() {
+export default async function ProjectsPage({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
+  const sp = await searchParams;
   const t = await getTranslations("projects");
   const projects = await listProjects();
+  const shouldOpenCreate = sp.create === "1";
 
   // Per-project counts for the card stats.
   const counts = new Map<string, { feedbacks: number; sites: number }>();
@@ -34,7 +36,7 @@ export default async function ProjectsPage() {
         icon={Icon.code}
         title={t("title")}
         subtitle={t("subtitle", { count: projects.length })}
-        actions={<CreateProject />}
+        actions={<CreateProject initialOpen={shouldOpenCreate && projects.length > 0} />}
       />
 
       {projects.length === 0 ? (
@@ -44,7 +46,7 @@ export default async function ProjectsPage() {
           </div>
           <h3 className="mb-1.5 text-base font-semibold text-strong">{t("emptyTitle")}</h3>
           <p className="mb-5 max-w-xs text-sm text-subtle">{t("emptyBody")}</p>
-          <CreateProject />
+          <CreateProject initialOpen={shouldOpenCreate} />
         </div>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
@@ -59,7 +61,6 @@ export default async function ProjectsPage() {
                   id: p.id,
                   name: p.name,
                   slug: p.slug,
-                  themeSlug: p.theme_slug,
                   widgetKey: p.widget_key,
                   accentColor: s.accentColor,
                 }}

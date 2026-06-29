@@ -151,8 +151,8 @@ export default function UserMenu({ user }: { user: string }) {
         aria-expanded={open}
         aria-label={tu("menu")}
         className={cn(
-          "flex w-full items-center gap-3 rounded-xl px-2 py-2 text-left transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent",
-          open ? "bg-raised" : "hover:bg-raised",
+          "flex w-full items-center gap-3 rounded-xl bg-surface px-2 py-2 text-left text-strong shadow-sm ring-1 ring-line-strong transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent",
+          open ? "bg-raised ring-accent-line" : "hover:bg-raised hover:ring-accent-line",
         )}
       >
         <Avatar name={user} size="md" />

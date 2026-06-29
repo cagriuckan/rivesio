@@ -9,7 +9,6 @@ export const runtime = "nodejs";
 const schema = z.object({
   widget_key: z.string().min(1).max(200),
   domain: z.string().min(1).max(300),
-  theme: z.string().max(100).optional().nullable(),
   meta: z.record(z.unknown()).optional(),
 });
 
@@ -27,12 +26,11 @@ export async function POST(req: Request) {
   if (!parsed.success) return corsJson({ error: "invalid_input" }, 400);
 
   const ip = clientIp(req);
-  const meta = { ...(parsed.data.meta ?? {}), ip, theme: parsed.data.theme ?? undefined };
+  const meta = { ...(parsed.data.meta ?? {}), ip };
 
   const result = await guardRegister({
     widgetKey: parsed.data.widget_key,
     domain: parsed.data.domain,
-    theme: parsed.data.theme,
     meta,
   });
 

@@ -25,7 +25,6 @@ const formFieldSchema = z.object({
 
 const schema = z.object({
   name: z.string().min(1).max(120).optional(),
-  themeSlug: z.string().min(1).max(60).optional(),
   accentColor: z.string().max(20).optional(),
   position: z.enum(["bottom-right", "bottom-left"]).optional(),
   categories: z.array(z.string().min(1).max(60)).optional(),
@@ -47,7 +46,6 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   const current = parseSettings(project);
   await updateProject(id, {
     name: d.name,
-    themeSlug: d.themeSlug,
     settings: {
       accentColor: d.accentColor ?? current.accentColor,
       position: d.position ?? current.position,

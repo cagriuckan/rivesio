@@ -11,7 +11,7 @@ import { cn } from "@/components/ui/cn";
 export interface WidgetOption {
   id: string;
   name: string;
-  themeSlug: string;
+  slug: string;
   accentColor: string;
 }
 
@@ -102,9 +102,8 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
           aria-haspopup="listbox"
           aria-expanded={open}
           className={cn(
-            "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors outline-none",
-            "ring-1 ring-line hover:bg-raised hover:ring-line-strong focus-visible:ring-2 focus-visible:ring-accent",
-            open && "bg-raised ring-line-strong"
+            "flex w-full items-center gap-3 rounded-xl bg-surface px-2.5 py-2.5 text-left text-strong shadow-sm ring-1 ring-line-strong transition-colors outline-none hover:bg-raised hover:ring-accent-line focus-visible:ring-2 focus-visible:ring-accent",
+            open && "bg-raised ring-accent-line"
           )}
         >
           <span
@@ -118,7 +117,7 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
               {active ? active.name : t("all")}
             </span>
             <span className="block truncate text-xs text-subtle">
-              {active ? active.themeSlug : t("count", { count: widgets.length })}
+              {active ? active.slug : t("count", { count: widgets.length })}
             </span>
           </span>
           <Icon.chevronDown
@@ -155,7 +154,7 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
 function DropdownList({ widgets, active, t, onSelect }: {
   widgets: WidgetOption[];
   active: WidgetOption | null;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string, values?: Record<string, string | number | Date>) => string;
   onSelect: (id: string | null) => void;
 }) {
   return (
@@ -173,7 +172,7 @@ function DropdownList({ widgets, active, t, onSelect }: {
         <OptionRow
           key={w.id}
           label={w.name}
-          sub={w.themeSlug}
+          sub={w.slug}
           selected={active?.id === w.id}
           onClick={() => onSelect(w.id)}
           icon={<span className="text-[10px] font-bold text-white">{w.name.slice(0, 1).toUpperCase()}</span>}
