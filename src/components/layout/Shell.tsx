@@ -1,16 +1,24 @@
 import { Suspense } from "react";
 import { listProjects, parseSettings } from "@/lib/repo";
+import { getStats } from "@/lib/admin-repo";
 import { env } from "@/lib/env";
 import ShellClient from "./ShellClient";
 import type { WidgetOption } from "./WidgetSwitcher";
 
 export default async function Shell({ children }: { children: React.ReactNode }) {
-  const widgets: WidgetOption[] = (await listProjects()).map((p) => ({
+  const [projects, stats] = await Promise.all([listProjects(), getStats()]);
+
+  const widgets: WidgetOption[] = projects.map((p) => ({
     id: p.id,
     name: p.name,
     slug: p.slug,
     accentColor: parseSettings(p).accentColor,
   }));
+
+  const navCounts = {
+    feedbacks: stats.newFeedbacks,
+    sites: stats.pendingSites,
+  };
 
   const user = env.adminUser || "admin";
 
@@ -20,7 +28,7 @@ export default async function Shell({ children }: { children: React.ReactNode })
         <div className="h-12 shrink-0 border-b border-line bg-base" />
       </div>
     }>
-      <ShellClient widgets={widgets} user={user}>
+      <ShellClient widgets={widgets} user={user} navCounts={navCounts}>
         {children}
       </ShellClient>
     </Suspense>

@@ -16,7 +16,22 @@ const schema = z.object({
   viewport: z.string().max(50).optional().nullable(),
   wp_user: z.string().max(300).optional().nullable(),
   custom_fields: z
-    .array(z.object({ label: z.string().max(80), value: z.string().max(2000) }))
+    .array(z.object({
+      label: z.string().max(80),
+      value: z.string().max(2000),
+      kind: z.literal("element_annotation").optional(),
+      selector: z.string().max(500).optional(),
+      tagName: z.string().max(80).optional(),
+      text: z.string().max(500).optional(),
+      rect: z.object({
+        x: z.number(),
+        y: z.number(),
+        width: z.number(),
+        height: z.number(),
+        viewportWidth: z.number(),
+        viewportHeight: z.number(),
+      }).optional(),
+    }))
     .max(20)
     .optional(),
   meta: z.record(z.unknown()).optional(),
@@ -59,7 +74,14 @@ export async function POST(req: Request) {
     viewport: data.viewport ?? null,
     wpUser: data.wp_user ?? null,
     customFields: data.custom_fields
-      ?.map((f) => ({ label: f.label.trim(), value: f.value.trim() }))
+      ?.map((f) => ({
+        ...f,
+        label: f.label.trim(),
+        value: f.value.trim(),
+        selector: f.selector?.trim(),
+        tagName: f.tagName?.trim(),
+        text: f.text?.trim(),
+      }))
       .filter((f) => f.value),
   });
 

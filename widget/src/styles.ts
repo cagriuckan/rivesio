@@ -347,6 +347,69 @@ export const widgetCss = `
 .kf-thumb:hover .kf-thumb-del { opacity: 1; }
 .kf-thumb-del svg { width: 9px; height: 9px; }
 
+/* ── Element annotations ── */
+.kf-annotations {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kf-annotations[hidden] { display: none; }
+.kf-ann-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  border: 1px solid var(--border);
+  background: var(--elevated);
+  border-radius: var(--radius-md);
+  padding: 9px;
+}
+.kf-ann-pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: var(--kf-accent, #6366f1);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.kf-ann-main { min-width: 0; flex: 1; }
+.kf-ann-selector {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--txt-muted);
+}
+.kf-ann-note {
+  margin-top: 2px;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--txt);
+  word-break: break-word;
+}
+.kf-ann-del {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--txt-faint);
+  cursor: pointer;
+  transition: background .14s, color .14s;
+}
+.kf-ann-del:hover { background: var(--overlay); color: var(--txt-dim); }
+.kf-ann-del svg { width: 12px; height: 12px; }
+
 /* ── Hint ── */
 .kf-hint {
   font-size: 11px;

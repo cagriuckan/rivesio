@@ -5,7 +5,7 @@ import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import FeedbacksList from "@/components/feedbacks/FeedbacksList";
 import { Icon } from "@/components/ui/Icons";
-import { cn } from "@/components/ui/cn";
+import { Tabs } from "@/components/ui/Tabs";
 import { listFeedbacks } from "@/lib/admin-repo";
 import { getProjectById } from "@/lib/repo";
 import { FEEDBACK_STATUSES } from "@/lib/types";
@@ -46,32 +46,20 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
           feedbacks={feedbacks}
           initialId={sp.f ?? null}
           filterBar={
-            <div className="flex items-center gap-1 rounded-md border border-line bg-raised p-0.5 w-fit">
-              <FilterTab href={buildHref()} active={!status}>{tc("all")}</FilterTab>
-              {FEEDBACK_STATUSES.map((s) => (
-                <FilterTab key={s} href={buildHref(s)} active={status === s}>
-                  {ts(s)}
-                </FilterTab>
-              ))}
-            </div>
+            <Tabs
+              linkComponent={Link}
+              items={[
+                { href: buildHref(), label: tc("all"), active: !status },
+                ...FEEDBACK_STATUSES.map((s) => ({
+                  href: buildHref(s),
+                  label: ts(s),
+                  active: status === s,
+                })),
+              ]}
+            />
           }
         />
       </PageContent>
     </Shell>
-  );
-}
-
-function FilterTab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
-  return (
-    <Link
-      href={href}
-      aria-current={active ? "page" : undefined}
-      className={cn(
-        "rounded px-3 py-1.5 text-xs font-medium transition-colors",
-        active ? "bg-surface text-primary" : "text-subtle hover:text-primary"
-      )}
-    >
-      {children}
-    </Link>
   );
 }

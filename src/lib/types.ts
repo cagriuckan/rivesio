@@ -83,6 +83,18 @@ export interface FeedbackRow {
 export interface CustomFieldValue {
   label: string;
   value: string;
+  kind?: "element_annotation";
+  selector?: string;
+  tagName?: string;
+  text?: string;
+  rect?: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    viewportWidth: number;
+    viewportHeight: number;
+  };
 }
 
 export interface AttachmentRow {

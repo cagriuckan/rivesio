@@ -158,23 +158,25 @@ export default function FeedbacksList({
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3" role="list" aria-label={t("listLabel")}>
+        <div
+          className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-3"
+          role="list"
+          aria-label={t("listLabel")}
+        >
           {filtered.map((f) => (
-            <div key={f.id} role="listitem" className="flex items-start gap-3">
-              <Checkbox
-                checked={selectedIds.has(f.id)}
-                onChange={() => toggle(f.id)}
-                className="mt-5"
-                aria-label={t("selectItem")}
-              />
-              <div className="min-w-0 flex-1">
-                <FeedbackCard
-                  feedback={f}
-                  selected={false}
-                  compact={false}
-                  onClick={() => openFeedback(f.id)}
+            <div key={f.id} role="listitem" className="relative">
+              <div className="absolute left-2 top-2 z-10">
+                <Checkbox
+                  checked={selectedIds.has(f.id)}
+                  onChange={() => toggle(f.id)}
+                  aria-label={t("selectItem")}
                 />
               </div>
+              <FeedbackCard
+                feedback={f}
+                selected={selectedIds.has(f.id)}
+                onClick={() => openFeedback(f.id)}
+              />
             </div>
           ))}
         </div>

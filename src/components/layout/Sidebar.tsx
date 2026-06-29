@@ -24,12 +24,14 @@ const FOOTER_LINKS = ["Lorem", "Ipsum", "Dolor"] as const;
 export default function Sidebar({
   widgets,
   user,
+  navCounts,
   onClose,
   collapsed,
   onToggleCollapse,
 }: {
   widgets: WidgetOption[];
   user: string;
+  navCounts?: { feedbacks?: number; sites?: number };
   onClose?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
@@ -43,7 +45,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className="flex h-full shrink-0 flex-col transition-[width] duration-200"
+      className="flex h-full shrink-0 flex-col overflow-x-hidden transition-[width] duration-200"
       style={{ width: collapsed ? "72px" : "var(--sidebar-w)" }}
     >
       {/* Brand */}
@@ -99,7 +101,7 @@ export default function Sidebar({
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-2" aria-label={t("mainMenu")}>
+      <nav className="flex-1 overflow-x-hidden overflow-y-auto p-2" aria-label={t("mainMenu")}>
         {!collapsed && (
           <div className="mb-1.5 px-2.5 pt-1 text-2xs font-semibold uppercase tracking-wider text-faint">
             {t("menu")}
@@ -109,16 +111,17 @@ export default function Sidebar({
           {NAV.map((n) => {
             const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
             const NavIcon = n.icon;
+            const count = navCounts?.[n.key as "feedbacks" | "sites"] ?? 0;
             return (
               <li key={n.href}>
                 {collapsed ? (
-                  <Tooltip label={t(n.key)} side="right" className="w-full">
+                  <Tooltip label={count > 0 ? `${t(n.key)} (${count})` : t(n.key)} side="right" className="w-full">
                     <Link
                       href={withWidget(n.href)}
                       aria-current={active ? "page" : undefined}
                       onClick={onClose}
                       className={cn(
-                        "group flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
+                        "group relative flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
                         active
                           ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong"
                           : "text-muted hover:bg-raised hover:text-primary"
@@ -130,6 +133,9 @@ export default function Sidebar({
                           active ? "text-accent" : "text-subtle group-hover:text-muted"
                         )}
                       />
+                      {count > 0 && (
+                        <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent ring-2 ring-base" />
+                      )}
                     </Link>
                   </Tooltip>
                 ) : (
@@ -150,7 +156,19 @@ export default function Sidebar({
                         active ? "text-accent" : "text-subtle group-hover:text-muted"
                       )}
                     />
-                    {t(n.key)}
+                    <span className="flex-1">{t(n.key)}</span>
+                    {count > 0 && (
+                      <span
+                        className={cn(
+                          "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-2xs font-semibold tnum",
+                          active
+                            ? "bg-accent-soft text-accent-text"
+                            : "bg-raised text-muted group-hover:bg-surface"
+                        )}
+                      >
+                        {count > 99 ? "99+" : count}
+                      </span>
+                    )}
                   </Link>
                 )}
               </li>
