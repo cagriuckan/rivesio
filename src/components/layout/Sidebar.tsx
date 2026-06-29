@@ -30,21 +30,21 @@ export default function Sidebar({
 
   return (
     <aside
-      className="flex h-full shrink-0 flex-col border-r border-line bg-base"
+      className="flex h-full shrink-0 flex-col bg-base"
       style={{ width: "var(--sidebar-w)" }}
     >
       {/* Widget filter */}
-      <div className="p-3 pb-2">
-        <div className="mb-2 px-1 text-2xs font-medium uppercase tracking-wider text-faint">Widgets</div>
+      <div className="p-4 pb-3">
+        <div className="mb-2 px-1.5 text-2xs font-semibold uppercase tracking-wider text-faint">Widgets</div>
         <WidgetSwitcher widgets={widgets} />
       </div>
 
-      <div className="mx-3 h-px bg-line" />
+      <div className="mx-4 h-px bg-line" />
 
       {/* Nav */}
-      <nav className="flex-1 overflow-y-auto p-3 pt-2" aria-label={t("mainMenu")}>
-        <div className="mb-2 px-1 text-2xs font-medium uppercase tracking-wider text-faint">{t("menu")}</div>
-        <ul className="space-y-0.5" role="list">
+      <nav className="flex-1 overflow-y-auto p-4 pt-3" aria-label={t("mainMenu")}>
+        <div className="mb-2 px-1.5 text-2xs font-semibold uppercase tracking-wider text-faint">{t("menu")}</div>
+        <ul className="space-y-1" role="list">
           {NAV.map((n) => {
             const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
             const NavIcon = n.icon;
@@ -55,15 +55,15 @@ export default function Sidebar({
                   aria-current={active ? "page" : undefined}
                   onClick={onClose}
                   className={cn(
-                    "group flex items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors",
+                    "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
                     active
-                      ? "bg-accent-soft text-accent-text"
-                      : "text-secondary hover:bg-raised hover:text-primary"
+                      ? "bg-surface text-strong shadow-sm ring-1 ring-line"
+                      : "text-muted hover:bg-raised hover:text-primary"
                   )}
                 >
                   <NavIcon
                     className={cn(
-                      "h-4 w-4 shrink-0 transition-colors",
+                      "h-[18px] w-[18px] shrink-0 transition-colors",
                       active ? "text-accent" : "text-subtle group-hover:text-muted"
                     )}
                   />

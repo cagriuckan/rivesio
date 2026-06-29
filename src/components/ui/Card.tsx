@@ -8,8 +8,9 @@ export function Card({
   return (
     <div
       className={cn(
-        "rounded-xl border border-line bg-surface",
-        interactive && "transition-colors hover:border-line-strong cursor-pointer",
+        "rounded-2xl bg-surface shadow-sm ring-1 ring-line",
+        interactive &&
+          "transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 cursor-pointer",
         className
       )}
       {...props}
@@ -20,7 +21,10 @@ export function Card({
 export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn("flex items-center justify-between gap-3 px-5 py-4 border-b border-line", className)}
+      className={cn(
+        "flex items-center justify-between gap-3 px-6 py-5 border-b border-line-soft",
+        className
+      )}
       {...props}
     />
   );
@@ -28,10 +32,10 @@ export function CardHeader({ className, ...props }: React.HTMLAttributes<HTMLDiv
 
 export function CardTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
   return (
-    <h3 className={cn("text-sm font-semibold text-strong", className)} {...props} />
+    <h3 className={cn("text-md font-semibold text-strong", className)} {...props} />
   );
 }
 
 export function CardBody({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("p-5", className)} {...props} />;
+  return <div className={cn("p-6", className)} {...props} />;
 }

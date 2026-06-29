@@ -3,8 +3,8 @@ import { cn } from "./cn";
 
 const FIELD_BASE =
   "w-full bg-inset text-primary placeholder:text-faint " +
-  "border border-line rounded-md transition-all duration-150 outline-none " +
-  "hover:border-line-strong focus:border-accent " +
+  "border border-line rounded-xl transition-all duration-150 outline-none " +
+  "hover:border-line-strong focus:border-accent focus:bg-surface " +
   "focus:ring-[3px] focus:ring-accent-soft";
 
 export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLabelElement>) {
@@ -18,7 +18,7 @@ export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLab
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(FIELD_BASE, "h-9 px-3 text-sm", className)} {...props} />
+    <input ref={ref} className={cn(FIELD_BASE, "h-10 px-3.5 text-sm", className)} {...props} />
   )
 );
 Input.displayName = "Input";
@@ -35,7 +35,7 @@ export const Select = forwardRef<HTMLSelectElement, React.SelectHTMLAttributes<H
     <div className="relative">
       <select
         ref={ref}
-        className={cn(FIELD_BASE, "h-9 pl-3 pr-9 text-sm appearance-none cursor-pointer", className)}
+        className={cn(FIELD_BASE, "h-10 pl-3.5 pr-9 text-sm appearance-none cursor-pointer", className)}
         {...props}
       >
         {children}

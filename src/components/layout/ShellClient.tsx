@@ -66,7 +66,7 @@ export default function ShellClient({
           </>
         )}
 
-        <main className="min-w-0 flex-1 overflow-y-auto pb-16 md:pb-0">
+        <main className="min-w-0 flex-1 overflow-y-auto bg-panel pb-16 md:pb-0">
           {children}
         </main>
       </div>

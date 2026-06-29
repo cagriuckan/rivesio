@@ -42,7 +42,7 @@ export default async function LocaleLayout({
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{if(localStorage.getItem('kf_theme')==='light')document.documentElement.setAttribute('data-theme','light')}catch(e){}`,
+            __html: `try{if(localStorage.getItem('kf_theme')==='dark')document.documentElement.setAttribute('data-theme','dark')}catch(e){}`,
           }}
         />
       </head>
