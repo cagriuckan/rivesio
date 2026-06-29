@@ -52,7 +52,15 @@
     "toLight": "Switch to light theme",
     "toDark": "Switch to dark theme",
     "light": "Light theme",
-    "dark": "Dark theme"
+    "dark": "Dark theme",
+    "label": "Theme",
+    "lightShort": "Light",
+    "darkShort": "Dark"
+  },
+  "user": {
+    "role": "Administrator",
+    "menu": "Account menu",
+    "account": "Account"
   },
   "widgetSwitcher": {
     "all": "All widgets",

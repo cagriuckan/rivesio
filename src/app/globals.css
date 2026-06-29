@@ -23,7 +23,7 @@
   --radius-full: 9999px;
 
   /* ── Background scale (light) — cool soft greys ── */
-  --color-canvas:   #e9ebef;   /* app shell behind the panel */
+  --color-canvas:   #f0f1f5;   /* app shell behind the panel */
   --color-base:     #ffffff;   /* sidebar / header chrome */
   --color-surface:  #ffffff;   /* cards */
   --color-raised:   #f4f5f7;   /* insets, icon chips */

@@ -53,41 +53,49 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
 
   return (
     <div ref={ref} className="relative">
+      {/* Workspace-switcher style trigger */}
       <button
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex w-full items-center gap-2.5 rounded-lg border border-line bg-surface px-2.5 py-2",
-          "text-left transition-colors hover:border-line-strong outline-none",
-          "focus-visible:ring-2 focus-visible:ring-accent",
-          open && "border-line-strong"
+          "flex w-full items-center gap-3 rounded-xl px-2.5 py-2.5 text-left transition-colors outline-none",
+          "ring-1 ring-line hover:bg-raised hover:ring-line-strong focus-visible:ring-2 focus-visible:ring-accent",
+          open && "bg-raised ring-line-strong"
         )}
         aria-haspopup="listbox"
         aria-expanded={open}
       >
+        {/* Icon avatar */}
         <span
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-          style={{ background: active ? active.accentColor : "var(--color-raised)" }}
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm"
+          style={{ background: active ? active.accentColor : "var(--color-subtle)" }}
         >
           {active ? (
-            <span className="text-2xs font-bold text-white">{active.name.slice(0, 1).toUpperCase()}</span>
+            active.name.slice(0, 1).toUpperCase()
           ) : (
-            <Icon.layers className="h-3.5 w-3.5 text-subtle" />
+            <Icon.layers className="h-4 w-4" />
           )}
         </span>
+
+        {/* Text */}
         <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-semibold text-primary">
+          <span className="block truncate text-sm font-semibold text-strong">
             {active ? active.name : t("all")}
           </span>
-          <span className="block truncate text-2xs text-subtle">
+          <span className="block truncate text-xs text-subtle">
             {active ? active.themeSlug : t("count", { count: widgets.length })}
           </span>
         </span>
-        <Icon.chevronDown className={cn("h-3.5 w-3.5 shrink-0 text-subtle transition-transform", open && "rotate-180")} />
+
+        {/* Chevron */}
+        <Icon.chevronDown
+          className={cn("h-4 w-4 shrink-0 text-subtle transition-transform", open && "rotate-180")}
+        />
       </button>
 
+      {/* Dropdown */}
       {open && (
         <div
-          className="ds-fade-in absolute left-0 right-0 top-[calc(100%+6px)] z-50 overflow-hidden rounded-lg border border-line bg-overlay p-1"
+          className="ds-fade-in absolute left-0 right-0 top-[calc(100%+4px)] z-50 overflow-hidden rounded-xl border border-line bg-overlay p-1.5 shadow-lg"
           role="listbox"
         >
           <OptionRow
@@ -95,7 +103,8 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
             sub={t("allMerged", { count: widgets.length })}
             selected={!active}
             onClick={() => select(null)}
-            icon={<Icon.layers className="h-3.5 w-3.5 text-subtle" />}
+            icon={<Icon.layers className="h-4 w-4 text-subtle" />}
+            iconBg="var(--color-raised)"
           />
           {widgets.length > 0 && <div className="my-1 h-px bg-line-soft" />}
           {widgets.map((w) => (
@@ -106,13 +115,11 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
               selected={active?.id === w.id}
               onClick={() => select(w.id)}
               icon={
-                <span
-                  className="flex h-3.5 w-3.5 items-center justify-center rounded-sm text-[8px] font-bold text-white"
-                  style={{ background: w.accentColor }}
-                >
+                <span className="text-[10px] font-bold text-white">
                   {w.name.slice(0, 1).toUpperCase()}
                 </span>
               }
+              iconBg={w.accentColor}
             />
           ))}
         </div>
@@ -122,13 +129,14 @@ export default function WidgetSwitcher({ widgets }: { widgets: WidgetOption[] })
 }
 
 function OptionRow({
-  label, sub, selected, onClick, icon,
+  label, sub, selected, onClick, icon, iconBg,
 }: {
   label: string;
   sub: string;
   selected: boolean;
   onClick: () => void;
   icon: React.ReactNode;
+  iconBg: string;
 }) {
   return (
     <button
@@ -136,20 +144,23 @@ function OptionRow({
       role="option"
       aria-selected={selected}
       className={cn(
-        "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors",
+        "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors",
         selected ? "bg-accent-soft" : "hover:bg-raised"
       )}
     >
-      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-surface">
+      <span
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold text-white"
+        style={{ background: iconBg }}
+      >
         {icon}
       </span>
       <span className="min-w-0 flex-1">
         <span className={cn("block truncate text-sm font-medium", selected ? "text-accent-text" : "text-primary")}>
           {label}
         </span>
-        <span className="block truncate text-2xs text-subtle">{sub}</span>
+        <span className="block truncate text-xs text-subtle">{sub}</span>
       </span>
-      {selected && <Icon.check className="h-3.5 w-3.5 shrink-0 text-accent-text" />}
+      {selected && <Icon.check className="h-4 w-4 shrink-0 text-accent-text" />}
     </button>
   );
 }

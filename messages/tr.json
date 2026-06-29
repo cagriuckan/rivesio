@@ -52,7 +52,15 @@
     "toLight": "Açık temaya geç",
     "toDark": "Koyu temaya geç",
     "light": "Açık tema",
-    "dark": "Koyu tema"
+    "dark": "Koyu tema",
+    "label": "Tema",
+    "lightShort": "Açık",
+    "darkShort": "Koyu"
+  },
+  "user": {
+    "role": "Yönetici",
+    "menu": "Hesap menüsü",
+    "account": "Hesap"
   },
   "widgetSwitcher": {
     "all": "Tüm widget'lar",

@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Field";
-import { Icon } from "@/components/ui/Icons";
 import { Spinner } from "@/components/ui/Spinner";
 
 export default function LoginPage() {
@@ -49,9 +48,20 @@ export default function LoginPage() {
         {/* Brand */}
         <div className="mb-7">
           <div className="mb-5 flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent">
-              <Icon.feedback className="h-4 w-4 text-white" strokeWidth={2.25} />
-            </div>
+            <span className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm" aria-hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="h-full w-full">
+                <defs>
+                  <linearGradient id="loginBrandG" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#6366f1" />
+                    <stop offset="100%" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+                <rect width="100" height="100" rx="24" fill="url(#loginBrandG)" />
+                <rect x="17" y="23" width="66" height="46" rx="13" fill="white" />
+                <path d="M27 69 L19 86 L45 69 Z" fill="white" />
+                <polyline points="30,47 42,59 70,31" fill="none" stroke="url(#loginBrandG)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </span>
             <div className="leading-tight">
               <div className="text-sm font-bold text-strong">{tc("brand")}</div>
               <div className="text-2xs font-medium text-subtle">Feedback</div>

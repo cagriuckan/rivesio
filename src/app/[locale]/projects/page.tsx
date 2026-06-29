@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
@@ -11,6 +12,7 @@ import { env } from "@/lib/env";
 export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
+  const t = await getTranslations("projects");
   const projects = await listProjects();
 
   // Per-project counts for the card stats.
@@ -30,8 +32,8 @@ export default async function ProjectsPage() {
       <PageContent>
       <PageHeader
         icon={Icon.code}
-        title="Widget'lar"
-        subtitle={`${projects.length} widget`}
+        title={t("title")}
+        subtitle={t("subtitle", { count: projects.length })}
         actions={<CreateProject />}
       />
 
@@ -40,10 +42,8 @@ export default async function ProjectsPage() {
           <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
             <Icon.code className="h-6 w-6 text-subtle" />
           </div>
-          <h3 className="mb-1.5 text-base font-semibold text-strong">Henüz widget yok</h3>
-          <p className="mb-5 max-w-xs text-sm text-subtle">
-            İlk widget&apos;ını oluştur ve gömme kodunu sitene ekle.
-          </p>
+          <h3 className="mb-1.5 text-base font-semibold text-strong">{t("emptyTitle")}</h3>
+          <p className="mb-5 max-w-xs text-sm text-subtle">{t("emptyBody")}</p>
           <CreateProject />
         </div>
       ) : (
