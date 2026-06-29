@@ -39,12 +39,17 @@ async function migrate(p: mysql.Pool): Promise<void> {
       id            VARCHAR(64) PRIMARY KEY,
       slug          VARCHAR(191) NOT NULL UNIQUE,
       name          VARCHAR(255) NOT NULL,
-      theme_slug    VARCHAR(191) NOT NULL,
       widget_key    VARCHAR(191) NOT NULL UNIQUE,
       settings_json TEXT NOT NULL,
       created_at    BIGINT NOT NULL
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
+
+  try {
+    await p.query("ALTER TABLE projects DROP COLUMN theme_slug");
+  } catch {
+    // Column already removed or does not exist on fresh installs.
+  }
 
   await p.query(`
     CREATE TABLE IF NOT EXISTS sites (

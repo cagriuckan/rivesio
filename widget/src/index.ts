@@ -67,8 +67,6 @@ function detectLocale(): WidgetLocale {
 
 interface HostConfig {
   domain?: string;
-  theme?: string;
-  themeVersion?: string;
   user?: string;
 }
 
@@ -114,7 +112,6 @@ async function boot() {
   const host: HostConfig = window.RevistoFeedback ?? {};
 
   const domain = host.domain || location.host;
-  const theme = host.theme || "";
 
   let registration: { enabled: boolean; project?: ServerConfig["project"] };
   try {
@@ -124,8 +121,7 @@ async function boot() {
       body: JSON.stringify({
         widget_key: server.widgetKey,
         domain,
-        theme,
-        meta: { themeVersion: host.themeVersion, user: host.user, href: location.href },
+        meta: { user: host.user, href: location.href },
       }),
     });
     registration = await res.json();
@@ -136,14 +132,14 @@ async function boot() {
   if (!registration.enabled) return;
 
   const cfg = { ...server.project, ...(registration.project ?? {}) };
-  mount(server, host, cfg, { domain, theme });
+  mount(server, host, cfg, { domain });
 }
 
 function mount(
   server: ServerConfig,
   host: HostConfig,
   project: ServerConfig["project"],
-  ctx: { domain: string; theme: string }
+  ctx: { domain: string }
 ) {
   const containerHost = document.createElement("div");
   containerHost.id = "revisto-widget";
@@ -506,14 +502,12 @@ function mount(
         body: JSON.stringify({
           widget_key: server.widgetKey,
           domain: ctx.domain,
-          theme: ctx.theme,
           category: select.value,
           message,
           page_url: location.href,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
           wp_user: host.user,
           custom_fields: custom.values,
-          meta: { themeVersion: host.themeVersion },
         }),
       });
       const data = await res.json();
@@ -526,7 +520,6 @@ function mount(
         const fd = new FormData();
         fd.append("widget_key", server.widgetKey);
         fd.append("domain", ctx.domain);
-        if (ctx.theme) fd.append("theme", ctx.theme);
         fd.append("kind", att.kind);
         const ext = att.blob.type === "image/png" ? "png" : "jpg";
         fd.append("file", att.blob, `${att.kind}.${ext}`);

@@ -15,18 +15,16 @@ import type {
 export async function createProject(args: {
   slug: string;
   name: string;
-  themeSlug: string;
   settings: Record<string, unknown>;
 }): Promise<ProjectRow> {
   const id = generateId();
   await execute(
-    `INSERT INTO projects (id, slug, name, theme_slug, widget_key, settings_json, created_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO projects (id, slug, name, widget_key, settings_json, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
     [
       id,
       args.slug,
       args.name,
-      args.themeSlug,
       generateWidgetKey(),
       JSON.stringify(args.settings),
       Date.now(),
@@ -35,19 +33,20 @@ export async function createProject(args: {
   return (await queryOne<ProjectRow>("SELECT * FROM projects WHERE id = ?", [id]))!;
 }
 
+export async function projectSlugExists(slug: string): Promise<boolean> {
+  const row = await queryOne<{ id: string }>("SELECT id FROM projects WHERE slug = ? LIMIT 1", [slug]);
+  return Boolean(row);
+}
+
 export async function updateProject(
   id: string,
-  fields: { name?: string; themeSlug?: string; settings?: Record<string, unknown> },
+  fields: { name?: string; settings?: Record<string, unknown> },
 ): Promise<void> {
   const sets: string[] = [];
   const vals: unknown[] = [];
   if (fields.name !== undefined) {
     sets.push("name = ?");
     vals.push(fields.name);
-  }
-  if (fields.themeSlug !== undefined) {
-    sets.push("theme_slug = ?");
-    vals.push(fields.themeSlug);
   }
   if (fields.settings !== undefined) {
     sets.push("settings_json = ?");

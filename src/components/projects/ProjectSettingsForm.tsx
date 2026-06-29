@@ -21,7 +21,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Button } from "@/components/ui/Button";
-import { Input, Select, Label } from "@/components/ui/Field";
+import { Checkbox, Input, Label, Select } from "@/components/ui/Field";
 import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
 import {
@@ -152,7 +152,7 @@ export default function ProjectSettingsForm({
       <Card className="p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-strong">{t("textSection")}</h3>
-          <div className="flex rounded-md border border-line p-0.5">
+          <div className="flex rounded-lg border border-line bg-raised p-0.5">
             {(["tr", "en"] as WidgetLocale[]).map((l) => (
               <button
                 key={l}
@@ -284,7 +284,7 @@ function SortableFieldRow({
     <div
       ref={setNodeRef}
       style={style}
-      className="rounded-lg border border-line bg-inset p-3"
+      className="rounded-xl border border-line bg-surface p-3 shadow-xs"
     >
       <div className="flex items-start gap-2">
         <button
@@ -351,12 +351,10 @@ function SortableFieldRow({
         </Button>
       </div>
 
-      <label className="mt-3 flex cursor-pointer items-center gap-2 text-xs text-subtle">
-        <input
-          type="checkbox"
+      <label className="mt-3 flex cursor-pointer items-center gap-2 text-xs font-medium text-secondary">
+        <Checkbox
           checked={field.required}
           onChange={(e) => onChange({ required: e.target.checked })}
-          className="h-4 w-4 cursor-pointer accent-accent"
         />
         {t("fieldRequired")}
       </label>

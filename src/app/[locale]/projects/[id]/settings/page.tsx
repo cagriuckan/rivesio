@@ -27,10 +27,10 @@ export default async function ProjectSettingsPage({
         <div className="mb-4">
           <Link
             href="/projects"
-            className="inline-flex items-center gap-1 text-xs font-medium text-subtle transition-colors hover:text-primary"
+            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-xs font-semibold text-secondary shadow-xs transition-colors hover:border-line-strong hover:bg-raised hover:text-primary"
           >
             <Icon.chevronLeft className="h-3.5 w-3.5" />
-            {project.name}
+            Back to Widgets
           </Link>
         </div>
         <PageHeader icon={Icon.code} title={project.name} subtitle={project.slug} />

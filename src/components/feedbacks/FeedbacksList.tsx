@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useRouter, usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icons";
+import { Checkbox, Input, Select } from "@/components/ui/Field";
 import { FEEDBACK_STATUSES } from "@/lib/types";
 import type { FeedbackStatus } from "@/lib/types";
 import FeedbackCard from "./FeedbackCard";
@@ -125,11 +126,9 @@ export default function FeedbacksList({
       <div className="mb-5 flex flex-wrap items-center gap-3">
         {filtered.length > 0 && (
           <label className="flex cursor-pointer items-center gap-2 text-xs text-subtle">
-            <input
-              type="checkbox"
+            <Checkbox
               checked={allSelected}
               onChange={toggleAll}
-              className="h-4 w-4 cursor-pointer accent-accent"
               aria-label={t("selectAll")}
             />
             {t("selectAll")}
@@ -138,12 +137,12 @@ export default function FeedbacksList({
         {filterBar}
         <div className="relative ml-auto">
           <Icon.search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-subtle" />
-          <input
+          <Input
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("searchPlaceholder")}
-            className="h-8 w-48 rounded-md border border-line bg-surface pl-8 pr-3 text-xs text-primary placeholder:text-faint outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+            className="h-8 w-48 rounded-md pl-8 pr-3 text-xs shadow-none"
             aria-label={t("searchLabel")}
           />
         </div>
@@ -162,11 +161,10 @@ export default function FeedbacksList({
         <div className="flex flex-col gap-3" role="list" aria-label={t("listLabel")}>
           {filtered.map((f) => (
             <div key={f.id} role="listitem" className="flex items-start gap-3">
-              <input
-                type="checkbox"
+              <Checkbox
                 checked={selectedIds.has(f.id)}
                 onChange={() => toggle(f.id)}
-                className="mt-5 h-4 w-4 shrink-0 cursor-pointer accent-accent"
+                className="mt-5"
                 aria-label={t("selectItem")}
               />
               <div className="min-w-0 flex-1">
@@ -187,25 +185,27 @@ export default function FeedbacksList({
           <span className="text-sm font-medium text-primary">
             {t("selectedCount", { count: selectedIds.size })}
           </span>
-          <select
-            defaultValue=""
-            disabled={applying}
-            onChange={(e) => {
-              if (e.target.value) applyStatus(e.target.value as FeedbackStatus);
-              e.target.value = "";
-            }}
-            className="ml-auto h-9 rounded-md border border-line bg-surface px-3 text-sm text-primary outline-none focus:border-accent focus:ring-1 focus:ring-accent disabled:opacity-50"
-            aria-label={t("changeStatus")}
-          >
-            <option value="" disabled>
-              {applying ? t("applying") : t("changeStatus")}
-            </option>
-            {FEEDBACK_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {ts(s)}
+          <div className="ml-auto">
+            <Select
+              defaultValue=""
+              disabled={applying}
+              onChange={(e) => {
+                if (e.target.value) applyStatus(e.target.value as FeedbackStatus);
+                e.target.value = "";
+              }}
+              className="h-9 rounded-md text-sm shadow-none"
+              aria-label={t("changeStatus")}
+            >
+              <option value="" disabled>
+                {applying ? t("applying") : t("changeStatus")}
               </option>
-            ))}
-          </select>
+              {FEEDBACK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {ts(s)}
+                </option>
+              ))}
+            </Select>
+          </div>
           <button
             onClick={clearSelection}
             disabled={applying}

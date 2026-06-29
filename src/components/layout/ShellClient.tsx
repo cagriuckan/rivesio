@@ -5,6 +5,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import BottomTabBar from "./BottomTabBar";
 import type { WidgetOption } from "./WidgetSwitcher";
+import { UserProvider } from "@/contexts/UserContext";
 
 export default function ShellClient({
   widgets,
@@ -16,6 +17,21 @@ export default function ShellClient({
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    if (localStorage.getItem("sidebar_collapsed") === "1") {
+      setSidebarCollapsed(true);
+    }
+  }, []);
+
+  function toggleCollapse() {
+    setSidebarCollapsed((v) => {
+      const next = !v;
+      localStorage.setItem("sidebar_collapsed", next ? "1" : "0");
+      return next;
+    });
+  }
 
   /* Close sidebar on route change */
   useEffect(() => {
@@ -32,9 +48,10 @@ export default function ShellClient({
   }, []);
 
   return (
+    <UserProvider value={user}>
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">
+      {/* Mobile-only header */}
       <Header
-        user={user}
         onMenuToggle={() => setSidebarOpen((v) => !v)}
         sidebarOpen={sidebarOpen}
       />
@@ -43,7 +60,7 @@ export default function ShellClient({
         {/* Desktop sidebar — always visible */}
         <div className="hidden md:flex">
           <Suspense>
-            <Sidebar widgets={widgets} />
+            <Sidebar widgets={widgets} user={user} collapsed={sidebarCollapsed} onToggleCollapse={toggleCollapse} />
           </Suspense>
         </div>
 
@@ -57,17 +74,18 @@ export default function ShellClient({
             />
             <div
               className="ds-slide-right fixed inset-y-0 left-0 z-50 md:hidden"
-              style={{ top: "var(--header-h)" }}
             >
               <Suspense>
-                <Sidebar widgets={widgets} onClose={() => setSidebarOpen(false)} />
+                <Sidebar widgets={widgets} user={user} onClose={() => setSidebarOpen(false)} />
               </Suspense>
             </div>
           </>
         )}
 
-        <main className="min-w-0 flex-1 overflow-y-auto bg-panel pb-16 md:pb-0">
-          {children}
+        <main className="min-w-0 flex-1 overflow-hidden bg-canvas p-3 pb-16 md:pb-3">
+          <div className="h-full overflow-y-auto rounded-xl border border-line bg-surface">
+            {children}
+          </div>
         </main>
       </div>
 
@@ -76,5 +94,6 @@ export default function ShellClient({
         <BottomTabBar widgets={widgets} />
       </Suspense>
     </div>
+    </UserProvider>
   );
 }

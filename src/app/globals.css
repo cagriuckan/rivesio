@@ -23,7 +23,7 @@
   --radius-full: 9999px;
 
   /* ── Background scale (light) — cool soft greys ── */
-  --color-canvas:   #e9ebef;   /* app shell behind the panel */
+  --color-canvas:   #f0f1f5;   /* app shell behind the panel */
   --color-base:     #ffffff;   /* sidebar / header chrome */
   --color-surface:  #ffffff;   /* cards */
   --color-raised:   #f4f5f7;   /* insets, icon chips */
@@ -31,10 +31,10 @@
   --color-inset:    #f0f1f4;   /* input fields */
   --color-panel:    #f7f8fa;   /* main content panel */
 
-  /* ── Borders — hairline, mostly decorative ── */
-  --color-line:        #e8e9ed;
-  --color-line-soft:   #f0f1f3;
-  --color-line-strong: #dcdee3;
+  /* ── Borders — single site-wide stroke ── */
+  --color-line:        #ebebeb;
+  --color-line-soft:   #ebebeb;
+  --color-line-strong: #ebebeb;
 
   /* ── Text scale ── */
   --color-faint:     #b6b9c2;
@@ -106,9 +106,9 @@
   --color-inset:    #0d0d0f;
   --color-panel:    #131316;
 
-  --color-line:        #26262b;
-  --color-line-soft:   #1f1f23;
-  --color-line-strong: #34343b;
+  --color-line:        #3a3a42;
+  --color-line-soft:   #3a3a42;
+  --color-line-strong: #3a3a42;
 
   --color-faint:     #45454d;
   --color-subtle:    #6a6a74;

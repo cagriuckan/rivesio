@@ -36,6 +36,7 @@ export default async function SiteSummaryCard({
   baseHref: string;
 }) {
   const t = await getTranslations("siteSummary");
+  const statusHref = (status: string) => `${baseHref}${baseHref.includes("?") ? "&" : "?"}status=${status}`;
   return (
     <Card>
       <CardHeader>
@@ -49,9 +50,9 @@ export default async function SiteSummaryCard({
       </CardHeader>
       <CardBody>
         <div className="divide-y divide-line-soft">
-          <StatRow label={t("approved")} value={approved} dot="bg-success" href={`${baseHref}?status=approved`} />
-          <StatRow label={t("pending")} value={pending} dot="bg-warning" href={`${baseHref}?status=pending`} />
-          <StatRow label={t("blocked")} value={blocked} dot="bg-danger" href={`${baseHref}?status=blocked`} />
+          <StatRow label={t("approved")} value={approved} dot="bg-success" href={statusHref("approved")} />
+          <StatRow label={t("pending")} value={pending} dot="bg-warning" href={statusHref("pending")} />
+          <StatRow label={t("blocked")} value={blocked} dot="bg-danger" href={statusHref("blocked")} />
         </div>
         <div className="mt-4 flex items-center justify-between border-t border-line pt-3">
           <span className="text-xs text-faint">{t("totalRegistered")}</span>
