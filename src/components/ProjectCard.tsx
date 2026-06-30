@@ -78,16 +78,9 @@ export default function ProjectCard({
         </span>
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
-          <span className="text-2xs text-subtle">{project.slug}</span>
+          <span className="text-xs text-subtle">{project.slug}</span>
         </div>
-        <div className="relative flex items-center gap-1.5">
-          <Link
-            href={`/projects/${project.id}/settings`}
-            className="inline-flex h-8 items-center gap-2 rounded-md border border-line bg-transparent px-3 text-xs font-semibold text-secondary transition-all hover:border-line-strong hover:bg-raised hover:text-primary"
-          >
-            <Icon.settings className="h-3.5 w-3.5" />
-            {t("settings")}
-          </Link>
+        <div className="relative">
           <button
             type="button"
             onClick={() => setActionOpen((v) => !v)}
@@ -100,6 +93,14 @@ export default function ProjectCard({
 
           {actionOpen && (
             <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-40 rounded-xl border border-line bg-surface p-1.5 shadow-lg">
+              <Link
+                href={`/projects/${project.id}/settings`}
+                onClick={() => setActionOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-secondary transition-colors hover:bg-raised hover:text-primary"
+              >
+                <Icon.settings className="h-3.5 w-3.5" />
+                {t("settings")}
+              </Link>
               <Link
                 href={`/?w=${project.id}`}
                 onClick={() => setActionOpen(false)}
@@ -135,26 +136,26 @@ export default function ProjectCard({
       <div className="grid grid-cols-2 divide-x divide-line border-b border-line">
         <div className="px-5 py-3">
           <div className="text-lg font-bold text-strong tnum">{stats.feedbacks}</div>
-          <div className="text-2xs text-subtle">{t("feedbackStat")}</div>
+          <div className="text-xs text-subtle">{t("feedbackStat")}</div>
         </div>
         <div className="px-5 py-3">
           <div className="text-lg font-bold text-strong tnum">{stats.sites}</div>
-          <div className="text-2xs text-subtle">{t("siteStat")}</div>
+          <div className="text-xs text-subtle">{t("siteStat")}</div>
         </div>
       </div>
 
       <div className="space-y-4 p-5">
         {/* Widget key */}
         <div>
-          <div className="mb-1.5 text-2xs font-semibold uppercase tracking-wider text-faint">{t("widgetKey")}</div>
+          <div className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-faint">{t("widgetKey")}</div>
           <div className="relative">
-            <code className="block truncate rounded-md border border-line bg-inset py-2 pl-2.5 pr-20 text-2xs text-secondary">
+            <code className="block truncate rounded-md border border-line bg-inset py-2 pl-2.5 pr-20 text-xs text-secondary">
               {widgetKey}
             </code>
             <button
               type="button"
               onClick={() => copy(widgetKey, "key")}
-              className="absolute right-1.5 top-1/2 inline-flex h-6 -translate-y-1/2 items-center gap-1 rounded px-2 text-2xs font-semibold text-secondary transition-colors hover:bg-surface hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="absolute right-1.5 top-1/2 inline-flex h-6 -translate-y-1/2 items-center gap-1 rounded px-2 text-xs font-semibold text-secondary transition-colors hover:bg-surface hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               {copied === "key" ? <Icon.check className="h-3 w-3 text-success-text" /> : <Icon.copy className="h-3 w-3" />}
               {copied === "key" ? tc("copied") : tc("copy")}
@@ -165,15 +166,15 @@ export default function ProjectCard({
         {/* Snippet */}
         <div>
           <div className="mb-1.5 flex items-center justify-between">
-            <span className="text-2xs font-semibold uppercase tracking-wider text-faint">{t("embedCode")}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-faint">{t("embedCode")}</span>
             <button
               onClick={() => copy(snippet, "snippet")}
-              className={cn("text-2xs font-medium transition-colors", copied === "snippet" ? "text-success-text" : "text-accent-text hover:underline")}
+              className={cn("text-xs font-medium transition-colors", copied === "snippet" ? "text-success-text" : "text-accent-text hover:underline")}
             >
               {copied === "snippet" ? `✓ ${tc("copied")}` : tc("copy")}
             </button>
           </div>
-          <pre className="overflow-x-auto rounded-md border border-line bg-inset px-2.5 py-2.5 text-2xs leading-relaxed text-secondary">
+          <pre className="overflow-x-auto rounded-md border border-line bg-inset px-2.5 py-2.5 text-xs leading-relaxed text-secondary">
             {snippet}
           </pre>
         </div>
