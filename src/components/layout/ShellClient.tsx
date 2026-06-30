@@ -86,8 +86,8 @@ export default function ShellClient({
           </>
         )}
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-canvas p-3 pb-16 md:pb-3">
-          <div className="h-full overflow-y-auto rounded-xl border border-line bg-surface">
+        <main className="min-w-0 flex-1 overflow-hidden bg-canvas pb-16 md:p-3 md:pb-3">
+          <div className="h-full overflow-y-auto bg-surface md:rounded-xl md:border md:border-line">
             {children}
           </div>
         </main>

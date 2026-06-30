@@ -2,6 +2,7 @@ import { queryAll, queryOne, execute } from "./db";
 import { generateId, generateWidgetKey } from "./ids";
 import type {
   AttachmentRow,
+  FeedbackReplyRow,
   FeedbackRow,
   FeedbackStatus,
   Priority,
@@ -101,6 +102,38 @@ export async function setSiteStatus(id: string, status: SiteStatus): Promise<voi
   await execute("UPDATE sites SET status = ? WHERE id = ?", [status, id]);
 }
 
+export async function updateSite(
+  id: string,
+  fields: { status?: SiteStatus; is_favorite?: boolean; label?: string | null },
+): Promise<void> {
+  const sets: string[] = [];
+  const vals: unknown[] = [];
+  if (fields.status !== undefined) {
+    sets.push("status = ?");
+    vals.push(fields.status);
+  }
+  if (fields.is_favorite !== undefined) {
+    sets.push("is_favorite = ?");
+    vals.push(fields.is_favorite ? 1 : 0);
+  }
+  if (fields.label !== undefined) {
+    sets.push("label = ?");
+    vals.push(fields.label);
+  }
+  if (!sets.length) return;
+  vals.push(id);
+  await execute(`UPDATE sites SET ${sets.join(", ")} WHERE id = ?`, vals);
+}
+
+export async function deleteSite(id: string): Promise<void> {
+  // FK cascades handle feedbacks/attachments rows; deleting the site is enough.
+  await execute("DELETE FROM sites WHERE id = ?", [id]);
+}
+
+export function listFeedbackIdsForSite(siteId: string): Promise<{ id: string }[]> {
+  return queryAll<{ id: string }>("SELECT id FROM feedbacks WHERE site_id = ?", [siteId]);
+}
+
 // --- Feedbacks ---
 
 export interface FeedbackWithMeta extends FeedbackRow {
@@ -157,9 +190,44 @@ export function getFeedbackWithMeta(id: string): Promise<FeedbackWithMeta | unde
   );
 }
 
+async function ensureFeedbackRepliesTable(): Promise<void> {
+  await execute(`
+    CREATE TABLE IF NOT EXISTS feedback_replies (
+      id          VARCHAR(64) PRIMARY KEY,
+      feedback_id VARCHAR(64) NOT NULL,
+      author      VARCHAR(32) NOT NULL DEFAULT 'admin',
+      message     TEXT NOT NULL,
+      created_at  BIGINT NOT NULL,
+      KEY idx_feedback_replies_feedback (feedback_id, created_at),
+      CONSTRAINT fk_feedback_replies_feedback FOREIGN KEY (feedback_id)
+        REFERENCES feedbacks(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+}
+
+export async function listFeedbackReplies(feedbackId: string): Promise<FeedbackReplyRow[]> {
+  await ensureFeedbackRepliesTable();
+  return queryAll<FeedbackReplyRow>(
+    "SELECT * FROM feedback_replies WHERE feedback_id = ? ORDER BY created_at ASC",
+    [feedbackId],
+  );
+}
+
+export async function addFeedbackReply(feedbackId: string, message: string): Promise<FeedbackReplyRow> {
+  await ensureFeedbackRepliesTable();
+  const id = generateId();
+  const createdAt = Date.now();
+  await execute(
+    `INSERT INTO feedback_replies (id, feedback_id, author, message, created_at)
+     VALUES (?, ?, 'admin', ?, ?)`,
+    [id, feedbackId, message, createdAt],
+  );
+  return (await queryOne<FeedbackReplyRow>("SELECT * FROM feedback_replies WHERE id = ?", [id]))!;
+}
+
 export async function updateFeedback(
   id: string,
-  fields: { status?: FeedbackStatus; priority?: Priority; admin_note?: string },
+  fields: { status?: FeedbackStatus; priority?: Priority; admin_note?: string; is_favorite?: boolean },
 ): Promise<void> {
   const sets: string[] = [];
   const vals: unknown[] = [];
@@ -174,6 +242,10 @@ export async function updateFeedback(
   if (fields.admin_note !== undefined) {
     sets.push("admin_note = ?");
     vals.push(fields.admin_note);
+  }
+  if (fields.is_favorite !== undefined) {
+    sets.push("is_favorite = ?");
+    vals.push(fields.is_favorite ? 1 : 0);
   }
   if (!sets.length) return;
   vals.push(id);

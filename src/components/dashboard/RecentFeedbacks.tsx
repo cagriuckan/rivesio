@@ -21,7 +21,7 @@ export default async function RecentFeedbacks({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("recentTitle")}</CardTitle>
+        <CardTitle icon={Icon.inbox}>{t("recentTitle")}</CardTitle>
         <Link
           href={detailHref}
           className="flex items-center gap-1 text-xs font-medium text-accent-text hover:underline"
@@ -41,7 +41,7 @@ export default async function RecentFeedbacks({
               <li key={f.id}>
                 <Link
                   href={`${detailHref}${detailHref.includes("?") ? "&" : "?"}f=${f.id}`}
-                  className="flex items-start gap-3 px-5 py-3 transition-colors hover:bg-raised"
+                  className="flex items-start gap-2.5 px-4 py-2.5 transition-colors hover:bg-raised"
                 >
                   <Avatar name={f.wp_user || f.domain} size="sm" className="mt-0.5" />
                   <div className="min-w-0 flex-1">
@@ -50,10 +50,10 @@ export default async function RecentFeedbacks({
                       <Badge tone={FEEDBACK_TONE[f.status]} dot>
                         {ts(f.status)}
                       </Badge>
-                      <span className="truncate text-2xs text-subtle">{f.domain}</span>
+                      <span className="truncate text-xs text-subtle">{f.domain}</span>
                     </div>
                   </div>
-                  <span className="shrink-0 text-2xs text-faint tnum">{relativeTime(f.created_at, tt)}</span>
+                  <span className="shrink-0 text-xs text-faint tnum">{relativeTime(f.created_at, tt)}</span>
                 </Link>
               </li>
             ))}

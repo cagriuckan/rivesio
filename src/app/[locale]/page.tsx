@@ -112,13 +112,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
                   </Link>
                 ))}
               </div>
-              <Link
-                href={feedbacksHref}
-                className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line px-3 text-xs font-medium text-secondary transition-colors hover:border-line-strong hover:text-primary"
-              >
-                <Icon.feedback className="h-3.5 w-3.5" />
-                {t("feedbacksLink")}
-              </Link>
             </div>
           }
         />
@@ -187,6 +180,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         <div className="mt-4 grid gap-4 xl:grid-cols-3">
           <BreakdownCard
             title={t("statusBreakdown")}
+            icon={Icon.checkCircle}
             items={FEEDBACK_STATUSES.map((s) => ({
               label: tStatus(s),
               value: statusBd[s],
@@ -195,6 +189,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           />
           <BreakdownCard
             title={t("priorityBreakdown")}
+            icon={Icon.alertTriangle}
             items={PRIORITIES.map((p) => ({
               label: tPriority(p),
               value: priorityBd[p],
@@ -273,7 +268,7 @@ function ActionQueueCard({
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle icon={Icon.alertTriangle}>{title}</CardTitle>
       </CardHeader>
       <CardBody className="space-y-3">
         {items.map((item) => {

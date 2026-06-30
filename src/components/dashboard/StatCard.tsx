@@ -16,13 +16,13 @@ const TONE_ICON: Record<Tone, { bg: string; text: string }> = {
 function TrendPill({ change }: { change: number }) {
   if (change === 0)
     return (
-      <span className="rounded-full bg-raised px-2 py-1 text-2xs font-semibold text-subtle">—</span>
+      <span className="rounded-full bg-raised px-2 py-1 text-xs font-semibold text-subtle">—</span>
     );
   const up = change > 0;
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-2xs font-semibold",
+        "inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-semibold",
         up ? "bg-success-soft text-success-text" : "bg-danger-soft text-danger-text"
       )}
     >
@@ -57,10 +57,10 @@ export default function StatCard({
 
   const inner = (
     <>
-      <div className="mb-5 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <span className={cn("flex h-9 w-9 items-center justify-center rounded-xl", t.bg)}>
-            <Ico className={cn("h-[18px] w-[18px]", t.text)} />
+      <div className="mb-4 flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className={cn("flex h-8 w-8 items-center justify-center rounded-xl", t.bg)}>
+            <Ico className={cn("h-4 w-4", t.text)} />
           </span>
           <span className="text-sm font-medium text-muted">{label}</span>
         </div>
@@ -79,7 +79,7 @@ export default function StatCard({
   );
 
   const className = cn(
-    "group block rounded-2xl bg-surface p-5 shadow-sm ring-1 ring-line transition-all duration-200",
+    "group block rounded-2xl bg-surface p-4 shadow-sm ring-1 ring-line transition-all duration-200",
     href && "hover:shadow-md hover:-translate-y-0.5"
   );
 

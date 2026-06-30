@@ -49,8 +49,19 @@ export const Icon = {
   menu: (p: IconProps) => (
     <Svg {...p}><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></Svg>
   ),
+  sort: (p: IconProps) => (
+    <Svg {...p}><path d="m3 16 4 4 4-4" /><path d="M7 20V4" /><path d="m21 8-4-4-4 4" /><path d="M17 4v16" /></Svg>
+  ),
   plus: (p: IconProps) => (
     <Svg {...p} strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></Svg>
+  ),
+  mic: (p: IconProps) => (
+    <Svg {...p}>
+      <rect x="9" y="2" width="6" height="12" rx="3" />
+      <path d="M5 10a7 7 0 0 0 14 0" />
+      <line x1="12" y1="19" x2="12" y2="22" />
+      <line x1="8" y1="22" x2="16" y2="22" />
+    </Svg>
   ),
   chevronDown: (p: IconProps) => (
     <Svg {...p}><polyline points="6 9 12 15 18 9" /></Svg>
@@ -155,6 +166,43 @@ export const Icon = {
     <Svg {...p}>
       <circle cx="12" cy="12" r="3" />
       <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </Svg>
+  ),
+  creditCard: (p: IconProps) => (
+    <Svg {...p}>
+      <rect x="2" y="5" width="20" height="14" rx="2" />
+      <line x1="2" y1="10" x2="22" y2="10" />
+    </Svg>
+  ),
+  barChart: (p: IconProps) => (
+    <Svg {...p}>
+      <line x1="6" y1="20" x2="6" y2="13" />
+      <line x1="12" y1="20" x2="12" y2="9" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+    </Svg>
+  ),
+  monitor: (p: IconProps) => (
+    <Svg {...p}>
+      <rect x="2" y="3" width="20" height="14" rx="2" />
+      <line x1="8" y1="21" x2="16" y2="21" />
+      <line x1="12" y1="17" x2="12" y2="21" />
+    </Svg>
+  ),
+  listFilter: (p: IconProps) => (
+    <Svg {...p}>
+      <path d="M3 6h18" />
+      <path d="M7 12h10" />
+      <path d="M10 18h4" />
+    </Svg>
+  ),
+  star: (p: IconProps) => (
+    <Svg {...p}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </Svg>
+  ),
+  edit: (p: IconProps) => (
+    <Svg {...p}>
+      <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </Svg>
   ),
   panelLeft: ({ className, style, width, height, ...p }: IconProps) => (

@@ -25,8 +25,8 @@ export default function TrendChart({
   const labelStep = Math.max(1, Math.floor(n / 6));
 
   return (
-    <div className="flex h-full flex-col rounded-xl border border-line bg-surface p-5">
-      <div className="mb-5 flex shrink-0 items-start justify-between">
+    <div className="flex h-full flex-col rounded-xl border border-line bg-surface p-4">
+      <div className="mb-4 flex shrink-0 items-start justify-between">
         <div>
           <p className="text-xs font-medium text-subtle">{chartLabel}</p>
           <p className="mt-0.5 text-2xl font-bold tracking-tight text-strong tnum">{total}</p>
