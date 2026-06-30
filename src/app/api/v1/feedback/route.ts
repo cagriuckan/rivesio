@@ -17,6 +17,7 @@ const schema = z.object({
   wp_user: z.string().max(300).optional().nullable(),
   custom_fields: z
     .array(z.object({
+      id: z.string().max(120).optional(),
       label: z.string().max(80),
       value: z.string().max(2000),
       kind: z.literal("element_annotation").optional(),

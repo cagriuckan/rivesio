@@ -64,7 +64,7 @@ export default function LoginPage() {
             </span>
             <div className="leading-tight">
               <div className="text-sm font-bold text-strong">{tc("brand")}</div>
-              <div className="text-2xs font-medium text-subtle">Feedback</div>
+              <div className="text-xs font-medium text-subtle">Feedback</div>
             </div>
           </div>
           <h1 className="text-xl font-bold tracking-tight text-strong">{t("welcome")}</h1>

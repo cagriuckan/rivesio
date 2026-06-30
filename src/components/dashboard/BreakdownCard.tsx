@@ -24,22 +24,24 @@ export default function BreakdownCard({
   title,
   items,
   action,
+  icon,
 }: {
   title: string;
   items: BreakdownItem[];
   action?: React.ReactNode;
+  icon?: (p: React.SVGProps<SVGSVGElement>) => React.ReactNode;
 }) {
   const total = items.reduce((s, i) => s + i.value, 0);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{title}</CardTitle>
+        <CardTitle icon={icon}>{title}</CardTitle>
         {action}
       </CardHeader>
       <CardBody>
         {/* Segmented bar */}
-        <div className="mb-5 flex h-2 w-full gap-0.5 overflow-hidden rounded-full bg-inset">
+        <div className="mb-4 flex h-2 w-full gap-0.5 overflow-hidden rounded-full bg-inset">
           {total === 0 ? (
             <div className="h-full w-full bg-line" />
           ) : (

@@ -1,5 +1,5 @@
 import { widgetCss } from "./styles";
-import { captureViewport, selectAndCapture } from "./capture";
+import { captureElementFrame, captureViewport, releaseFrame, renderHighlightedElement, selectAndCapture } from "./capture";
 
 interface WidgetText {
   fabLabel: string;
@@ -83,9 +83,11 @@ interface Attachment {
   blob: Blob;
   url: string;
   kind: "screenshot" | "upload";
+  annotationId?: string;
 }
 
 interface ElementAnnotation {
+  id: string;
   kind: "element_annotation";
   label: string;
   value: string;
@@ -122,6 +124,11 @@ const ICONS = {
 
 function delay(ms: number) {
   return new Promise((r) => setTimeout(r, ms));
+}
+
+function localId(): string {
+  if (crypto?.randomUUID) return crypto.randomUUID();
+  return `ann_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
 async function boot() {
@@ -412,6 +419,7 @@ function mount(
     counter.textContent = `${attachments.length} / ${MAX_ATTACHMENTS}`;
     capFullBtn.disabled = atMax;
     capAreaBtn.disabled = atMax;
+    elementBtn.disabled = atMax;
     uploadBtn.disabled  = atMax;
 
     thumbs.innerHTML = "";
@@ -421,8 +429,13 @@ function mount(
       wrap.innerHTML = `<img src="${att.url}" alt="ek"><button class="kf-thumb-del" type="button" aria-label="Kaldır">${ICONS.x}</button>`;
       wrap.querySelector("button")!.addEventListener("click", () => {
         URL.revokeObjectURL(att.url);
+        if (att.annotationId) {
+          const annIndex = annotations.findIndex((ann) => ann.id === att.annotationId);
+          if (annIndex >= 0) annotations.splice(annIndex, 1);
+        }
         attachments.splice(i, 1);
         renderAttachments();
+        renderAnnotations();
       });
       thumbs.appendChild(wrap);
     });
@@ -442,16 +455,23 @@ function mount(
         </div>
         <button class="kf-ann-del" type="button" aria-label="Kaldır">${ICONS.x}</button>`;
       row.querySelector("button")!.addEventListener("click", () => {
+        for (let ai = attachments.length - 1; ai >= 0; ai--) {
+          if (attachments[ai].annotationId === ann.id) {
+            URL.revokeObjectURL(attachments[ai].url);
+            attachments.splice(ai, 1);
+          }
+        }
         annotations.splice(i, 1);
+        renderAttachments();
         renderAnnotations();
       });
       annotationsEl.appendChild(row);
     });
   }
 
-  function addAttachment(blob: Blob, kind: "screenshot" | "upload") {
+  function addAttachment(blob: Blob, kind: "screenshot" | "upload", annotationId?: string) {
     if (attachments.length >= MAX_ATTACHMENTS) return;
-    attachments.push({ blob, kind, url: URL.createObjectURL(blob) });
+    attachments.push({ blob, kind, annotationId, url: URL.createObjectURL(blob) });
     renderAttachments();
   }
 
@@ -506,17 +526,42 @@ function mount(
   });
 
   elementBtn.addEventListener("click", async () => {
+    if (attachments.length >= MAX_ATTACHMENTS) {
+      setMessage(locale === "en" ? "Attachment limit reached." : "Ek sınırına ulaşıldı.", "err");
+      return;
+    }
     close();
     elementBtn.disabled = true;
+    elementBtn.innerHTML = `${ICONS.target} Bekleniyor…`;
+    const frame = await captureElementFrame(containerHost);
+    if (!frame) {
+      elementBtn.innerHTML = `${ICONS.target} Öğe seç`;
+      elementBtn.disabled = false;
+      open();
+      setMessage(locale === "en" ? "Screen capture was cancelled." : "Ekran paylaşımı iptal edildi.", "err");
+      renderAttachments();
+      return;
+    }
     try {
       const ann = await selectElementAnnotation(containerHost, locale);
       if (ann) {
+        const blob = await renderHighlightedElement(frame, {
+          x: ann.rect.x,
+          y: ann.rect.y,
+          w: ann.rect.width,
+          h: ann.rect.height,
+        }, annotations.length + 1);
         annotations.push(ann);
+        if (blob) addAttachment(blob, "screenshot", ann.id);
+        else setMessage(locale === "en" ? "Element screenshot couldn't be captured." : "Öğe ekran görüntüsü alınamadı.", "err");
         renderAnnotations();
       }
     } finally {
+      releaseFrame(frame);
+      elementBtn.innerHTML = `${ICONS.target} Öğe seç`;
       elementBtn.disabled = false;
       open();
+      renderAttachments();
     }
   });
 
@@ -577,6 +622,7 @@ function mount(
         return;
       }
 
+      let failedAttachments = 0;
       for (const att of attachments) {
         const fd = new FormData();
         fd.append("widget_key", server.widgetKey);
@@ -584,16 +630,24 @@ function mount(
         fd.append("kind", att.kind);
         const ext = att.blob.type === "image/png" ? "png" : "jpg";
         fd.append("file", att.blob, `${att.kind}.${ext}`);
-        await fetch(`${server.base}/api/v1/feedback/${data.feedback_id}/attachment`, {
+        const ok = await fetch(`${server.base}/api/v1/feedback/${data.feedback_id}/attachment`, {
           method: "POST",
           body: fd,
-        }).catch(() => {});
+        }).then((r) => r.ok).catch(() => false);
+        if (!ok) failedAttachments++;
       }
 
       const fid: string = data.feedback_id;
       saveToHistory({ id: fid, category: select.value, page: location.pathname, date: Date.now() });
 
-      // Show success with copyable reference ID
+      // Show success with copyable reference ID, plus a warning if any attachment failed to upload
+      const warningHtml = failedAttachments > 0
+        ? `<div class="kf-msg kf-warn">${ICONS.alert} ${esc(
+            locale === "en"
+              ? `${failedAttachments} attachment${failedAttachments > 1 ? "s" : ""} could not be uploaded.`
+              : `${failedAttachments} ek yüklenemedi.`
+          )}</div>`
+        : "";
       msg.hidden = false;
       msg.className = "kf-msg kf-ok";
       msg.innerHTML = `
@@ -602,7 +656,8 @@ function mount(
           <span class="kf-ref-label">${esc(locale === "en" ? "Reference" : "Referans no")}</span>
           <span class="kf-ref-id" title="${esc(fid)}">#${esc(fid.slice(0, 8))}</span>
           <button class="kf-ref-copy" type="button" aria-label="Kopyala">${ICONS.copy}</button>
-        </div>`;
+        </div>
+        ${warningHtml}`;
       msg.querySelector(".kf-ref-copy")!.addEventListener("click", (e) =>
         copyId(fid, e.currentTarget as Element)
       );
@@ -616,7 +671,7 @@ function mount(
       annotations.splice(0);
       renderAttachments();
       renderAnnotations();
-      setTimeout(close, 4000);
+      setTimeout(close, failedAttachments > 0 ? 7000 : 4000);
     } catch {
       setMessage(locale === "en" ? "Connection error. Please try again." : "Bağlantı hatası. Lütfen tekrar dene.", "err");
     } finally {
@@ -818,6 +873,7 @@ function selectElementAnnotation(widgetHost: HTMLElement, locale: WidgetLocale):
         const selector = elementSelector(target);
         const r = target.getBoundingClientRect();
         finish({
+          id: localId(),
           kind: "element_annotation",
           label: locale === "en" ? "Element note" : "Öğe notu",
           value,

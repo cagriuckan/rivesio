@@ -40,7 +40,7 @@ export default async function SiteSummaryCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
+        <CardTitle icon={Icon.globe}>{t("title")}</CardTitle>
         <Link
           href={baseHref}
           className="flex items-center gap-1 text-xs font-medium text-accent-text hover:underline"

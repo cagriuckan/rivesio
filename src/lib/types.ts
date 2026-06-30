@@ -60,6 +60,8 @@ export interface SiteRow {
   meta_json: string;
   first_seen: number;
   last_seen: number;
+  is_favorite: number;
+  label: string | null;
 }
 
 export interface FeedbackRow {
@@ -77,10 +79,20 @@ export interface FeedbackRow {
   admin_note: string | null;
   custom_fields_json: string | null;
   created_at: number;
+  is_favorite: number;
+}
+
+export interface FeedbackReplyRow {
+  id: string;
+  feedback_id: string;
+  author: "admin";
+  message: string;
+  created_at: number;
 }
 
 /** A captured value for a custom form field, stored on the feedback. */
 export interface CustomFieldValue {
+  id?: string;
   label: string;
   value: string;
   kind?: "element_annotation";

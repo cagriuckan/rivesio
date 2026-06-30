@@ -108,8 +108,24 @@ async function migrate(p: mysql.Pool): Promise<void> {
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
   `);
 
+  await p.query(`
+    CREATE TABLE IF NOT EXISTS feedback_replies (
+      id          VARCHAR(64) PRIMARY KEY,
+      feedback_id VARCHAR(64) NOT NULL,
+      author      VARCHAR(32) NOT NULL DEFAULT 'admin',
+      message     TEXT NOT NULL,
+      created_at  BIGINT NOT NULL,
+      KEY idx_feedback_replies_feedback (feedback_id, created_at),
+      CONSTRAINT fk_feedback_replies_feedback FOREIGN KEY (feedback_id)
+        REFERENCES feedbacks(id) ON DELETE CASCADE
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+
   // Idempotent column additions for tables that predate them.
   await addColumnIfMissing(p, "feedbacks", "custom_fields_json", "TEXT");
+  await addColumnIfMissing(p, "sites", "is_favorite", "TINYINT(1) NOT NULL DEFAULT 0");
+  await addColumnIfMissing(p, "sites", "label", "VARCHAR(255)");
+  await addColumnIfMissing(p, "feedbacks", "is_favorite", "TINYINT(1) NOT NULL DEFAULT 0");
 
   // No default project is seeded; projects are created explicitly from the panel.
 }

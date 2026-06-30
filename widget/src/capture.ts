@@ -2,7 +2,7 @@ export interface Region { x: number; y: number; w: number; h: number; }
 
 // ── Internal: grab one frame via getDisplayMedia ──────────────────────────────
 
-interface ScreenFrame {
+export interface ScreenFrame {
   bitmap: ImageBitmap;
   /** bitmap.width / window.innerWidth  (≈ devicePixelRatio on retina) */
   scaleX: number;
@@ -61,6 +61,10 @@ async function grabFrame(hideEl?: HTMLElement): Promise<ScreenFrame | null> {
   };
 }
 
+export function releaseFrame(frame: ScreenFrame | null): void {
+  frame?.bitmap.close();
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function rrect(
@@ -88,6 +92,73 @@ export async function captureViewport(hideEl?: HTMLElement): Promise<Blob | null
   canvas.height = bitmap.height;
   canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
   bitmap.close();
+
+  return new Promise((r) => canvas.toBlob(r, "image/png"));
+}
+
+export async function captureHighlightedElement(
+  hideEl: HTMLElement | undefined,
+  rect: Region,
+  index: number,
+): Promise<Blob | null> {
+  const frame = await grabFrame(hideEl);
+  if (!frame) return null;
+  try {
+    return await renderHighlightedElement(frame, rect, index);
+  } finally {
+    releaseFrame(frame);
+  }
+}
+
+export async function captureElementFrame(hideEl?: HTMLElement): Promise<ScreenFrame | null> {
+  return grabFrame(hideEl);
+}
+
+export function renderHighlightedElement(
+  frame: ScreenFrame,
+  rect: Region,
+  index: number,
+): Promise<Blob | null> {
+  const { bitmap, scaleX, scaleY } = frame;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = bitmap.width;
+  canvas.height = bitmap.height;
+  const ctx = canvas.getContext("2d")!;
+  ctx.drawImage(bitmap, 0, 0);
+
+  const x = Math.round(rect.x * scaleX);
+  const y = Math.round(rect.y * scaleY);
+  const w = Math.round(rect.w * scaleX);
+  const h = Math.round(rect.h * scaleY);
+  const stroke = Math.max(3, Math.round(2 * Math.max(scaleX, scaleY)));
+  const radius = Math.max(14, Math.round(12 * Math.max(scaleX, scaleY)));
+
+  ctx.save();
+  ctx.fillStyle = "rgba(59, 130, 246, 0.18)";
+  rrect(ctx, x, y, w, h, radius);
+  ctx.fill();
+  ctx.strokeStyle = "#3b82f6";
+  ctx.lineWidth = stroke;
+  rrect(ctx, x + stroke / 2, y + stroke / 2, Math.max(0, w - stroke), Math.max(0, h - stroke), radius);
+  ctx.stroke();
+
+  const badgeSize = Math.max(24, Math.round(22 * Math.max(scaleX, scaleY)));
+  const badgeX = Math.min(canvas.width - badgeSize - stroke, Math.max(stroke, x + w - badgeSize / 2));
+  const badgeY = Math.max(stroke, y - badgeSize / 2);
+  ctx.fillStyle = "#3b82f6";
+  ctx.beginPath();
+  ctx.arc(badgeX + badgeSize / 2, badgeY + badgeSize / 2, badgeSize / 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = Math.max(2, Math.round(1.5 * Math.max(scaleX, scaleY)));
+  ctx.stroke();
+  ctx.fillStyle = "#ffffff";
+  ctx.font = `700 ${Math.round(badgeSize * 0.5)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(String(index), badgeX + badgeSize / 2, badgeY + badgeSize / 2 + 1);
+  ctx.restore();
 
   return new Promise((r) => canvas.toBlob(r, "image/png"));
 }

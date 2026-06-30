@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Card, CardHeader, CardTitle, CardBody } from "@/components/ui/Card";
+import { Icon } from "@/components/ui/Icons";
 
 export default async function CategoryCard({
   categories,
@@ -12,7 +13,7 @@ export default async function CategoryCard({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("categories")}</CardTitle>
+        <CardTitle icon={Icon.layers}>{t("categories")}</CardTitle>
       </CardHeader>
       <CardBody>
         {categories.length === 0 ? (

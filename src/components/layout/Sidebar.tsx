@@ -1,10 +1,10 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, type MouseEvent } from "react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import { Tooltip } from "@/components/ui/Tooltip";
@@ -18,8 +18,6 @@ const NAV = [
   { href: "/sites",     key: "sites",     icon: Icon.globe },
   { href: "/projects",  key: "widgets",   icon: Icon.code },
 ] as const;
-
-const FOOTER_LINKS = ["Lorem", "Ipsum", "Dolor"] as const;
 
 export default function Sidebar({
   widgets,
@@ -37,15 +35,24 @@ export default function Sidebar({
   onToggleCollapse?: () => void;
 }) {
   const t = useTranslations("nav");
+  const tu = useTranslations("user");
   const pathname = usePathname();
+  const router = useRouter();
   const params = useSearchParams();
   const w = params.get("w");
 
   const withWidget = (href: string) => (w ? `${href}?w=${w}` : href);
+  const handleNavClick = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
+    onClose?.();
+    if (href === "/feedbacks" && params.has("f")) {
+      event.preventDefault();
+      router.push(withWidget("/feedbacks"));
+    }
+  };
 
   return (
     <aside
-      className="flex h-full shrink-0 flex-col overflow-x-hidden transition-[width] duration-200"
+      className="content-radius-tight flex h-full shrink-0 flex-col overflow-x-hidden transition-[width] duration-200"
       style={{ width: collapsed ? "72px" : "var(--sidebar-w)" }}
     >
       {/* Brand */}
@@ -103,7 +110,7 @@ export default function Sidebar({
       {/* Nav */}
       <nav className="flex-1 overflow-x-hidden overflow-y-auto p-2" aria-label={t("mainMenu")}>
         {!collapsed && (
-          <div className="mb-1.5 px-2.5 pt-1 text-2xs font-semibold uppercase tracking-wider text-faint">
+          <div className="mb-1.5 px-2.5 pt-1 text-xs font-semibold uppercase tracking-wider text-faint">
             {t("menu")}
           </div>
         )}
@@ -119,7 +126,7 @@ export default function Sidebar({
                     <Link
                       href={withWidget(n.href)}
                       aria-current={active ? "page" : undefined}
-                      onClick={onClose}
+                      onClick={handleNavClick(n.href)}
                       className={cn(
                         "group relative flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
                         active
@@ -129,7 +136,7 @@ export default function Sidebar({
                     >
                       <NavIcon
                         className={cn(
-                          "h-[18px] w-[18px] shrink-0 transition-colors",
+                          "h-4 w-4 shrink-0 transition-colors",
                           active ? "text-accent" : "text-subtle group-hover:text-muted"
                         )}
                       />
@@ -142,7 +149,7 @@ export default function Sidebar({
                   <Link
                     href={withWidget(n.href)}
                     aria-current={active ? "page" : undefined}
-                    onClick={onClose}
+                    onClick={handleNavClick(n.href)}
                     className={cn(
                       "group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
                       active
@@ -152,7 +159,7 @@ export default function Sidebar({
                   >
                     <NavIcon
                       className={cn(
-                        "h-[18px] w-[18px] shrink-0 transition-colors",
+                        "h-4 w-4 shrink-0 transition-colors",
                         active ? "text-accent" : "text-subtle group-hover:text-muted"
                       )}
                     />
@@ -160,7 +167,7 @@ export default function Sidebar({
                     {count > 0 && (
                       <span
                         className={cn(
-                          "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-2xs font-semibold tnum",
+                          "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tnum",
                           active
                             ? "bg-accent-soft text-accent-text"
                             : "bg-raised text-muted group-hover:bg-surface"
@@ -191,18 +198,14 @@ export default function Sidebar({
           <div className="space-y-3">
             <UserMenu user={user} />
             <div className="px-1.5">
-              <div className="mb-2 flex flex-wrap gap-x-3 gap-y-1 text-2xs font-medium text-subtle">
-                {FOOTER_LINKS.map((label) => (
-                  <a
-                    key={label}
-                    href="#"
-                    className="transition-colors hover:text-primary"
-                  >
-                    {label}
-                  </a>
-                ))}
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-subtle">
+                <a href="#" className="transition-colors hover:text-primary">
+                  {tu("privacyPolicy")}
+                </a>
+                <a href="#" className="transition-colors hover:text-primary">
+                  {tu("termsOfService")}
+                </a>
               </div>
-              <p className="text-2xs text-faint">&copy; 2026 Revisto</p>
             </div>
           </div>
         )}

@@ -21,6 +21,8 @@ export const widgetCss = `
   --err:         #ef4444;
   --err-bg:      rgba(239,68,68,.12);
   --err-txt:     #fca5a5;
+  --warn-bg:     rgba(245,158,11,.12);
+  --warn-txt:    #fcd34d;
   --ring:        rgba(99,102,241,.4);
   --shadow-fab:  0 4px 6px rgba(0,0,0,.35), 0 12px 28px rgba(0,0,0,.4);
   --shadow-panel: 0 0 0 1px rgba(255,255,255,.06), 0 8px 24px rgba(0,0,0,.55), 0 32px 64px rgba(0,0,0,.45);
@@ -52,6 +54,8 @@ export const widgetCss = `
   --txt-faint:   #a1a1aa;
   --ok-txt:      #059669;
   --err-txt:     #dc2626;
+  --warn-bg:     rgba(245,158,11,.14);
+  --warn-txt:    #b45309;
   --ring:        rgba(79,70,229,.35);
   --shadow-fab:  0 4px 6px rgba(0,0,0,.12), 0 12px 28px rgba(0,0,0,.14);
   --shadow-panel: 0 0 0 1px rgba(0,0,0,.07), 0 8px 24px rgba(0,0,0,.1), 0 32px 64px rgba(0,0,0,.08);
@@ -170,6 +174,15 @@ export const widgetCss = `
 .kf-msg svg { width: 15px; height: 15px; flex-shrink: 0; margin-top: 1px; }
 .kf-ok  { background: var(--ok-bg);  color: var(--ok-txt); }
 .kf-err { background: var(--err-bg); color: var(--err-txt); }
+.kf-msg .kf-warn {
+  margin: 8px 0 0;
+  padding: 8px 10px;
+  background: var(--warn-bg);
+  color: var(--warn-txt);
+  border-radius: var(--radius-sm);
+  flex-basis: 100%;
+}
+.kf-msg .kf-warn svg { width: 13px; height: 13px; }
 
 /* ── Body ── */
 .kf-body {

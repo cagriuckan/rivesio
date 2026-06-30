@@ -16,12 +16,12 @@ export default function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line pb-4 pl-0 pr-0 pt-0">
+    <div className="mb-5 flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-line pb-3 pl-0 pr-0 pt-0">
       {/* Left: icon + title */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2.5">
         {IconComp && (
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-accent-line bg-accent-soft">
-            <IconComp className="h-[18px] w-[18px] text-accent" />
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center text-accent">
+            <IconComp className="h-4 w-4 text-accent" />
           </span>
         )}
         <div>
@@ -31,11 +31,11 @@ export default function PageHeader({
       </div>
 
       {/* Right: global actions + page actions */}
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
+        {actions && <div className="flex items-center gap-2.5">{actions}</div>}
         <Suspense>
           <ContentActions />
         </Suspense>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
       </div>
     </div>
   );
