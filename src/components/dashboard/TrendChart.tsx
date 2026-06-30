@@ -21,20 +21,12 @@ export default function TrendChart({
   const max = Math.max(...data.map((d) => d.count), 1);
   const n = data.length;
 
-  const VW = 600;
-  const BAR_H = 80;
-  const LABEL_H = 16;
-  const VH = BAR_H + LABEL_H;
-
-  const gap = 3;
-  const barW = (VW - gap * (n - 1)) / n;
-
   // Show ~6 date labels evenly distributed
   const labelStep = Math.max(1, Math.floor(n / 6));
 
   return (
-    <div className="rounded-xl border border-line bg-surface p-5">
-      <div className="mb-5 flex items-start justify-between">
+    <div className="flex h-full flex-col rounded-xl border border-line bg-surface p-5">
+      <div className="mb-5 flex shrink-0 items-start justify-between">
         <div>
           <p className="text-xs font-medium text-subtle">{chartLabel}</p>
           <p className="mt-0.5 text-2xl font-bold tracking-tight text-strong tnum">{total}</p>
@@ -42,47 +34,37 @@ export default function TrendChart({
         <span className="text-xs text-subtle">{t("days", { count: n })}</span>
       </div>
 
-      <svg
-        viewBox={`0 0 ${VW} ${VH}`}
-        width="100%"
-        height={VH}
-        aria-label={chartLabel}
-        role="img"
-        style={{ display: "block", overflow: "visible" }}
-      >
-        {data.map((d, i) => {
-          const x = i * (barW + gap);
+      {/* Bars — fill remaining vertical space */}
+      <div className="flex min-h-[100px] flex-1 items-end gap-[3px]" aria-label={chartLabel} role="img">
+        {data.map((d) => {
           const filled = d.count > 0;
-          const h = filled ? Math.max(4, (d.count / max) * BAR_H) : 3;
-          const y = BAR_H - h;
-          const showLabel = i === 0 || (i + 1) % labelStep === 0 || i === n - 1;
-
+          const heightPct = filled ? Math.max(4, (d.count / max) * 100) : 1.5;
           return (
-            <g key={d.date}>
-              <rect
-                x={x}
-                y={y}
-                width={barW}
-                height={h}
-                rx={filled ? 2 : 1}
-                fill={filled ? "var(--color-accent)" : "var(--color-line-strong)"}
-                opacity={filled ? 0.75 : 1}
-              />
-              {showLabel && (
-                <text
-                  x={x + barW / 2}
-                  y={BAR_H + LABEL_H - 2}
-                  textAnchor="middle"
-                  fontSize="9"
-                  fill="var(--color-subtle)"
-                >
-                  {shortDate(d.date)}
-                </text>
-              )}
-            </g>
+            <div
+              key={d.date}
+              className="flex-1 rounded-[2px]"
+              style={{
+                height: `${heightPct}%`,
+                background: filled ? "var(--color-accent)" : "var(--color-line-strong)",
+                opacity: filled ? 0.75 : 1,
+              }}
+              title={`${shortDate(d.date)}: ${d.count}`}
+            />
           );
         })}
-      </svg>
+      </div>
+
+      {/* Date labels */}
+      <div className="mt-2 flex shrink-0">
+        {data.map((d, i) => {
+          const showLabel = i === 0 || (i + 1) % labelStep === 0 || i === n - 1;
+          return (
+            <span key={d.date} className="flex-1 text-center text-[10px] text-subtle">
+              {showLabel ? shortDate(d.date) : ""}
+            </span>
+          );
+        })}
+      </div>
     </div>
   );
 }

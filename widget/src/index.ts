@@ -85,6 +85,23 @@ interface Attachment {
   kind: "screenshot" | "upload";
 }
 
+interface ElementAnnotation {
+  kind: "element_annotation";
+  label: string;
+  value: string;
+  selector: string;
+  tagName: string;
+  text: string;
+  rect: {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    viewportWidth: number;
+    viewportHeight: number;
+  };
+}
+
 function icon(path: string) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${path}</svg>`;
 }
@@ -95,6 +112,7 @@ const ICONS = {
   copy:    icon('<rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>'),
   camera: icon('<path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/>'),
   crop: icon('<path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/>'),
+  target: icon('<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/>'),
   upload: icon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
   close: icon('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
   check: icon('<polyline points="20 6 9 17 4 12"/>'),
@@ -238,6 +256,9 @@ function mount(
           <button class="kf-chip kf-capture-area" type="button">
             ${ICONS.crop} Alan seç
           </button>
+          <button class="kf-chip kf-element-select" type="button">
+            ${ICONS.target} Öğe seç
+          </button>
           <button class="kf-chip kf-chip-upload kf-upload" type="button" aria-label="Görsel yükle">
             ${ICONS.upload}
           </button>
@@ -248,6 +269,7 @@ function mount(
         </div>
 
         <div class="kf-thumbs"></div>
+        <div class="kf-annotations" hidden></div>
         <input class="kf-file" type="file" accept="image/*" multiple hidden />
 
         <div class="kf-hint">İpucu: <kbd>⌘ / Ctrl + /</kbd> ile her yerden aç</div>
@@ -273,12 +295,14 @@ function mount(
   const submitBtn      = $<HTMLButtonElement>(".kf-submit");
   const capFullBtn     = $<HTMLButtonElement>(".kf-capture-full");
   const capAreaBtn     = $<HTMLButtonElement>(".kf-capture-area");
+  const elementBtn     = $<HTMLButtonElement>(".kf-element-select");
   const uploadBtn      = $<HTMLButtonElement>(".kf-upload");
   const fileInput      = $<HTMLInputElement>(".kf-file");
   const textarea       = $<HTMLTextAreaElement>(".kf-textarea");
   const select         = $<HTMLSelectElement>(".kf-select");
   const thumbs         = $<HTMLDivElement>(".kf-thumbs");
   const counter        = $<HTMLSpanElement>(".kf-counter");
+  const annotationsEl  = $<HTMLDivElement>(".kf-annotations");
   const msg            = $<HTMLDivElement>(".kf-msg");
   const viewForm       = $<HTMLDivElement>(".kf-view-form");
   const viewHistory    = $<HTMLDivElement>(".kf-view-history");
@@ -287,6 +311,7 @@ function mount(
   const footEl         = $<HTMLDivElement>(".kf-foot");
 
   const attachments: Attachment[] = [];
+  const annotations: ElementAnnotation[] = [];
 
   // ── History (localStorage) ────────────────────────────────────────
 
@@ -403,6 +428,27 @@ function mount(
     });
   }
 
+  function renderAnnotations() {
+    annotationsEl.hidden = annotations.length === 0;
+    annotationsEl.innerHTML = "";
+    annotations.forEach((ann, i) => {
+      const row = document.createElement("div");
+      row.className = "kf-ann-item";
+      row.innerHTML = `
+        <div class="kf-ann-pin">${i + 1}</div>
+        <div class="kf-ann-main">
+          <div class="kf-ann-selector">${esc(ann.selector)}</div>
+          <div class="kf-ann-note">${esc(ann.value)}</div>
+        </div>
+        <button class="kf-ann-del" type="button" aria-label="Kaldır">${ICONS.x}</button>`;
+      row.querySelector("button")!.addEventListener("click", () => {
+        annotations.splice(i, 1);
+        renderAnnotations();
+      });
+      annotationsEl.appendChild(row);
+    });
+  }
+
   function addAttachment(blob: Blob, kind: "screenshot" | "upload") {
     if (attachments.length >= MAX_ATTACHMENTS) return;
     attachments.push({ blob, kind, url: URL.createObjectURL(blob) });
@@ -459,6 +505,21 @@ function mount(
     }
   });
 
+  elementBtn.addEventListener("click", async () => {
+    close();
+    elementBtn.disabled = true;
+    try {
+      const ann = await selectElementAnnotation(containerHost, locale);
+      if (ann) {
+        annotations.push(ann);
+        renderAnnotations();
+      }
+    } finally {
+      elementBtn.disabled = false;
+      open();
+    }
+  });
+
   // ── Submit ────────────────────────────────────────────────────────
 
   function collectCustomFields(): { ok: boolean; values: { label: string; value: string }[] } {
@@ -507,7 +568,7 @@ function mount(
           page_url: location.href,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
           wp_user: host.user,
-          custom_fields: custom.values,
+          custom_fields: [...custom.values, ...annotations],
         }),
       });
       const data = await res.json();
@@ -552,7 +613,9 @@ function mount(
         else el.value = "";
       });
       attachments.splice(0).forEach((a) => URL.revokeObjectURL(a.url));
+      annotations.splice(0);
       renderAttachments();
+      renderAnnotations();
       setTimeout(close, 4000);
     } catch {
       setMessage(locale === "en" ? "Connection error. Please try again." : "Bağlantı hatası. Lütfen tekrar dene.", "err");
@@ -570,12 +633,213 @@ function mount(
   });
 
   renderAttachments();
+  renderAnnotations();
 }
 
 function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string
   );
+}
+
+function elementSelector(el: Element): string {
+  const parts: string[] = [];
+  let node: Element | null = el;
+  while (node && node.nodeType === 1 && node !== document.body && parts.length < 5) {
+    let part = node.tagName.toLowerCase();
+    if (node.id) {
+      part += `#${cssEscape(node.id)}`;
+      parts.unshift(part);
+      break;
+    }
+    const classes = Array.from(node.classList)
+      .filter((c) => c && !c.startsWith("revisto-") && !c.startsWith("kf-"))
+      .slice(0, 2);
+    if (classes.length) part += `.${classes.map(cssEscape).join(".")}`;
+    const parent = node.parentElement;
+    if (parent) {
+      const sameTag = Array.from(parent.children).filter((child) => child.tagName === node!.tagName);
+      if (sameTag.length > 1) part += `:nth-of-type(${sameTag.indexOf(node) + 1})`;
+    }
+    parts.unshift(part);
+    node = parent;
+  }
+  return parts.join(" > ") || el.tagName.toLowerCase();
+}
+
+function cssEscape(value: string): string {
+  const css = (window as unknown as { CSS?: { escape?: (s: string) => string } }).CSS;
+  if (css?.escape) return css.escape(value);
+  return value.replace(/[^a-zA-Z0-9_-]/g, "\\$&");
+}
+
+function textSnippet(el: Element): string {
+  return (el.textContent || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 140);
+}
+
+function selectElementAnnotation(widgetHost: HTMLElement, locale: WidgetLocale): Promise<ElementAnnotation | null> {
+  return new Promise((resolve) => {
+    const highlight = document.createElement("div");
+    highlight.className = "revisto-element-highlight";
+    Object.assign(highlight.style, {
+      position: "fixed",
+      zIndex: "2147483645",
+      pointerEvents: "none",
+      border: "2px solid #3b82f6",
+      background: "rgba(59,130,246,.14)",
+      borderRadius: "8px",
+      boxShadow: "0 0 0 9999px rgba(15,23,42,.18)",
+      transition: "left .08s, top .08s, width .08s, height .08s",
+      display: "none",
+    });
+
+    const badge = document.createElement("div");
+    Object.assign(badge.style, {
+      position: "fixed",
+      zIndex: "2147483646",
+      pointerEvents: "none",
+      background: "#2563eb",
+      color: "#fff",
+      borderRadius: "999px",
+      padding: "4px 9px",
+      font: "600 12px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+      boxShadow: "0 8px 18px rgba(37,99,235,.28)",
+      display: "none",
+    });
+    badge.textContent = locale === "en" ? "Click an element" : "Öğeye tıkla";
+
+    document.body.append(highlight, badge);
+    widgetHost.style.visibility = "hidden";
+
+    let current: Element | null = null;
+    let editor: HTMLDivElement | null = null;
+    let done = false;
+
+    function finish(value: ElementAnnotation | null) {
+      if (done) return;
+      done = true;
+      cleanup();
+      resolve(value);
+    }
+
+    function cleanup() {
+      widgetHost.style.visibility = "";
+      highlight.remove();
+      badge.remove();
+      editor?.remove();
+      window.removeEventListener("mousemove", onMove, true);
+      window.removeEventListener("click", onClick, true);
+      window.removeEventListener("keydown", onKey, true);
+    }
+
+    function setTarget(target: Element | null) {
+      current = target;
+      if (!target) {
+        highlight.style.display = "none";
+        badge.style.display = "none";
+        return;
+      }
+      const rect = target.getBoundingClientRect();
+      highlight.style.display = "block";
+      highlight.style.left = `${Math.max(0, rect.left)}px`;
+      highlight.style.top = `${Math.max(0, rect.top)}px`;
+      highlight.style.width = `${Math.max(0, rect.width)}px`;
+      highlight.style.height = `${Math.max(0, rect.height)}px`;
+
+      badge.style.display = "block";
+      badge.style.left = `${Math.min(window.innerWidth - 132, Math.max(8, rect.left))}px`;
+      badge.style.top = `${Math.max(8, rect.top - 32)}px`;
+    }
+
+    function onMove(e: MouseEvent) {
+      if (editor) return;
+      const target = document.elementFromPoint(e.clientX, e.clientY);
+      if (!target || target === widgetHost || widgetHost.contains(target)) {
+        setTarget(null);
+        return;
+      }
+      setTarget(target);
+    }
+
+    function onClick(e: MouseEvent) {
+      if (editor?.contains(e.target as Node)) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (!current) return;
+      showEditor(current);
+    }
+
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        finish(null);
+      }
+    }
+
+    function showEditor(target: Element) {
+      const rect = target.getBoundingClientRect();
+      editor?.remove();
+      editor = document.createElement("div");
+      Object.assign(editor.style, {
+        position: "fixed",
+        zIndex: "2147483647",
+        width: "min(320px, calc(100vw - 24px))",
+        left: `${Math.min(window.innerWidth - 332, Math.max(12, rect.left))}px`,
+        top: `${Math.min(window.innerHeight - 190, Math.max(12, rect.bottom + 10))}px`,
+        background: "#ffffff",
+        border: "1px solid rgba(15,23,42,.14)",
+        borderRadius: "12px",
+        boxShadow: "0 20px 50px rgba(15,23,42,.22)",
+        padding: "12px",
+        font: "13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif",
+        color: "#0f172a",
+      });
+      editor.innerHTML = `
+        <div style="font-weight:700;margin-bottom:6px">${locale === "en" ? "Add note to element" : "Öğeye not ekle"}</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(elementSelector(target))}</div>
+        <textarea style="width:100%;min-height:78px;resize:none;border:1px solid #cbd5e1;border-radius:8px;padding:8px;font:13px -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;outline:none" placeholder="${locale === "en" ? "What should change here?" : "Burada ne değişmeli?"}"></textarea>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+          <button type="button" data-cancel style="border:1px solid #cbd5e1;background:#fff;border-radius:8px;padding:7px 10px;font-weight:600;color:#475569;cursor:pointer">${locale === "en" ? "Cancel" : "Vazgeç"}</button>
+          <button type="button" data-save style="border:0;background:#2563eb;border-radius:8px;padding:7px 12px;font-weight:700;color:#fff;cursor:pointer">${locale === "en" ? "Add" : "Ekle"}</button>
+        </div>`;
+      document.body.appendChild(editor);
+      const input = editor.querySelector("textarea") as HTMLTextAreaElement;
+      input.focus();
+      editor.querySelector("[data-cancel]")!.addEventListener("click", () => finish(null));
+      editor.querySelector("[data-save]")!.addEventListener("click", () => {
+        const value = input.value.trim();
+        if (!value) {
+          input.focus();
+          return;
+        }
+        const selector = elementSelector(target);
+        const r = target.getBoundingClientRect();
+        finish({
+          kind: "element_annotation",
+          label: locale === "en" ? "Element note" : "Öğe notu",
+          value,
+          selector,
+          tagName: target.tagName.toLowerCase(),
+          text: textSnippet(target),
+          rect: {
+            x: Math.round(r.left),
+            y: Math.round(r.top),
+            width: Math.round(r.width),
+            height: Math.round(r.height),
+            viewportWidth: window.innerWidth,
+            viewportHeight: window.innerHeight,
+          },
+        });
+      });
+    }
+
+    window.addEventListener("mousemove", onMove, true);
+    window.addEventListener("click", onClick, true);
+    window.addEventListener("keydown", onKey, true);
+  });
 }
 
 if (document.readyState === "loading") {

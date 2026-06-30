@@ -7,13 +7,17 @@ import BottomTabBar from "./BottomTabBar";
 import type { WidgetOption } from "./WidgetSwitcher";
 import { UserProvider } from "@/contexts/UserContext";
 
+export type NavCounts = { feedbacks?: number; sites?: number };
+
 export default function ShellClient({
   widgets,
   user,
+  navCounts,
   children,
 }: {
   widgets: WidgetOption[];
   user: string;
+  navCounts?: NavCounts;
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -58,9 +62,9 @@ export default function ShellClient({
 
       <div className="flex min-h-0 flex-1">
         {/* Desktop sidebar — always visible */}
-        <div className="hidden md:flex">
+        <div className="hidden shrink-0 overflow-hidden md:flex">
           <Suspense>
-            <Sidebar widgets={widgets} user={user} collapsed={sidebarCollapsed} onToggleCollapse={toggleCollapse} />
+            <Sidebar widgets={widgets} user={user} navCounts={navCounts} collapsed={sidebarCollapsed} onToggleCollapse={toggleCollapse} />
           </Suspense>
         </div>
 
@@ -76,7 +80,7 @@ export default function ShellClient({
               className="ds-slide-right fixed inset-y-0 left-0 z-50 md:hidden"
             >
               <Suspense>
-                <Sidebar widgets={widgets} user={user} onClose={() => setSidebarOpen(false)} />
+                <Sidebar widgets={widgets} user={user} navCounts={navCounts} onClose={() => setSidebarOpen(false)} />
               </Suspense>
             </div>
           </>
