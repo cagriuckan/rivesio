@@ -5,8 +5,10 @@ import PageHeader from "@/components/layout/PageHeader";
 import CreateProject from "@/components/CreateProject";
 import ProjectCard from "@/components/ProjectCard";
 import { Icon } from "@/components/ui/Icons";
-import { listProjects, parseSettings } from "@/lib/repo";
-import { listFeedbacks, listSites } from "@/lib/admin-repo";
+import { parseSettings } from "@/lib/repo";
+import { listFeedbacks, listOwnedProjects, listSites } from "@/lib/admin-repo";
+import { getSessionUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
 
 export const dynamic = "force-dynamic";
@@ -14,7 +16,9 @@ export const dynamic = "force-dynamic";
 export default async function ProjectsPage({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
   const sp = await searchParams;
   const t = await getTranslations("projects");
-  const projects = await listProjects();
+  const user = await getSessionUser();
+  if (!user) redirect("/login");
+  const projects = await listOwnedProjects(user.id);
   const shouldOpenCreate = sp.create === "1";
 
   // Per-project counts for the card stats.
@@ -22,8 +26,8 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
   await Promise.all(
     projects.map(async (p) => {
       const [feedbacks, sites] = await Promise.all([
-        listFeedbacks({ projectId: p.id }),
-        listSites({ projectId: p.id }),
+        listFeedbacks(user.id, { projectId: p.id }),
+        listSites(user.id, { projectId: p.id }),
       ]);
       counts.set(p.id, { feedbacks: feedbacks.length, sites: sites.length });
     }),
@@ -36,7 +40,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         icon={Icon.code}
         title={t("title")}
         subtitle={t("subtitle", { count: projects.length })}
-        actions={<CreateProject initialOpen={shouldOpenCreate && projects.length > 0} />}
+        actions={<CreateProject initialOpen={shouldOpenCreate && projects.length > 0} triggerSize="md" />}
       />
 
       {projects.length === 0 ? (

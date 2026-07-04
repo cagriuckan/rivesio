@@ -7,7 +7,7 @@ const nextConfig = {
   // Plain build → `.next`, served by `next start`. This is the most compatible
   // setup for Hostinger's Node.js application hosting (persistent process that
   // runs `npm start`). `next start` honors the PORT env var Hostinger assigns.
-  serverExternalPackages: ["mysql2"],
+  serverExternalPackages: ["postgres"],
   experimental: {
     // Avoid intermittent missing server chunks during the webpack build worker
     // phase with native/server-only dependencies.

@@ -8,8 +8,14 @@ import { cn } from "@/components/ui/cn";
 import { useThemePref } from "@/hooks/useThemePref";
 import { Dropdown, DropdownItem, DropdownLabel, DropdownSeparator } from "@/components/ui/Dropdown";
 import LanguageSwitcher from "./LanguageSwitcher";
+import { authClient } from "@/lib/auth-client";
 
-export default function UserMenu({ user }: { user: string }) {
+export default function UserMenu({
+  userInfo,
+}: {
+  userInfo: { name: string; email: string; image: string | null };
+}) {
+  const user = userInfo.name || userInfo.email;
   const t = useTranslations("nav");
   const tt = useTranslations("theme");
   const tu = useTranslations("user");
@@ -18,37 +24,37 @@ export default function UserMenu({ user }: { user: string }) {
   const { theme, setTheme } = useThemePref();
 
   async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await authClient.signOut();
     router.replace("/login");
     router.refresh();
   }
 
   const menuItems = [
-    { label: tu("settings"), icon: Icon.settings },
-    { label: tu("subscription"), icon: Icon.creditCard },
-    { label: tu("usage"), icon: Icon.barChart },
+    { label: tu("settings"), icon: Icon.settings, href: "/settings" },
+    { label: tu("subscription"), icon: Icon.creditCard, href: "/settings" },
+    { label: tu("usage"), icon: Icon.barChart, href: "/settings" },
   ];
 
   return (
     <Dropdown
       portal
-      side="top"
-      panelClassName="w-72"
+      side="bottom"
+      panelClassName="w-64"
       trigger={({ open, triggerProps }) => (
         <button
           {...triggerProps}
           aria-label={tu("menu")}
           className={cn(
             "flex w-full items-center gap-3 rounded-xl bg-surface px-2 py-2 text-left text-strong shadow-sm ring-1 ring-line-strong transition-colors outline-none focus-visible:ring-2 focus-visible:ring-accent",
-            open ? "bg-raised ring-accent-line" : "hover:bg-raised hover:ring-accent-line",
+            open ? "bg-raised ring-accent-line" : " hover:ring-accent-line",
           )}
         >
-          <Avatar name={user} size="md" />
+          <Avatar name={user} src={userInfo.image} size="md" />
           <span className="min-w-0 flex-1">
             <span className="block truncate text-sm font-semibold text-strong">{user}</span>
-            <span className="block truncate text-xs text-subtle">{tu("role")}</span>
+            <span className="block truncate text-xs text-subtle">{userInfo.email}</span>
           </span>
-          <Icon.chevronDown
+          <Icon.expandUpDown
             className={cn("h-4 w-4 shrink-0 text-subtle transition-transform", open && "rotate-180")}
           />
         </button>
@@ -57,11 +63,11 @@ export default function UserMenu({ user }: { user: string }) {
       {(close) => (
         <>
           {/* Identity */}
-          <div className="flex items-center gap-3 px-2.5 py-2.5">
-            <Avatar name={user} size="md" />
+          <div className="flex items-center gap-2.5 px-2 py-2">
+            <Avatar name={user} src={userInfo.image} size="md" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-strong">{user}</span>
-              <span className="block truncate text-xs text-subtle">{tu("role")}</span>
+              <span className="block truncate text-xs text-subtle">{userInfo.email}</span>
             </span>
           </div>
 
@@ -69,8 +75,8 @@ export default function UserMenu({ user }: { user: string }) {
 
           {/* Items */}
           <div className="space-y-0.5">
-            {menuItems.map(({ label, icon }) => (
-              <DropdownItem key={label} icon={icon} onClick={close}>
+            {menuItems.map(({ label, icon, href }) => (
+              <DropdownItem key={label} icon={icon} onClick={() => { close(); router.push(href); }}>
                 {label}
               </DropdownItem>
             ))}
@@ -94,36 +100,36 @@ export default function UserMenu({ user }: { user: string }) {
               onClick={() => setTheme("light")}
               aria-pressed={theme === "light"}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors",
                 theme === "light" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary",
               )}
             >
               <Icon.sun className="h-3.5 w-3.5" />
-              {tt("lightShort")}
+
             </button>
             <button
               type="button"
               onClick={() => setTheme("dark")}
               aria-pressed={theme === "dark"}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors",
                 theme === "dark" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary",
               )}
             >
               <Icon.moon className="h-3.5 w-3.5" />
-              {tt("darkShort")}
+            
             </button>
             <button
               type="button"
               onClick={() => setTheme("system")}
               aria-pressed={theme === "system"}
               className={cn(
-                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium transition-colors",
                 theme === "system" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary",
               )}
             >
               <Icon.monitor className="h-3.5 w-3.5" />
-              {tt("systemShort")}
+ 
             </button>
           </div>
 

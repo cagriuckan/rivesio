@@ -28,7 +28,7 @@ export function Tooltip({
       <span
         className={cn(
           "pointer-events-none absolute z-[9999] whitespace-nowrap rounded-md",
-          "bg-strong px-2 py-1 text-xs font-medium text-white shadow-md",
+          "bg-strong dark:bg-base px-2 py-1 text-xs font-medium text-white dark:text-strong shadow-md",
           "opacity-0 transition-opacity delay-150 group-hover/tip:opacity-100",
           sideClasses[side]
         )}

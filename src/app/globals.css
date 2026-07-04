@@ -32,9 +32,9 @@
   --color-panel:    #f7f8fa;   /* main content panel */
 
   /* ── Borders — single site-wide stroke ── */
-  --color-line:        #ebebeb;
-  --color-line-soft:   #ebebeb;
-  --color-line-strong: #ebebeb;
+  --color-line:        #e1e4ea;
+  --color-line-soft:   #e1e4ea;
+  --color-line-strong: #e1e4ea;
 
   /* ── Text scale ── */
   --color-faint:     #b6b9c2;
@@ -98,6 +98,14 @@
   --shadow-lg:  0 12px 28px rgba(17,20,40,.08), 0 2px 6px rgba(17,20,40,.05);
   --shadow-pop: 0 16px 40px rgba(17,20,40,.14), 0 4px 10px rgba(17,20,40,.06);
   --shadow-accent: 0 8px 20px color-mix(in srgb, #6366f1 35%, transparent);
+
+  /* ── Liquid-glass tab bar (mobile) ── */
+  --tabbar-glass-bg:     rgba(255,255,255,0.28);
+  --tabbar-glass-border: rgba(255,255,255,0.5);
+  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 22%, rgba(255,255,255,0) 55%, rgba(255,255,255,0.08) 100%);
+  --tabbar-glass-shadow: 0 20px 50px rgba(17,20,40,0.16), 0 6px 16px rgba(17,20,40,0.08), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(17,20,40,0.06);
+  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.65) 100%);
+  --tabbar-bubble-shadow: 0 8px 20px rgba(17,20,40,0.14), 0 2px 6px rgba(17,20,40,0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(17,20,40,0.04);
 }
 
 /* ═══ Dark theme override ════════════════════════════════════════════════ */
@@ -111,9 +119,9 @@
   --color-inset:    #0d0d0f;
   --color-panel:    #131316;
 
-  --color-line:        color-mix(in srgb, #ffffff 9%, transparent);
-  --color-line-soft:   color-mix(in srgb, #ffffff 6%, transparent);
-  --color-line-strong: color-mix(in srgb, #ffffff 14%, transparent);
+  --color-line:        color-mix(in srgb, #ffffff 6%, transparent);
+  --color-line-soft:   color-mix(in srgb, #ffffff 5%, transparent);
+  --color-line-strong: color-mix(in srgb, #ffffff 11%, transparent);
 
   --color-faint:     #45454d;
   --color-subtle:    #6a6a74;
@@ -140,6 +148,14 @@
   --shadow-lg:  0 12px 28px rgba(0,0,0,.55);
   --shadow-pop: 0 16px 40px rgba(0,0,0,.6);
   --shadow-accent: 0 8px 20px color-mix(in srgb, #7c7ff5 30%, transparent);
+
+
+  --tabbar-glass-bg:     rgba(28,28,32,0.38);
+  --tabbar-glass-border: rgba(255,255,255,0.1);
+  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 55%, rgba(255,255,255,0.02) 100%);
+  --tabbar-glass-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 6px 16px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 1px rgba(0,0,0,0.3);
+  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.1) 100%);
+  --tabbar-bubble-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.2);
 }
 
 /* ═══ Base ══════════════════════════════════════════════════════════════ */
@@ -162,6 +178,7 @@ body {
   letter-spacing: -0.006em;
   background-color: var(--color-canvas);
   color: var(--color-primary);
+  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

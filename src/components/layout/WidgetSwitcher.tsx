@@ -35,11 +35,10 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
 
   return (
     <Dropdown
-      portal={collapsed}
       role="listbox"
       panelClassName={cn(
-        "overflow-hidden rounded-xl bg-overlay",
-        collapsed ? "min-w-[220px]" : "w-full",
+        "w-52 max-w-[calc(100vw-2rem)] overflow-hidden rounded-lg bg-overlay",
+        collapsed && "min-w-[208px]",
       )}
       trigger={({ open, triggerProps }) =>
         collapsed ? (
@@ -59,13 +58,13 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
           <button
             {...triggerProps}
             className={cn(
-              "flex w-full items-center gap-3 rounded-xl bg-surface px-2.5 py-2.5 text-left text-strong shadow-sm ring-1 ring-line-strong transition-colors outline-none hover:bg-raised hover:ring-accent-line focus-visible:ring-2 focus-visible:ring-accent",
+              "flex w-full items-center gap-3 rounded-xl bg-surface px-2.5 py-2.5 text-left text-strong shadow-sm ring-1 ring-line-strong transition-colors outline-none hover:ring-accent-line focus-visible:ring-2 focus-visible:ring-accent",
               open && "bg-raised ring-accent-line"
             )}
           >
             <span
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm"
-              style={{ background: active ? active.accentColor : "var(--color-subtle)" }}
+              style={{ background: active ? active.accentColor : "var(--color-accent)" }}
             >
               {active ? active.name.slice(0, 1).toUpperCase() : <Icon.layers className="h-4 w-4" />}
             </span>
@@ -77,7 +76,7 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
                 {active ? active.slug : t("count", { count: widgets.length })}
               </span>
             </span>
-            <Icon.chevronDown
+            <Icon.expandUpDown
               className={cn("h-4 w-4 shrink-0 text-subtle transition-transform", open && "rotate-180")}
             />
           </button>
@@ -142,12 +141,12 @@ function OptionRow({ label, sub, selected, onClick, icon, iconBg }: {
       role="option"
       aria-selected={selected}
       className={cn(
-        "flex w-full items-center gap-3 rounded-lg px-2.5 py-2 text-left transition-colors",
+        "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors",
         selected ? "bg-accent-soft" : "hover:bg-raised"
       )}
     >
       <span
-        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[10px] font-bold text-white"
+        className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-bold text-white"
         style={{ background: iconBg }}
       >
         {icon}
@@ -156,7 +155,6 @@ function OptionRow({ label, sub, selected, onClick, icon, iconBg }: {
         <span className={cn("block truncate text-sm font-medium", selected ? "text-accent-text" : "text-primary")}>
           {label}
         </span>
-        <span className="block truncate text-xs text-subtle">{sub}</span>
       </span>
       {selected && <Icon.check className="h-4 w-4 shrink-0 text-accent-text" />}
     </button>

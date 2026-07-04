@@ -44,12 +44,14 @@ export function ActionMenu({
       align={align}
       side="bottom"
       panelClassName="w-52"
+      portal
       trigger={({ open, triggerProps }) => (
         <>
           <OpenChangeReporter open={open} onOpenChange={onOpenChange} />
           <button
             type="button"
             ref={triggerProps.ref}
+            id={triggerProps.id}
             onClick={(e) => {
               e.stopPropagation();
               triggerProps.onClick();
@@ -59,6 +61,7 @@ export function ActionMenu({
             aria-label={label}
             aria-haspopup={triggerProps["aria-haspopup"]}
             aria-expanded={triggerProps["aria-expanded"]}
+            aria-controls={triggerProps["aria-controls"]}
           >
             <Icon.dots className="h-4 w-4" />
           </button>
@@ -79,7 +82,7 @@ export function ActionMenu({
                     close();
                     item.onSelect();
                   }}
-                  className="h-9 rounded-md px-2.5 text-xs"
+                  className="text-xs"
                 >
                   {item.label}
                 </DropdownItem>

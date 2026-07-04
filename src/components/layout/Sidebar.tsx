@@ -22,17 +22,21 @@ const NAV = [
 export default function Sidebar({
   widgets,
   user,
+  userInfo,
   navCounts,
   onClose,
   collapsed,
   onToggleCollapse,
+  hasOwnedProjects = true,
 }: {
   widgets: WidgetOption[];
   user: string;
+  userInfo: { name: string; email: string; image: string | null };
   navCounts?: { feedbacks?: number; sites?: number };
   onClose?: () => void;
   collapsed?: boolean;
   onToggleCollapse?: () => void;
+  hasOwnedProjects?: boolean;
 }) {
   const t = useTranslations("nav");
   const tu = useTranslations("user");
@@ -40,6 +44,9 @@ export default function Sidebar({
   const router = useRouter();
   const params = useSearchParams();
   const w = params.get("w");
+  // Pure agents (no owned widgets) only get the inbox — site/widget
+  // management belongs to the owner.
+  const nav = hasOwnedProjects ? NAV : NAV.filter((n) => n.key === "overview" || n.key === "feedbacks");
 
   const withWidget = (href: string) => (w ? `${href}?w=${w}` : href);
   const handleNavClick = (href: string) => (event: MouseEvent<HTMLAnchorElement>) => {
@@ -52,11 +59,14 @@ export default function Sidebar({
 
   return (
     <aside
-      className="content-radius-tight flex h-full shrink-0 flex-col overflow-x-hidden transition-[width] duration-200"
+      className={cn(
+        "content-radius-tight flex h-full shrink-0 flex-col overflow-x-hidden transition-[width] duration-200",
+        onClose ? "bg-base" : "bg-transparent",
+      )}
       style={{ width: collapsed ? "72px" : "var(--sidebar-w)" }}
     >
       {/* Brand */}
-      <div className={cn("flex items-center pt-3 pb-0", collapsed ? "justify-center px-2" : "gap-2.5 px-4")}>
+      <div className={cn("flex items-center pt-3 pb-0", collapsed ? "justify-center px-2" : "gap-0 px-4")}>
         {/* Logo + toggle overlay when collapsed */}
         <div className="relative group/brand shrink-0">
           <Link
@@ -86,22 +96,35 @@ export default function Sidebar({
 
         {!collapsed && (
           <>
-            <span className="flex-1 text-xl font-bold tracking-tight text-strong">Revisto</span>
-            <Tooltip label="Collapse" side="bottom">
-              <button
-                onClick={onToggleCollapse}
-                className="flex h-7 w-7 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-raised hover:text-primary"
-                aria-label="Collapse sidebar"
+            <div className="flex-1 truncate">
+              <Link
+                href={withWidget("/")}
+                onClick={onClose}
+                className="inline-flex items-center gap-1.5 text-xl font-bold tracking-tight text-strong outline-none focus-visible:ring-2 -tracking-tighter focus-visible:ring-accent"
               >
-                <Icon.panelLeft className="h-4 w-4" />
-              </button>
-            </Tooltip>
+                Revisto
+                <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-warning/30 bg-warning-soft px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning-text">
+                  Beta
+                </span>
+              </Link>
+            </div>
+            {!onClose && (
+              <Tooltip label="Collapse" side="bottom">
+                <button
+                  onClick={onToggleCollapse}
+                  className="flex h-7 w-7 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-raised hover:text-primary"
+                  aria-label="Collapse sidebar"
+                >
+                  <Icon.panelLeft className="h-4 w-4" />
+                </button>
+              </Tooltip>
+            )}
           </>
         )}
       </div>
 
       {/* Widget switcher */}
-      <div className={collapsed ? "flex justify-center py-2" : "p-3 pb-2"}>
+      <div className={collapsed ? "flex justify-center pb-2" : "px-3 py-2"}>
         <Suspense>
           <WidgetSwitcher widgets={widgets} collapsed={collapsed} />
         </Suspense>
@@ -115,7 +138,7 @@ export default function Sidebar({
           </div>
         )}
         <ul className="space-y-0.5" role="list">
-          {NAV.map((n) => {
+          {nav.map((n) => {
             const active = n.href === "/" ? pathname === "/" : pathname.startsWith(n.href);
             const NavIcon = n.icon;
             const count = navCounts?.[n.key as "feedbacks" | "sites"] ?? 0;
@@ -185,26 +208,29 @@ export default function Sidebar({
       </nav>
 
       {/* Footer */}
-      <div className={cn("p-3", collapsed && "flex justify-center")}>
+      <div className={cn("px-3 py-2", collapsed && "flex justify-center")}>
         {collapsed ? (
           <button
             onClick={onToggleCollapse}
             className="flex items-center justify-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent"
             aria-label="Expand sidebar"
           >
-            <Avatar name={user} size="md" />
+            <Avatar name={user} src={userInfo.image} size="md" />
           </button>
         ) : (
-          <div className="space-y-3">
-            <UserMenu user={user} />
-            <div className="px-1.5">
-              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs font-medium text-subtle">
+          <div className="space-y-1.5">
+            <UserMenu userInfo={userInfo} />
+            <div className="px-1.5 space-y-1">
+              <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-[11px] font-medium text-subtle">
                 <a href="#" className="transition-colors hover:text-primary">
                   {tu("privacyPolicy")}
                 </a>
                 <a href="#" className="transition-colors hover:text-primary">
                   {tu("termsOfService")}
                 </a>
+              </div>
+              <div className="text-[10px] font-semibold text-faint tracking-wider">
+                Beta v0.0.1
               </div>
             </div>
           </div>

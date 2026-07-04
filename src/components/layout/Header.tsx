@@ -1,7 +1,11 @@
 "use client";
 
+import { Suspense } from "react";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
+import ContentActions from "./ContentActions";
+import Image from "next/image";
 
 export default function Header({
   onMenuToggle,
@@ -27,30 +31,30 @@ export default function Header({
           aria-expanded={sidebarOpen}
         >
           {sidebarOpen ? (
-            <Icon.close className="h-4 w-4" />
+            <Icon.close className="h-5 w-5" />
           ) : (
-            <Icon.menu className="h-4 w-4" />
+            <Icon.menu className="h-5 w-5" />
           )}
         </button>
       )}
 
       {/* Brand */}
-      <div className="flex items-center gap-2.5">
-        <span className="flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-lg shadow-sm" aria-hidden>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="h-full w-full">
-            <defs>
-              <linearGradient id="brandGm" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#6366f1"/>
-                <stop offset="100%" stopColor="#8b5cf6"/>
-              </linearGradient>
-            </defs>
-            <rect width="100" height="100" rx="24" fill="url(#brandGm)"/>
-            <rect x="17" y="23" width="66" height="46" rx="13" fill="white"/>
-            <path d="M27 69 L19 86 L45 69 Z" fill="white"/>
-            <polyline points="30,47 42,59 70,31" fill="none" stroke="url(#brandGm)" strokeWidth="9" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </span>
-        <span className="text-sm font-bold tracking-tight text-strong">{tc("brand")}</span>
+      <Link href="/" className="flex items-center gap-2">
+      <Image
+              src="/icon.png"
+              alt="Revisto"
+              width={34}
+              height={32}
+              className="rounded-xl bg-raised"
+            />
+        <span className="text-lg font-bold tracking-tighter text-strong">{tc("brand")}</span>
+      </Link>
+
+      {/* Right: mode switch, notifications, user menu */}
+      <div className="ml-auto flex items-center">
+        <Suspense>
+          <ContentActions />
+        </Suspense>
       </div>
     </header>
   );

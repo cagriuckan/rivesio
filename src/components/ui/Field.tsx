@@ -19,7 +19,7 @@ export function Label({ className, ...props }: React.LabelHTMLAttributes<HTMLLab
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, ...props }, ref) => (
-    <input ref={ref} className={cn(FIELD_BASE, "h-10 px-3 text-sm", className)} {...props} />
+    <input ref={ref} className={cn(FIELD_BASE, "h-9 px-3 text-sm", className)} {...props} />
   )
 );
 Input.displayName = "Input";

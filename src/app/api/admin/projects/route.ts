@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAdminSession } from "@/lib/auth";
 import { createProject, projectSlugExists } from "@/lib/admin-repo";
-import { DEFAULT_PROJECT_CATEGORIES } from "@/lib/db";
+import { DEFAULT_PROJECT_CATEGORIES } from "@/lib/repo";
 
 const schema = z.object({
   slug: z.string().min(1).max(60).regex(/^[a-z0-9-]+$/, "slug: a-z0-9-"),
@@ -12,6 +13,8 @@ const schema = z.object({
 });
 
 export async function GET(req: Request) {
+  const user = await requireAdminSession();
+  if (user instanceof NextResponse) return user;
   const { searchParams } = new URL(req.url);
   const slug = searchParams.get("slug")?.trim() ?? "";
   const parsed = schema.shape.slug.safeParse(slug);
@@ -26,6 +29,8 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  const user = await requireAdminSession();
+  if (user instanceof NextResponse) return user;
   const body = await req.json().catch(() => null);
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
@@ -33,7 +38,7 @@ export async function POST(req: Request) {
   }
   const d = parsed.data;
   try {
-    const project = await createProject({
+    const project = await createProject(user.id, {
       slug: d.slug,
       name: d.name,
       settings: {
@@ -43,7 +48,7 @@ export async function POST(req: Request) {
       },
     });
     return NextResponse.json({ ok: true, id: project.id, widget_key: project.widget_key });
-  } catch (e) {
+  } catch {
     // Most likely a duplicate slug (UNIQUE constraint).
     return NextResponse.json({ error: "slug_taken" }, { status: 409 });
   }

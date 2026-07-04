@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
+import PwaRegister from "@/components/PwaRegister";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -16,6 +17,14 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -33,11 +42,11 @@ export async function generateMetadata({
     description: t("description"),
     icons: {
       icon: [
-        { url: "/icon.svg", type: "image/svg+xml" },
-        { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+        { url: "/icon.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon.png", sizes: "32x32", type: "image/png" },
       ],
-      shortcut: "/favicon.ico",
-      apple: "/apple-icon.png",
+      shortcut: "/icon.png",
+      apple: "/icon.png",
     },
   };
 }
@@ -68,8 +77,9 @@ export default async function LocaleLayout({
       </head>
       <body>
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
+        <PwaRegister />
         <Script
-          src="https://revisto.app/api/widget/wk_dh45mv7dXRsJYTyUrCgtRR-D.js"
+          src="http://localhost:3000/api/widget/wk_test123.js"
           strategy="afterInteractive"
         />
       </body>

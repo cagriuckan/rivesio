@@ -5,8 +5,12 @@ import PageHeader from "@/components/layout/PageHeader";
 import { Icon } from "@/components/ui/Icons";
 import { Link } from "@/i18n/navigation";
 import ProjectSettingsForm from "@/components/projects/ProjectSettingsForm";
-import { getProjectById, parseSettings } from "@/lib/repo";
+import { parseSettings } from "@/lib/repo";
+import { getOwnedProject } from "@/lib/admin-repo";
+import { getSessionUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
 import { DEFAULT_WIDGET_TEXT } from "@/lib/types";
+import { getTranslations } from "next-intl/server";
 
 export const dynamic = "force-dynamic";
 
@@ -16,24 +20,32 @@ export default async function ProjectSettingsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const project = await getProjectById(id);
+  const user = await getSessionUser();
+  if (!user) redirect("/login");
+  const project = await getOwnedProject(user.id, id);
   if (!project) notFound();
 
   const settings = parseSettings(project);
 
+  const t = await getTranslations("projects");
+
   return (
     <Shell>
       <PageContent>
-        <div className="mb-4">
-          <Link
-            href="/projects"
-            className="inline-flex h-8 items-center gap-1.5 rounded-md border border-line bg-surface px-3 text-xs font-semibold text-secondary shadow-xs transition-colors hover:border-line-strong hover:bg-raised hover:text-primary"
-          >
-            <Icon.chevronLeft className="h-3.5 w-3.5" />
-            Back to Widgets
-          </Link>
-        </div>
-        <PageHeader icon={Icon.code} title={project.name} subtitle={project.slug} />
+        <PageHeader
+          icon={Icon.code}
+          title={project.name}
+          subtitle={project.slug}
+          actions={
+            <Link
+              href="/projects" className="
+              h-9 px-3.5 text-sm inline-flex items-center justify-center gap-2 font-semibold whitespace-nowrap rounded-full transition-all duration-150 outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-canvas active:scale-[.97] disabled:pointer-events-none disabled:opacity-45 select-none
+            bg-accent text-white hover:bg-accent-hover shadow-sm">
+              <Icon.chevronLeft className="h-3.5 w-3.5" />
+              {t("backToProjects")}
+            </Link>
+          }
+        />
 
         <ProjectSettingsForm
           projectId={project.id}
@@ -41,6 +53,21 @@ export default async function ProjectSettingsPage({
             categories: settings.categories,
             text: settings.text ?? DEFAULT_WIDGET_TEXT,
             fields: settings.fields ?? [],
+            design: {
+              position: settings.position,
+              fabStyle: settings.fabStyle ?? "label",
+              theme: settings.theme ?? "auto",
+              accentColor: settings.accentColor,
+            },
+            logoUrl: settings.logoUrl ?? null,
+            limits: {
+              siteLimit: project.site_limit,
+              autoApproveSites: project.auto_approve_sites,
+              allowConversation: project.allow_conversation,
+              defaultDailyLimitSite: project.default_daily_limit_site,
+              defaultDailyLimitVisitor: project.default_daily_limit_visitor,
+              defaultSupportDays: project.default_support_days,
+            },
           }}
         />
       </PageContent>

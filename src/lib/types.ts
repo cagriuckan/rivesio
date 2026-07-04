@@ -1,6 +1,10 @@
 export type SiteStatus = "pending" | "approved" | "blocked";
+export type SiteSource = "auto" | "manual";
 export type FeedbackStatus = "new" | "planned" | "in_progress" | "resolved" | "wontfix";
 export type Priority = "low" | "normal" | "high";
+export type ReplyAuthor = "admin" | "user";
+export type AgentMembershipStatus = "invited" | "active" | "revoked";
+export type FeedbackAssignmentSource = "claimed" | "category_auto" | "manual";
 
 export interface WidgetText {
   fabLabel: string;
@@ -26,9 +30,21 @@ export interface FormField {
   options?: string[]; // select only
 }
 
+export type WidgetPosition = "bottom-right" | "bottom-left";
+/** FAB presentation: full label + icon, or icon-only (compact circular). */
+export type FabStyle = "label" | "icon";
+/** "auto" follows the host page's data-theme; otherwise force dark/light. */
+export type WidgetTheme = "auto" | "dark" | "light";
+
 export interface ProjectSettings {
   accentColor: string;
-  position: "bottom-right" | "bottom-left";
+  /** Absolute URL to the uploaded brand logo, shown in the widget's emails. */
+  logoUrl?: string;
+  /** Internal storage key for the uploaded logo (backs the public serving route). */
+  logoPath?: string;
+  position: WidgetPosition;
+  fabStyle?: FabStyle;
+  theme?: WidgetTheme;
   categories: string[];
   text?: Record<WidgetLocale, WidgetText>;
   fields?: FormField[];
@@ -48,20 +64,34 @@ export interface ProjectRow {
   name: string;
   widget_key: string;
   settings_json: string;
+  // Operational, widget-global defaults. null == unlimited.
+  site_limit: number | null;
+  auto_approve_sites: boolean;
+  allow_conversation: boolean;
+  default_daily_limit_site: number | null;
+  default_daily_limit_visitor: number | null;
+  default_support_days: number | null;
   created_at: number;
+  updated_at: number;
 }
 
 export interface SiteRow {
   id: string;
   project_id: string;
   domain: string;
-  license_key: string | null;
   status: SiteStatus;
+  source: SiteSource;
   meta_json: string;
   first_seen: number;
   last_seen: number;
   is_favorite: number;
   label: string | null;
+  // Per-site overrides. null == inherit the widget default.
+  support_starts_at: number | null;
+  daily_limit_site: number | null;
+  daily_limit_visitor: number | null;
+  support_days: number | null;
+  allow_conversation: boolean | null;
 }
 
 export interface FeedbackRow {
@@ -74,19 +104,45 @@ export interface FeedbackRow {
   user_agent: string | null;
   viewport: string | null;
   wp_user: string | null;
+  email: string | null;
+  access_token: string;
+  visitor_hash: string | null;
   status: FeedbackStatus;
   priority: Priority;
   admin_note: string | null;
   custom_fields_json: string | null;
   created_at: number;
+  updated_at: number;
+  last_activity_at: number;
   is_favorite: number;
+  last_admin_read_at: number | null;
+  pinned_at: number | null;
+  assigned_to: string | null;
+  assigned_at: number | null;
+  assignment_source: FeedbackAssignmentSource | null;
+}
+
+export interface AgentMembershipRow {
+  id: string;
+  project_id: string;
+  email: string;
+  user_id: string | null;
+  status: AgentMembershipStatus;
+  categories: string[] | null;
+  invited_by: string;
+  invited_at: number;
+  accepted_at: number | null;
+  created_at: number;
+  updated_at: number;
 }
 
 export interface FeedbackReplyRow {
   id: string;
   feedback_id: string;
-  author: "admin";
+  author: ReplyAuthor;
   message: string;
+  page_url: string | null;
+  user_agent: string | null;
   created_at: number;
 }
 
@@ -112,6 +168,7 @@ export interface CustomFieldValue {
 export interface AttachmentRow {
   id: string;
   feedback_id: string;
+  reply_id: string | null;
   kind: "screenshot" | "upload";
   file_path: string;
   mime: string;
@@ -150,3 +207,36 @@ export const DEFAULT_WIDGET_TEXT: Record<WidgetLocale, WidgetText> = {
     errorMessage: "Couldn't send. Please try again.",
   },
 };
+
+// ── Notifications ─────────────────────────────────────────────────────
+export type NotificationType = "feedback_new" | "reply_user" | "status_change";
+
+export interface NotificationChannelPrefs {
+  inApp: boolean;
+  email: boolean;
+  push: boolean;
+}
+
+export interface NotificationPrefs {
+  feedbackNew: NotificationChannelPrefs;
+  replyUser: NotificationChannelPrefs;
+  statusChange: NotificationChannelPrefs;
+}
+
+export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
+  feedbackNew: { inApp: true, email: true, push: true },
+  replyUser: { inApp: true, email: true, push: true },
+  statusChange: { inApp: true, email: false, push: false },
+};
+
+export interface NotificationRow {
+  id: string;
+  user_id: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  link: string | null;
+  icon_url: string | null;
+  read_at: number | null;
+  created_at: number;
+}

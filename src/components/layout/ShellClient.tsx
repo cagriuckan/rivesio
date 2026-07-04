@@ -12,12 +12,16 @@ export type NavCounts = { feedbacks?: number; sites?: number };
 export default function ShellClient({
   widgets,
   user,
+  userInfo,
   navCounts,
+  hasOwnedProjects = true,
   children,
 }: {
   widgets: WidgetOption[];
   user: string;
+  userInfo: { name: string; email: string; image: string | null };
   navCounts?: NavCounts;
+  hasOwnedProjects?: boolean;
   children: React.ReactNode;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -52,7 +56,7 @@ export default function ShellClient({
   }, []);
 
   return (
-    <UserProvider value={user}>
+    <UserProvider value={userInfo}>
     <div className="flex h-screen flex-col overflow-hidden bg-canvas">
       {/* Mobile-only header */}
       <Header
@@ -64,7 +68,7 @@ export default function ShellClient({
         {/* Desktop sidebar — always visible */}
         <div className="hidden shrink-0 overflow-hidden md:flex">
           <Suspense>
-            <Sidebar widgets={widgets} user={user} navCounts={navCounts} collapsed={sidebarCollapsed} onToggleCollapse={toggleCollapse} />
+            <Sidebar widgets={widgets} user={user} userInfo={userInfo} navCounts={navCounts} collapsed={sidebarCollapsed} onToggleCollapse={toggleCollapse} hasOwnedProjects={hasOwnedProjects} />
           </Suspense>
         </div>
 
@@ -72,22 +76,22 @@ export default function ShellClient({
         {sidebarOpen && (
           <>
             <div
-              className="fixed inset-0 z-40 bg-black/40 md:hidden"
+              className="fixed inset-0 z-40 md:hidden"
               aria-hidden
               onClick={() => setSidebarOpen(false)}
             />
             <div
-              className="ds-slide-right fixed inset-y-0 left-0 z-50 md:hidden"
+              className="ds-slide-right fixed inset-y-0 left-0 z-50 shadow-pop ring-1 ring-line md:hidden"
             >
               <Suspense>
-                <Sidebar widgets={widgets} user={user} navCounts={navCounts} onClose={() => setSidebarOpen(false)} />
+                <Sidebar widgets={widgets} user={user} userInfo={userInfo} navCounts={navCounts} onClose={() => setSidebarOpen(false)} hasOwnedProjects={hasOwnedProjects} />
               </Suspense>
             </div>
           </>
         )}
 
-        <main className="min-w-0 flex-1 overflow-hidden bg-canvas pb-16 md:p-3 md:pb-3">
-          <div className="h-full overflow-y-auto bg-surface md:rounded-xl md:border md:border-line">
+        <main className="min-w-0 flex-1 overflow-hidden bg-canvas md:p-3 md:pb-3">
+          <div className="h-full overflow-y-auto bg-surface pb-24 md:rounded-xl md:border md:border-line md:pb-0">
             {children}
           </div>
         </main>
@@ -95,7 +99,7 @@ export default function ShellClient({
 
       {/* Mobile bottom tab bar */}
       <Suspense>
-        <BottomTabBar widgets={widgets} />
+        <BottomTabBar widgets={widgets} hasOwnedProjects={hasOwnedProjects} />
       </Suspense>
     </div>
     </UserProvider>

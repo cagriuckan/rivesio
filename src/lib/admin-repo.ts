@@ -1,5 +1,11 @@
-import { queryAll, queryOne, execute } from "./db";
+import { and, count, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
+import { db } from "@/db/client";
+import { attachments, feedbackReplies, feedbacks, projects, sites, user } from "@/db/schema";
+import { toAttachmentRow, toFeedbackRow, toProjectRow, toSiteRow } from "@/db/map";
 import { generateId, generateWidgetKey } from "./ids";
+import { env } from "./env";
+import { addReply, listReplies } from "./repo";
+import { accessibleProjectIds } from "./agent-repo";
 import type {
   AttachmentRow,
   FeedbackReplyRow,
@@ -11,61 +17,100 @@ import type {
   SiteStatus,
 } from "./types";
 
+// All admin queries are tenant-scoped: every function takes the session
+// user's id and only touches rows reachable through projects.user_id.
+const ownedProjectIds = (userId: string) =>
+  db.select({ id: projects.id }).from(projects).where(eq(projects.userId, userId));
+
 // --- Projects ---
 
-export async function createProject(args: {
+export async function createProject(userId: string, args: {
   slug: string;
   name: string;
   settings: Record<string, unknown>;
 }): Promise<ProjectRow> {
   const id = generateId();
-  await execute(
-    `INSERT INTO projects (id, slug, name, widget_key, settings_json, created_at)
-     VALUES (?, ?, ?, ?, ?, ?)`,
-    [
-      id,
-      args.slug,
-      args.name,
-      generateWidgetKey(),
-      JSON.stringify(args.settings),
-      Date.now(),
-    ],
-  );
-  return (await queryOne<ProjectRow>("SELECT * FROM projects WHERE id = ?", [id]))!;
+  const now = Date.now();
+  await db.insert(projects).values({
+    id,
+    userId,
+    slug: args.slug,
+    name: args.name,
+    widgetKey: generateWidgetKey(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    settings: args.settings as any,
+    autoApproveSites: env.autoApproveSites,
+    allowConversation: true,
+    createdAt: now,
+    updatedAt: now,
+  });
+  const [r] = await db.select().from(projects).where(eq(projects.id, id)).limit(1);
+  return toProjectRow(r!);
 }
 
 export async function projectSlugExists(slug: string): Promise<boolean> {
-  const row = await queryOne<{ id: string }>("SELECT id FROM projects WHERE slug = ? LIMIT 1", [slug]);
-  return Boolean(row);
+  const [r] = await db.select({ id: projects.id }).from(projects).where(eq(projects.slug, slug)).limit(1);
+  return Boolean(r);
+}
+
+export async function listOwnedProjects(userId: string): Promise<ProjectRow[]> {
+  const rows = await db
+    .select()
+    .from(projects)
+    .where(eq(projects.userId, userId))
+    .orderBy(desc(projects.createdAt));
+  return rows.map(toProjectRow);
+}
+
+export async function getOwnedProject(userId: string, id: string): Promise<ProjectRow | undefined> {
+  const [r] = await db
+    .select()
+    .from(projects)
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)))
+    .limit(1);
+  return r ? toProjectRow(r) : undefined;
+}
+
+export interface ProjectOperationalFields {
+  siteLimit?: number | null;
+  autoApproveSites?: boolean;
+  allowConversation?: boolean;
+  defaultDailyLimitSite?: number | null;
+  defaultDailyLimitVisitor?: number | null;
+  defaultSupportDays?: number | null;
 }
 
 export async function updateProject(
+  userId: string,
   id: string,
-  fields: { name?: string; settings?: Record<string, unknown> },
+  fields: {
+    name?: string;
+    settings?: Record<string, unknown>;
+  } & ProjectOperationalFields,
 ): Promise<void> {
-  const sets: string[] = [];
-  const vals: unknown[] = [];
-  if (fields.name !== undefined) {
-    sets.push("name = ?");
-    vals.push(fields.name);
-  }
-  if (fields.settings !== undefined) {
-    sets.push("settings_json = ?");
-    vals.push(JSON.stringify(fields.settings));
-  }
-  if (!sets.length) return;
-  vals.push(id);
-  await execute(`UPDATE projects SET ${sets.join(", ")} WHERE id = ?`, vals);
+  const set: Record<string, unknown> = { updatedAt: Date.now() };
+  if (fields.name !== undefined) set.name = fields.name;
+  if (fields.settings !== undefined) set.settings = fields.settings;
+  if (fields.siteLimit !== undefined) set.siteLimit = fields.siteLimit;
+  if (fields.autoApproveSites !== undefined) set.autoApproveSites = fields.autoApproveSites;
+  if (fields.allowConversation !== undefined) set.allowConversation = fields.allowConversation;
+  if (fields.defaultDailyLimitSite !== undefined) set.defaultDailyLimitSite = fields.defaultDailyLimitSite;
+  if (fields.defaultDailyLimitVisitor !== undefined) set.defaultDailyLimitVisitor = fields.defaultDailyLimitVisitor;
+  if (fields.defaultSupportDays !== undefined) set.defaultSupportDays = fields.defaultSupportDays;
+  await db.update(projects).set(set).where(and(eq(projects.id, id), eq(projects.userId, userId)));
 }
 
-export async function deleteProject(id: string): Promise<void> {
-  // FK cascades handle sites/feedbacks/attachments; deleting the project is enough.
-  await execute("DELETE FROM projects WHERE id = ?", [id]);
+export async function deleteProject(userId: string, id: string): Promise<void> {
+  // FK cascades handle sites/feedbacks/attachments.
+  await db.delete(projects).where(and(eq(projects.id, id), eq(projects.userId, userId)));
 }
 
-export async function rotateWidgetKey(id: string): Promise<string> {
+export async function rotateWidgetKey(userId: string, id: string): Promise<string> {
   const key = generateWidgetKey();
-  await execute("UPDATE projects SET widget_key = ? WHERE id = ?", [key, id]);
+  await db
+    .update(projects)
+    .set({ widgetKey: key, updatedAt: Date.now() })
+    .where(and(eq(projects.id, id), eq(projects.userId, userId)));
   return key;
 }
 
@@ -74,64 +119,126 @@ export async function rotateWidgetKey(id: string): Promise<string> {
 export interface SiteWithCounts extends SiteRow {
   project_name: string;
   feedback_count: number;
+  // Widget-global defaults, for rendering "inherits default" hints in the UI.
+  project_default_daily_limit_site: number | null;
+  project_default_daily_limit_visitor: number | null;
+  project_default_support_days: number | null;
+  project_allow_conversation: boolean;
 }
 
-export function listSites(filter?: { status?: SiteStatus; projectId?: string }): Promise<SiteWithCounts[]> {
-  const where: string[] = [];
-  const vals: unknown[] = [];
-  if (filter?.status) {
-    where.push("s.status = ?");
-    vals.push(filter.status);
-  }
-  if (filter?.projectId) {
-    where.push("s.project_id = ?");
-    vals.push(filter.projectId);
-  }
-  const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  return queryAll<SiteWithCounts>(
-    `SELECT s.*, p.name AS project_name,
-      (SELECT COUNT(*) FROM feedbacks f WHERE f.site_id = s.id) AS feedback_count
-     FROM sites s JOIN projects p ON p.id = s.project_id
-     ${clause}
-     ORDER BY s.last_seen DESC`,
-    vals,
-  );
+export async function listSites(
+  userId: string,
+  filter?: { status?: SiteStatus; projectId?: string },
+): Promise<SiteWithCounts[]> {
+  const where = [eq(projects.userId, userId)];
+  if (filter?.status) where.push(eq(sites.status, filter.status));
+  if (filter?.projectId) where.push(eq(sites.projectId, filter.projectId));
+
+  const rows = await db
+    .select({
+      site: sites,
+      projectName: projects.name,
+      feedbackCount: sql<number>`(select count(*) from ${feedbacks} where ${feedbacks.siteId} = ${sites.id})`,
+      defaultDailyLimitSite: projects.defaultDailyLimitSite,
+      defaultDailyLimitVisitor: projects.defaultDailyLimitVisitor,
+      defaultSupportDays: projects.defaultSupportDays,
+      allowConversation: projects.allowConversation,
+    })
+    .from(sites)
+    .innerJoin(projects, eq(projects.id, sites.projectId))
+    .where(and(...where))
+    .orderBy(desc(sites.lastSeen));
+
+  return rows.map((r) => ({
+    ...toSiteRow(r.site),
+    project_name: r.projectName,
+    feedback_count: Number(r.feedbackCount),
+    project_default_daily_limit_site: r.defaultDailyLimitSite,
+    project_default_daily_limit_visitor: r.defaultDailyLimitVisitor,
+    project_default_support_days: r.defaultSupportDays,
+    project_allow_conversation: r.allowConversation,
+  }));
 }
 
-export async function setSiteStatus(id: string, status: SiteStatus): Promise<void> {
-  await execute("UPDATE sites SET status = ? WHERE id = ?", [status, id]);
+export async function getSite(userId: string, id: string): Promise<SiteRow | undefined> {
+  const [r] = await db
+    .select({ site: sites })
+    .from(sites)
+    .innerJoin(projects, eq(projects.id, sites.projectId))
+    .where(and(eq(sites.id, id), eq(projects.userId, userId)))
+    .limit(1);
+  return r ? toSiteRow(r.site) : undefined;
 }
 
-export async function updateSite(
-  id: string,
-  fields: { status?: SiteStatus; is_favorite?: boolean; label?: string | null },
-): Promise<void> {
-  const sets: string[] = [];
-  const vals: unknown[] = [];
-  if (fields.status !== undefined) {
-    sets.push("status = ?");
-    vals.push(fields.status);
-  }
-  if (fields.is_favorite !== undefined) {
-    sets.push("is_favorite = ?");
-    vals.push(fields.is_favorite ? 1 : 0);
-  }
-  if (fields.label !== undefined) {
-    sets.push("label = ?");
-    vals.push(fields.label);
-  }
-  if (!sets.length) return;
-  vals.push(id);
-  await execute(`UPDATE sites SET ${sets.join(", ")} WHERE id = ?`, vals);
+export async function createManualSite(args: {
+  projectId: string;
+  domain: string;
+  status: SiteStatus;
+}): Promise<SiteRow> {
+  const id = generateId();
+  const now = Date.now();
+  await db.insert(sites).values({
+    id,
+    projectId: args.projectId,
+    domain: args.domain,
+    status: args.status,
+    source: "manual",
+    meta: {},
+    supportStartsAt: now,
+    firstSeen: now,
+    lastSeen: now,
+    createdAt: now,
+  });
+  const [r] = await db.select().from(sites).where(eq(sites.id, id)).limit(1);
+  return toSiteRow(r!);
 }
 
-export async function deleteSite(id: string): Promise<void> {
-  // FK cascades handle feedbacks/attachments rows; deleting the site is enough.
-  await execute("DELETE FROM sites WHERE id = ?", [id]);
+export async function setSiteStatus(userId: string, id: string, status: SiteStatus): Promise<void> {
+  await db
+    .update(sites)
+    .set({ status })
+    .where(and(eq(sites.id, id), inArray(sites.projectId, ownedProjectIds(userId))));
 }
 
-export function listFeedbackIdsForSite(siteId: string): Promise<{ id: string }[]> {
-  return queryAll<{ id: string }>("SELECT id FROM feedbacks WHERE site_id = ?", [siteId]);
+export interface SiteOverrideFields {
+  status?: SiteStatus;
+  is_favorite?: boolean;
+  label?: string | null;
+  support_starts_at?: number | null;
+  daily_limit_site?: number | null;
+  daily_limit_visitor?: number | null;
+  support_days?: number | null;
+  allow_conversation?: boolean | null;
+}
+
+export async function updateSite(userId: string, id: string, fields: SiteOverrideFields): Promise<void> {
+  const set: Record<string, unknown> = {};
+  if (fields.status !== undefined) set.status = fields.status;
+  if (fields.is_favorite !== undefined) set.isFavorite = fields.is_favorite;
+  if (fields.label !== undefined) set.label = fields.label;
+  if (fields.support_starts_at !== undefined) set.supportStartsAt = fields.support_starts_at;
+  if (fields.daily_limit_site !== undefined) set.dailyLimitSite = fields.daily_limit_site;
+  if (fields.daily_limit_visitor !== undefined) set.dailyLimitVisitor = fields.daily_limit_visitor;
+  if (fields.support_days !== undefined) set.supportDays = fields.support_days;
+  if (fields.allow_conversation !== undefined) set.allowConversation = fields.allow_conversation;
+  if (!Object.keys(set).length) return;
+  await db
+    .update(sites)
+    .set(set)
+    .where(and(eq(sites.id, id), inArray(sites.projectId, ownedProjectIds(userId))));
+}
+
+export async function deleteSite(userId: string, id: string): Promise<void> {
+  await db
+    .delete(sites)
+    .where(and(eq(sites.id, id), inArray(sites.projectId, ownedProjectIds(userId))));
+}
+
+export async function listFeedbackIdsForSite(userId: string, siteId: string): Promise<{ id: string }[]> {
+  return db
+    .select({ id: feedbacks.id })
+    .from(feedbacks)
+    .where(and(eq(feedbacks.siteId, siteId), inArray(feedbacks.projectId, ownedProjectIds(userId))));
 }
 
 // --- Feedbacks ---
@@ -141,133 +248,187 @@ export interface FeedbackWithMeta extends FeedbackRow {
   domain: string;
   attachment_count: number;
   first_attachment_id: string | null;
+  reply_count: number;
+  last_replier: "admin" | "user" | null;
+  last_reply_at: number | null;
+  has_new_user_reply: boolean;
+  last_message: string;
+  last_message_author: "admin" | "user";
+  last_message_at: number;
+  unread: boolean;
+  assignee_name: string | null;
+  assignee_email: string | null;
 }
 
-export function listFeedbacks(filter: {
-  projectId?: string;
-  status?: FeedbackStatus;
-  priority?: Priority;
-}): Promise<FeedbackWithMeta[]> {
-  const where: string[] = [];
-  const vals: unknown[] = [];
-  if (filter.projectId) {
-    where.push("f.project_id = ?");
-    vals.push(filter.projectId);
+function feedbackMetaSelect() {
+  return {
+    feedback: feedbacks,
+    projectName: projects.name,
+    domain: sites.domain,
+    attachmentCount: sql<number>`(select count(*) from ${attachments} where ${attachments.feedbackId} = ${feedbacks.id})`,
+    firstAttachmentId: sql<string | null>`(select id from ${attachments} where ${attachments.feedbackId} = ${feedbacks.id} order by id limit 1)`,
+    replyCount: sql<number>`(select count(*) from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id})`,
+    lastReplier: sql<string | null>`(select author from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} order by created_at desc limit 1)`,
+    lastReplyAt: sql<number | null>`(select created_at from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} order by created_at desc limit 1)`,
+    hasNewUserReply: sql<number>`(select count(*) from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} and author = 'user' and created_at > coalesce((select created_at from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} and author = 'admin' order by created_at desc limit 1), 0))`,
+    lastMessage: sql<string | null>`(select message from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} order by created_at desc limit 1)`,
+    // Newest user activity (initial message or latest user reply) — drives the unread flag.
+    lastUserActivityAt: sql<number>`coalesce((select max(created_at) from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} and author = 'user'), ${feedbacks.createdAt})`,
+    assigneeName: sql<string | null>`(select name from ${user} where id = ${feedbacks.assignedTo})`,
+    assigneeEmail: sql<string | null>`(select email from ${user} where id = ${feedbacks.assignedTo})`,
+  };
+}
+
+function toFeedbackWithMeta(r: {
+  feedback: typeof feedbacks.$inferSelect;
+  projectName: string;
+  domain: string;
+  attachmentCount: number;
+  firstAttachmentId: string | null;
+  replyCount: number;
+  lastReplier: string | null;
+  lastReplyAt: number | null;
+  hasNewUserReply: number;
+  lastMessage: string | null;
+  lastUserActivityAt: number;
+  assigneeName: string | null;
+  assigneeEmail: string | null;
+}): FeedbackWithMeta {
+  const row = toFeedbackRow(r.feedback);
+  return {
+    ...row,
+    project_name: r.projectName,
+    domain: r.domain,
+    attachment_count: Number(r.attachmentCount),
+    first_attachment_id: r.firstAttachmentId,
+    reply_count: Number(r.replyCount),
+    last_replier: (r.lastReplier as "admin" | "user" | null) ?? null,
+    last_reply_at: r.lastReplyAt ?? null,
+    has_new_user_reply: Number(r.hasNewUserReply) > 0,
+    last_message: r.lastMessage ?? row.message,
+    last_message_author: (r.lastReplier as "admin" | "user" | null) ?? "user",
+    last_message_at: r.lastReplyAt ?? row.created_at,
+    unread: (row.last_admin_read_at ?? 0) < Number(r.lastUserActivityAt),
+    assignee_name: r.assigneeName,
+    assignee_email: r.assigneeEmail,
+  };
+}
+
+export async function listFeedbacks(
+  userId: string,
+  filter: {
+    projectId?: string;
+    status?: FeedbackStatus;
+    priority?: Priority;
+    q?: string;
+  },
+): Promise<FeedbackWithMeta[]> {
+  const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
+  if (filter.projectId) where.push(eq(feedbacks.projectId, filter.projectId));
+  if (filter.status) where.push(eq(feedbacks.status, filter.status));
+  if (filter.priority) where.push(eq(feedbacks.priority, filter.priority));
+  if (filter.q) {
+    const like = `%${filter.q.replace(/[%_]/g, "\\$&")}%`;
+    where.push(
+      sql`(${feedbacks.message} ilike ${like} or ${feedbacks.email} ilike ${like} or ${sites.domain} ilike ${like})`,
+    );
   }
-  if (filter.status) {
-    where.push("f.status = ?");
-    vals.push(filter.status);
-  }
-  if (filter.priority) {
-    where.push("f.priority = ?");
-    vals.push(filter.priority);
-  }
-  const clause = where.length ? `WHERE ${where.join(" AND ")}` : "";
-  return queryAll<FeedbackWithMeta>(
-    `SELECT f.*, p.name AS project_name, s.domain AS domain,
-      (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count,
-      (SELECT a.id FROM attachments a WHERE a.feedback_id = f.id ORDER BY a.id LIMIT 1) AS first_attachment_id
-     FROM feedbacks f
-     JOIN projects p ON p.id = f.project_id
-     JOIN sites s ON s.id = f.site_id
-     ${clause}
-     ORDER BY f.created_at DESC
-     LIMIT 500`,
-    vals,
-  );
+
+  const rows = await db
+    .select(feedbackMetaSelect())
+    .from(feedbacks)
+    .innerJoin(projects, eq(projects.id, feedbacks.projectId))
+    .innerJoin(sites, eq(sites.id, feedbacks.siteId))
+    .where(and(...where))
+    .orderBy(desc(feedbacks.lastActivityAt))
+    .limit(500);
+
+  return rows.map(toFeedbackWithMeta);
 }
 
-export function getFeedbackWithMeta(id: string): Promise<FeedbackWithMeta | undefined> {
-  return queryOne<FeedbackWithMeta>(
-    `SELECT f.*, p.name AS project_name, s.domain AS domain,
-      (SELECT COUNT(*) FROM attachments a WHERE a.feedback_id = f.id) AS attachment_count,
-      (SELECT a.id FROM attachments a WHERE a.feedback_id = f.id ORDER BY a.id LIMIT 1) AS first_attachment_id
-     FROM feedbacks f
-     JOIN projects p ON p.id = f.project_id
-     JOIN sites s ON s.id = f.site_id
-     WHERE f.id = ?`,
-    [id],
-  );
+export async function markFeedbackRead(userId: string, id: string): Promise<void> {
+  await db
+    .update(feedbacks)
+    .set({ lastAdminReadAt: Date.now() })
+    .where(and(eq(feedbacks.id, id), inArray(feedbacks.projectId, accessibleProjectIds(userId))));
 }
 
-async function ensureFeedbackRepliesTable(): Promise<void> {
-  await execute(`
-    CREATE TABLE IF NOT EXISTS feedback_replies (
-      id          VARCHAR(64) PRIMARY KEY,
-      feedback_id VARCHAR(64) NOT NULL,
-      author      VARCHAR(32) NOT NULL DEFAULT 'admin',
-      message     TEXT NOT NULL,
-      created_at  BIGINT NOT NULL,
-      KEY idx_feedback_replies_feedback (feedback_id, created_at),
-      CONSTRAINT fk_feedback_replies_feedback FOREIGN KEY (feedback_id)
-        REFERENCES feedbacks(id) ON DELETE CASCADE
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  `);
+export async function setFeedbackPinned(userId: string, id: string, pinned: boolean): Promise<void> {
+  await db
+    .update(feedbacks)
+    .set({ pinnedAt: pinned ? Date.now() : null })
+    .where(and(eq(feedbacks.id, id), inArray(feedbacks.projectId, accessibleProjectIds(userId))));
 }
 
-export async function listFeedbackReplies(feedbackId: string): Promise<FeedbackReplyRow[]> {
-  await ensureFeedbackRepliesTable();
-  return queryAll<FeedbackReplyRow>(
-    "SELECT * FROM feedback_replies WHERE feedback_id = ? ORDER BY created_at ASC",
-    [feedbackId],
-  );
+export async function getFeedbackWithMeta(userId: string, id: string): Promise<FeedbackWithMeta | undefined> {
+  const [r] = await db
+    .select(feedbackMetaSelect())
+    .from(feedbacks)
+    .innerJoin(projects, eq(projects.id, feedbacks.projectId))
+    .innerJoin(sites, eq(sites.id, feedbacks.siteId))
+    .where(and(eq(feedbacks.id, id), inArray(feedbacks.projectId, accessibleProjectIds(userId))))
+    .limit(1);
+  return r ? toFeedbackWithMeta(r) : undefined;
 }
 
-export async function addFeedbackReply(feedbackId: string, message: string): Promise<FeedbackReplyRow> {
-  await ensureFeedbackRepliesTable();
-  const id = generateId();
-  const createdAt = Date.now();
-  await execute(
-    `INSERT INTO feedback_replies (id, feedback_id, author, message, created_at)
-     VALUES (?, ?, 'admin', ?, ?)`,
-    [id, feedbackId, message, createdAt],
-  );
-  return (await queryOne<FeedbackReplyRow>("SELECT * FROM feedback_replies WHERE id = ?", [id]))!;
+// Replies — shared primitives live in repo.ts; these keep the admin-facing names.
+export function listFeedbackReplies(feedbackId: string): Promise<FeedbackReplyRow[]> {
+  return listReplies(feedbackId);
+}
+
+export function addFeedbackReply(feedbackId: string, message: string): Promise<FeedbackReplyRow> {
+  return addReply({ feedbackId, author: "admin", message });
 }
 
 export async function updateFeedback(
+  userId: string,
   id: string,
   fields: { status?: FeedbackStatus; priority?: Priority; admin_note?: string; is_favorite?: boolean },
 ): Promise<void> {
-  const sets: string[] = [];
-  const vals: unknown[] = [];
-  if (fields.status !== undefined) {
-    sets.push("status = ?");
-    vals.push(fields.status);
-  }
-  if (fields.priority !== undefined) {
-    sets.push("priority = ?");
-    vals.push(fields.priority);
-  }
-  if (fields.admin_note !== undefined) {
-    sets.push("admin_note = ?");
-    vals.push(fields.admin_note);
-  }
-  if (fields.is_favorite !== undefined) {
-    sets.push("is_favorite = ?");
-    vals.push(fields.is_favorite ? 1 : 0);
-  }
-  if (!sets.length) return;
-  vals.push(id);
-  await execute(`UPDATE feedbacks SET ${sets.join(", ")} WHERE id = ?`, vals);
+  const set: Record<string, unknown> = {};
+  if (fields.status !== undefined) set.status = fields.status;
+  if (fields.priority !== undefined) set.priority = fields.priority;
+  if (fields.admin_note !== undefined) set.adminNote = fields.admin_note;
+  if (fields.is_favorite !== undefined) set.isFavorite = fields.is_favorite;
+  if (!Object.keys(set).length) return;
+  set.updatedAt = Date.now();
+  await db
+    .update(feedbacks)
+    .set(set)
+    .where(and(eq(feedbacks.id, id), inArray(feedbacks.projectId, accessibleProjectIds(userId))));
 }
 
-export async function bulkUpdateStatus(ids: string[], status: FeedbackStatus): Promise<void> {
+export async function bulkUpdateStatus(userId: string, ids: string[], status: FeedbackStatus): Promise<void> {
   if (!ids.length) return;
-  const placeholders = ids.map(() => "?").join(", ");
-  await execute(
-    `UPDATE feedbacks SET status = ? WHERE id IN (${placeholders})`,
-    [status, ...ids],
-  );
+  await db
+    .update(feedbacks)
+    .set({ status, updatedAt: Date.now() })
+    .where(and(inArray(feedbacks.id, ids), inArray(feedbacks.projectId, accessibleProjectIds(userId))));
 }
 
-export async function deleteFeedback(id: string): Promise<void> {
-  // FK cascade removes attachments rows.
-  await execute("DELETE FROM feedbacks WHERE id = ?", [id]);
+// Agents can't delete tickets — owner-only.
+export async function deleteFeedback(userId: string, id: string): Promise<void> {
+  await db
+    .delete(feedbacks)
+    .where(and(eq(feedbacks.id, id), inArray(feedbacks.projectId, ownedProjectIds(userId))));
 }
 
-export function getAttachmentById(id: string): Promise<AttachmentRow | undefined> {
-  return queryOne<AttachmentRow>("SELECT * FROM attachments WHERE id = ?", [id]);
+/** Tenant-scoped attachment lookup for the admin panel. */
+export async function getOwnedAttachment(userId: string, id: string): Promise<AttachmentRow | undefined> {
+  const [r] = await db
+    .select({ attachment: attachments })
+    .from(attachments)
+    .innerJoin(feedbacks, eq(feedbacks.id, attachments.feedbackId))
+    .innerJoin(projects, eq(projects.id, feedbacks.projectId))
+    .where(and(eq(attachments.id, id), eq(projects.userId, userId)))
+    .limit(1);
+  return r ? toAttachmentRow(r.attachment) : undefined;
+}
+
+/** Unscoped lookup — only for the public token-authenticated conversation API. */
+export async function getAttachmentById(id: string): Promise<AttachmentRow | undefined> {
+  const [r] = await db.select().from(attachments).where(eq(attachments.id, id)).limit(1);
+  return r ? toAttachmentRow(r) : undefined;
 }
 
 // --- Dashboard stats ---
@@ -283,23 +444,31 @@ export interface Stats {
   projects: number;
 }
 
-/** Builds a `WHERE` fragment + values to scope a query to one project (or all). */
-function projectScope(projectId: string | undefined): { clause: string; vals: unknown[] } {
-  return projectId
-    ? { clause: "WHERE project_id = ?", vals: [projectId] }
-    : { clause: "", vals: [] };
+async function countFeedbacks(
+  userId: string,
+  projectId: string | undefined,
+  extra?: ReturnType<typeof eq>,
+): Promise<number> {
+  const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
+  if (projectId) where.push(eq(feedbacks.projectId, projectId));
+  if (extra) where.push(extra);
+  const [r] = await db.select({ c: count() }).from(feedbacks).where(and(...where));
+  return r?.c ?? 0;
 }
 
-export async function getStats(projectId?: string): Promise<Stats> {
-  const fb = projectScope(projectId);
-  const st = projectScope(projectId);
-  const count = async (sql: string, vals: unknown[] = []) =>
-    (await queryOne<{ c: number }>(sql, vals))!.c;
+async function countSites(
+  userId: string,
+  projectId: string | undefined,
+  extra?: ReturnType<typeof eq>,
+): Promise<number> {
+  const where = [inArray(sites.projectId, ownedProjectIds(userId))];
+  if (projectId) where.push(eq(sites.projectId, projectId));
+  if (extra) where.push(extra);
+  const [r] = await db.select({ c: count() }).from(sites).where(and(...where));
+  return r?.c ?? 0;
+}
 
-  const and = (extra: string) => (fb.clause ? `${fb.clause} AND ${extra}` : `WHERE ${extra}`);
-  const stAnd = (extra: string) =>
-    st.clause ? `${st.clause} AND ${extra}` : `WHERE ${extra}`;
-
+export async function getStats(userId: string, projectId?: string): Promise<Stats> {
   const [
     totalFeedbacks,
     newFeedbacks,
@@ -308,16 +477,20 @@ export async function getStats(projectId?: string): Promise<Stats> {
     approvedSites,
     blockedSites,
     totalSites,
-    projects,
+    projectCount,
   ] = await Promise.all([
-    count(`SELECT COUNT(*) AS c FROM feedbacks ${fb.clause}`, fb.vals),
-    count(`SELECT COUNT(*) AS c FROM feedbacks ${and("status = 'new'")}`, fb.vals),
-    count(`SELECT COUNT(*) AS c FROM feedbacks ${and("status = 'resolved'")}`, fb.vals),
-    count(`SELECT COUNT(*) AS c FROM sites ${stAnd("status = 'pending'")}`, st.vals),
-    count(`SELECT COUNT(*) AS c FROM sites ${stAnd("status = 'approved'")}`, st.vals),
-    count(`SELECT COUNT(*) AS c FROM sites ${stAnd("status = 'blocked'")}`, st.vals),
-    count(`SELECT COUNT(*) AS c FROM sites ${st.clause}`, st.vals),
-    count("SELECT COUNT(*) AS c FROM projects"),
+    countFeedbacks(userId, projectId),
+    countFeedbacks(userId, projectId, eq(feedbacks.status, "new")),
+    countFeedbacks(userId, projectId, eq(feedbacks.status, "resolved")),
+    countSites(userId, projectId, eq(sites.status, "pending")),
+    countSites(userId, projectId, eq(sites.status, "approved")),
+    countSites(userId, projectId, eq(sites.status, "blocked")),
+    countSites(userId, projectId),
+    db
+      .select({ c: count() })
+      .from(projects)
+      .where(eq(projects.userId, userId))
+      .then((r) => r[0]?.c ?? 0),
   ]);
 
   return {
@@ -328,44 +501,51 @@ export async function getStats(projectId?: string): Promise<Stats> {
     approvedSites,
     blockedSites,
     totalSites,
-    projects,
+    projects: projectCount,
   };
 }
 
-/** Counts feedbacks grouped by status, scoped to a project or all. */
-export async function getStatusBreakdown(projectId?: string): Promise<Record<FeedbackStatus, number>> {
-  const { clause, vals } = projectScope(projectId);
-  const rows = await queryAll<{ status: FeedbackStatus; c: number }>(
-    `SELECT status, COUNT(*) AS c FROM feedbacks ${clause} GROUP BY status`,
-    vals,
-  );
-  const out: Record<FeedbackStatus, number> = {
-    new: 0, planned: 0, in_progress: 0, resolved: 0, wontfix: 0,
-  };
+function scopedFeedbackWhere(userId: string, projectId?: string) {
+  const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
+  if (projectId) where.push(eq(feedbacks.projectId, projectId));
+  return where;
+}
+
+export async function getStatusBreakdown(userId: string, projectId?: string): Promise<Record<FeedbackStatus, number>> {
+  const rows = await db
+    .select({ status: feedbacks.status, c: count() })
+    .from(feedbacks)
+    .where(and(...scopedFeedbackWhere(userId, projectId)))
+    .groupBy(feedbacks.status);
+  const out: Record<FeedbackStatus, number> = { new: 0, planned: 0, in_progress: 0, resolved: 0, wontfix: 0 };
   for (const r of rows) out[r.status] = r.c;
   return out;
 }
 
-/** Counts feedbacks grouped by priority, scoped to a project or all. */
-export async function getPriorityBreakdown(projectId?: string): Promise<Record<Priority, number>> {
-  const { clause, vals } = projectScope(projectId);
-  const rows = await queryAll<{ priority: Priority; c: number }>(
-    `SELECT priority, COUNT(*) AS c FROM feedbacks ${clause} GROUP BY priority`,
-    vals,
-  );
+export async function getPriorityBreakdown(userId: string, projectId?: string): Promise<Record<Priority, number>> {
+  const rows = await db
+    .select({ priority: feedbacks.priority, c: count() })
+    .from(feedbacks)
+    .where(and(...scopedFeedbackWhere(userId, projectId)))
+    .groupBy(feedbacks.priority);
   const out: Record<Priority, number> = { low: 0, normal: 0, high: 0 };
   for (const r of rows) out[r.priority] = r.c;
   return out;
 }
 
-/** Returns the top feedback categories by count, scoped to a project or all. */
-export function getCategoryBreakdown(projectId?: string, limit = 6): Promise<{ category: string; count: number }[]> {
-  const { clause, vals } = projectScope(projectId);
-  return queryAll<{ category: string; count: number }>(
-    `SELECT category, COUNT(*) AS count FROM feedbacks ${clause}
-     GROUP BY category ORDER BY count DESC LIMIT ?`,
-    [...vals, limit],
-  );
+export async function getCategoryBreakdown(
+  userId: string,
+  projectId?: string,
+  limit = 6,
+): Promise<{ category: string; count: number }[]> {
+  const rows = await db
+    .select({ category: feedbacks.category, count: count() })
+    .from(feedbacks)
+    .where(and(...scopedFeedbackWhere(userId, projectId)))
+    .groupBy(feedbacks.category)
+    .orderBy(desc(count()))
+    .limit(limit);
+  return rows.map((r) => ({ category: r.category, count: Number(r.count) }));
 }
 
 export interface PeriodStats {
@@ -376,23 +556,28 @@ export interface PeriodStats {
   resolutionRate: number;
 }
 
-async function getPeriodStats(projectId: string | undefined, fromTs: number, toTs: number): Promise<PeriodStats> {
-  const proj = projectId ? "AND project_id = ?" : "";
-  const baseVals = projectId ? [fromTs, toTs, projectId] : [fromTs, toTs];
-
-  const count = async (extra: string) =>
-    (await queryOne<{ c: number }>(
-      `SELECT COUNT(*) AS c FROM feedbacks WHERE created_at >= ? AND created_at < ? ${proj} ${extra}`,
-      baseVals,
-    ))!.c;
-
+async function getPeriodStats(
+  userId: string,
+  projectId: string | undefined,
+  fromTs: number,
+  toTs: number,
+): Promise<PeriodStats> {
+  const base = [
+    ...scopedFeedbackWhere(userId, projectId),
+    gte(feedbacks.createdAt, fromTs),
+    lt(feedbacks.createdAt, toTs),
+  ];
+  const countWith = async (extra?: ReturnType<typeof eq>) => {
+    const where = extra ? [...base, extra] : base;
+    const [r] = await db.select({ c: count() }).from(feedbacks).where(and(...where));
+    return r?.c ?? 0;
+  };
   const [total, newCount, resolved, highPriority] = await Promise.all([
-    count(""),
-    count("AND status = 'new'"),
-    count("AND status = 'resolved'"),
-    count("AND priority = 'high'"),
+    countWith(),
+    countWith(eq(feedbacks.status, "new")),
+    countWith(eq(feedbacks.status, "resolved")),
+    countWith(eq(feedbacks.priority, "high")),
   ]);
-
   return {
     total,
     newCount,
@@ -402,27 +587,28 @@ async function getPeriodStats(projectId: string | undefined, fromTs: number, toT
   };
 }
 
-export interface TrendPoint { date: string; count: number; }
+export interface TrendPoint {
+  date: string;
+  count: number;
+}
 
-export async function getDailyTrend(projectId?: string, days = 30): Promise<TrendPoint[]> {
+export async function getDailyTrend(userId: string, projectId?: string, days = 30): Promise<TrendPoint[]> {
   const now = Date.now();
   const from = now - days * 86_400_000;
-  const proj = projectId ? "AND project_id = ?" : "";
-  const vals = projectId ? [from, projectId] : [from];
+  const where = [...scopedFeedbackWhere(userId, projectId), gte(feedbacks.createdAt, from)];
 
-  const rows = await queryAll<TrendPoint>(
-    `SELECT DATE(FROM_UNIXTIME(created_at / 1000)) AS date, COUNT(*) AS count
-     FROM feedbacks WHERE created_at >= ? ${proj}
-     GROUP BY date ORDER BY date ASC`,
-    vals,
-  );
+  const bucket = sql<string>`to_char(to_timestamp(${feedbacks.createdAt} / 1000), 'YYYY-MM-DD')`;
+  const rows = await db
+    .select({ date: bucket, count: count() })
+    .from(feedbacks)
+    .where(and(...where))
+    .groupBy(bucket)
+    .orderBy(bucket);
 
-  // Fill missing days with 0
-  const map = new Map(rows.map((r) => [r.date, r.count]));
+  const map = new Map(rows.map((r) => [r.date, Number(r.count)]));
   const result: TrendPoint[] = [];
   for (let i = days - 1; i >= 0; i--) {
-    const d = new Date(now - i * 86_400_000);
-    const key = d.toISOString().slice(0, 10);
+    const key = new Date(now - i * 86_400_000).toISOString().slice(0, 10);
     result.push({ date: key, count: map.get(key) ?? 0 });
   }
   return result;
@@ -433,12 +619,12 @@ export interface StatsWithTrend {
   previous: PeriodStats;
 }
 
-export async function getStatsWithTrend(projectId?: string, days = 30): Promise<StatsWithTrend> {
+export async function getStatsWithTrend(userId: string, projectId?: string, days = 30): Promise<StatsWithTrend> {
   const now = Date.now();
   const periodMs = days * 86_400_000;
   const [current, previous] = await Promise.all([
-    getPeriodStats(projectId, now - periodMs, now),
-    getPeriodStats(projectId, now - 2 * periodMs, now - periodMs),
+    getPeriodStats(userId, projectId, now - periodMs, now),
+    getPeriodStats(userId, projectId, now - 2 * periodMs, now - periodMs),
   ]);
   return { current, previous };
 }
