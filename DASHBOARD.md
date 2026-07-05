@@ -11,9 +11,10 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 (App Router, `[local
 - **Commitlenmemiş çalışma:** Logo/branding geçişi — yeni `ThemedLogo` bileşeni (`src/components/ui/ThemedLogo.tsx`), `logo-light.png` / `logo-dark.png` assetleri; Header, Sidebar, AuthShell, UserSettings, Avatar, ChatThread, email şablonu ve manifest/icon güncellemeleri.
 
 ## Kalanlar / Yapılacaklar
-- [ ] Commitlenmemiş branding değişikliklerini gözden geçirip commit'le
-- [ ] `public/Group 2.png` ve `public/Group 4.png` — gerekli mi? Gereksizse sil (boşluklu isimler sorun çıkarabilir)
-- [ ] `feat/issues-1-2-3` branch'ini main'e merge/PR
+- [x] Branding değişiklikleri commit'lendi (`116bd84`) ve push'landı
+- [x] PR açık/güncel: https://github.com/cagriuckan/revisto/pull/15
+- [ ] PR #15'i gözden geçirip main'e merge et
+- [ ] `public/Group 2.png` ve `public/Group 4.png` — referans edilmiyor, commit dışı bırakıldı; gereksizse sil
 
 ## Alınan Kararlar
 - 2026-07: Tema duyarlı logo için tek `ThemedLogo` bileşeni (light/dark asset çifti)
