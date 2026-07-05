@@ -13,6 +13,7 @@
     "start": "node server.js",
     "lint": "next lint",
     "hash": "node scripts/hash-password.mjs",
+    "icons": "sips -Z 192 public/icon.png --out public/icon-192.png",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

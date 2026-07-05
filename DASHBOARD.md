@@ -14,10 +14,10 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 (App Router, `[local
 - [x] Branding değişiklikleri commit'lendi (`116bd84`) ve push'landı
 - [x] PR açık/güncel: https://github.com/cagriuckan/revisto/pull/15
 - [ ] PR #15'i gözden geçirip main'e merge et
-- [ ] `public/Group 2.png` ve `public/Group 4.png` — referans edilmiyor, commit dışı bırakıldı; gereksizse sil
 
 ## Alınan Kararlar
 - 2026-07: Tema duyarlı logo için tek `ThemedLogo` bileşeni (light/dark asset çifti)
+- 2026-07: İkon tek kaynak: `public/icon.png` (512px master). `icon-192.png` `npm run icons` ile türetilir; favicon.ico/apple-icon/icon-512/svg'ler silindi, tüm referanslar icon.png'ye bağlı
 - Mimari kararlar için bkz. Claude memory: `revisto-architecture-v2`, `db-architecture`
 
 ## Faydalı Komutlar

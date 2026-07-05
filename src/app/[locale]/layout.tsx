@@ -41,10 +41,7 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     icons: {
-      icon: [
-        { url: "/icon.png", sizes: "192x192", type: "image/png" },
-        { url: "/icon.png", sizes: "32x32", type: "image/png" },
-      ],
+      icon: "/icon.png",
       shortcut: "/icon.png",
       apple: "/icon.png",
     },

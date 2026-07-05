@@ -17,6 +17,7 @@ Centralized feedback widget server + admin panel.
 - `src/components/` — feature folders: `agents`, `auth`, `dashboard`, `feedbacks`, `sites`, `projects`, `settings`, `layout` (Header/Sidebar), `ui` (Avatar, Dropdown, ThemedLogo…).
 - App routes: `feedbacks`, `sites`, `projects`, `settings`, `login`, `signup`, `agent-invite`.
 - Branding: use `src/components/ui/ThemedLogo.tsx` with `public/logo-light.png` / `logo-dark.png` — don't hardcode logo `<img>`s.
+- Icons: single source of truth is `public/icon.png` (512px). `icon-192.png` is derived via `npm run icons` (sips). No favicon.ico / apple-icon / icon-512 — metadata (`[locale]/layout.tsx`) and `manifest.ts` all point at `/icon.png` + `/icon-192.png`. To change the icon: replace `icon.png`, run `npm run icons`.
 
 ## Gotchas
 - Node 20–22 only (see `engines`).
