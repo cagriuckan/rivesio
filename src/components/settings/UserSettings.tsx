@@ -220,9 +220,9 @@ function AppearanceTab() {
   const { theme, setTheme } = useThemePref();
 
   const previews: Record<ThemePref, React.ReactNode> = {
-    light: <ThemePreview bg="#f0f1f5" card="#ffffff" bar="#6366f1" line="#e5e7eb" text="#1f2937" />,
-    dark: <ThemePreview bg="#0a0a0c" card="#161619" bar="#7c7ff5" line="#26262b" text="#e5e7eb" />,
-    system: <ThemePreview split bg="#f0f1f5" card="#ffffff" bar="#6366f1" line="#e5e7eb" text="#1f2937" />,
+    light: <ThemePreview bg="#f0f1f5" card="#ffffff" bar="#673ab7" line="#e5e7eb" text="#1f2937" />,
+    dark: <ThemePreview bg="#0a0a0c" card="#161619" bar="#9575cd" line="#26262b" text="#e5e7eb" />,
+    system: <ThemePreview split bg="#f0f1f5" card="#ffffff" bar="#673ab7" line="#e5e7eb" text="#1f2937" />,
   };
 
   return (

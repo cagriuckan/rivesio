@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import ContentActions from "./ContentActions";
-import Image from "next/image";
+import ThemedLogo from "@/components/ui/ThemedLogo";
 
 export default function Header({
   onMenuToggle,
@@ -15,7 +15,6 @@ export default function Header({
   sidebarOpen?: boolean;
 }) {
   const t = useTranslations("nav");
-  const tc = useTranslations("common");
 
   return (
     <header
@@ -40,14 +39,7 @@ export default function Header({
 
       {/* Brand */}
       <Link href="/" className="flex items-center gap-2">
-      <Image
-              src="/icon.png"
-              alt="Revisto"
-              width={34}
-              height={32}
-              className="rounded-xl bg-raised"
-            />
-        <span className="text-lg font-bold tracking-tighter text-strong">{tc("brand")}</span>
+        <ThemedLogo width={110} height={30} className="h-8 w-auto" />
       </Link>
 
       {/* Right: mode switch, notifications, user menu */}

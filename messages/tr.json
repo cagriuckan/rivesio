@@ -257,6 +257,7 @@
       "pin": "Sabitle",
       "unpin": "Sabitlemeyi kaldır",
       "attachmentAlt": "Ek",
+      "selectedElement": "Seçili alan",
       "composerPlaceholder": "Yanıtını yaz…",
       "composerHint": "Göndermek için ⌘+Enter",
       "send": "Gönder",

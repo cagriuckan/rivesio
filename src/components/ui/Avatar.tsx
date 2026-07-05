@@ -1,12 +1,12 @@
 import { cn } from "./cn";
 
 const COLORS = [
-  { bg: "#6e79d6", text: "#fff" },
-  { bg: "#3ecf8e", text: "#fff" },
-  { bg: "#f5a623", text: "#fff" },
-  { bg: "#4aa8ff", text: "#fff" },
-  { bg: "#a78bfa", text: "#fff" },
-  { bg: "#f5535b", text: "#fff" },
+  { bg: "#673ab7", text: "#fff" },
+  { bg: "#7e57c2", text: "#fff" },
+  { bg: "#9575cd", text: "#fff" },
+  { bg: "#5e35a8", text: "#fff" },
+  { bg: "#8559c9", text: "#fff" },
+  { bg: "#7c4dbd", text: "#fff" },
 ];
 
 function seedIndex(seed: string): number {

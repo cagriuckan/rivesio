@@ -34,8 +34,8 @@ export default function AuthShell({
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" className="h-full w-full">
                 <defs>
                   <linearGradient id="authBrandG" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stopColor="#6366f1" />
-                    <stop offset="100%" stopColor="#8b5cf6" />
+                    <stop offset="0%" stopColor="#673ab7" />
+                    <stop offset="100%" stopColor="#9c27b0" />
                   </linearGradient>
                 </defs>
                 <rect width="100" height="100" rx="24" fill="url(#authBrandG)" />

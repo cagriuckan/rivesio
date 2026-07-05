@@ -44,15 +44,15 @@
   --color-primary:   #232733;
   --color-strong:    #0e1016;
 
-  /* ── Accent (indigo / blurple) ── */
-  --color-accent:        #6366f1;
-  --color-accent-hover:  #5457e5;
-  --color-accent-soft:   color-mix(in srgb, #6366f1 10%, transparent);
-  --color-accent-line:   color-mix(in srgb, #6366f1 24%, transparent);
-  --color-accent-text:   #5457e5;
+  /* ── Accent (deep purple) ── */
+  --color-accent:        #673ab7;
+  --color-accent-hover:  #5e35a8;
+  --color-accent-soft:   color-mix(in srgb, #673ab7 10%, transparent);
+  --color-accent-line:   color-mix(in srgb, #673ab7 24%, transparent);
+  --color-accent-text:   #5e35a8;
 
   /* Gradient pair for hero buttons / accents */
-  --grad-accent: linear-gradient(120deg, #6366f1 0%, #8b5cf6 100%);
+  --grad-accent: linear-gradient(120deg, #673ab7 0%, #9c27b0 100%);
   --grad-ai:     linear-gradient(120deg, #c4b5fd 0%, #a5b4fc 45%, #93c5fd 100%);
 
   /* ── Semantic ── */
@@ -97,7 +97,7 @@
   --shadow-md:  0 4px 12px rgba(17,20,40,.06), 0 1px 3px rgba(17,20,40,.04);
   --shadow-lg:  0 12px 28px rgba(17,20,40,.08), 0 2px 6px rgba(17,20,40,.05);
   --shadow-pop: 0 16px 40px rgba(17,20,40,.14), 0 4px 10px rgba(17,20,40,.06);
-  --shadow-accent: 0 8px 20px color-mix(in srgb, #6366f1 35%, transparent);
+  --shadow-accent: 0 8px 20px color-mix(in srgb, #673ab7 35%, transparent);
 
   /* ── Liquid-glass tab bar (mobile) ── */
   --tabbar-glass-bg:     rgba(255,255,255,0.28);
@@ -130,11 +130,11 @@
   --color-primary:   #ececf0;
   --color-strong:    #ffffff;
 
-  --color-accent:        #7c7ff5;
-  --color-accent-hover:  #8b8ef7;
-  --color-accent-soft:   color-mix(in srgb, #7c7ff5 16%, transparent);
-  --color-accent-line:   color-mix(in srgb, #7c7ff5 32%, transparent);
-  --color-accent-text:   #b3b5fb;
+  --color-accent:        #9575cd;
+  --color-accent-hover:  #a48ad4;
+  --color-accent-soft:   color-mix(in srgb, #9575cd 16%, transparent);
+  --color-accent-line:   color-mix(in srgb, #9575cd 32%, transparent);
+  --color-accent-text:   #b39ddb;
 
   --color-success-text: #4ade80;
   --color-warning-text: #fbbf24;
@@ -147,7 +147,7 @@
   --shadow-md:  0 4px 12px rgba(0,0,0,.5);
   --shadow-lg:  0 12px 28px rgba(0,0,0,.55);
   --shadow-pop: 0 16px 40px rgba(0,0,0,.6);
-  --shadow-accent: 0 8px 20px color-mix(in srgb, #7c7ff5 30%, transparent);
+  --shadow-accent: 0 8px 20px color-mix(in srgb, #9575cd 30%, transparent);
 
 
   --tabbar-glass-bg:     rgba(28,28,32,0.38);

@@ -257,6 +257,7 @@
       "pin": "Pin",
       "unpin": "Unpin",
       "attachmentAlt": "Attachment",
+      "selectedElement": "Selected element",
       "composerPlaceholder": "Write your reply…",
       "composerHint": "⌘+Enter to send",
       "send": "Send",

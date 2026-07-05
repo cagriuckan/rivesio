@@ -3,7 +3,7 @@ import { emailEnabled, env } from "./env";
 
 const resend = emailEnabled ? new Resend(env.email.resendApiKey) : null;
 
-const DEFAULT_ACCENT = "#6366f1";
+const DEFAULT_ACCENT = "#673ab7";
 const DEFAULT_BRAND = "Revisto";
 
 export interface EmailBrand {

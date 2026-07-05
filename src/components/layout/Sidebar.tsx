@@ -11,6 +11,7 @@ import { Tooltip } from "@/components/ui/Tooltip";
 import WidgetSwitcher, { type WidgetOption } from "./WidgetSwitcher";
 import UserMenu from "./UserMenu";
 import { Avatar } from "@/components/ui/Avatar";
+import ThemedLogo from "@/components/ui/ThemedLogo";
 
 const NAV = [
   { href: "/",          key: "overview",  icon: Icon.dashboard },
@@ -67,23 +68,23 @@ export default function Sidebar({
     >
       {/* Brand */}
       <div className={cn("flex items-center pt-3 pb-0", collapsed ? "justify-center px-2" : "gap-0 px-4")}>
-        {/* Logo + toggle overlay when collapsed */}
-        <div className="relative group/brand shrink-0">
-          <Link
-            href={withWidget("/")}
-            onClick={onClose}
-            aria-label="Dashboard"
-            className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          >
-            <Image
-              src="/icon.png"
-              alt="Revisto"
-              width={48}
-              height={48}
-              className="rounded-xl"
-            />
-          </Link>
-          {collapsed && (
+        {collapsed ? (
+          /* Collapsed: show only the square icon with expand overlay */
+          <div className="relative group/brand shrink-0">
+            <Link
+              href={withWidget("/")}
+              onClick={onClose}
+              aria-label="Dashboard"
+              className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <Image
+                src="/icon.png"
+                alt="Revisto"
+                width={48}
+                height={48}
+                className="rounded-xl"
+              />
+            </Link>
             <button
               onClick={onToggleCollapse}
               className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-md bg-black/60 opacity-0 shadow-sm transition-opacity group-hover/brand:opacity-100"
@@ -91,23 +92,22 @@ export default function Sidebar({
             >
               <Icon.panelLeft className="h-3.5 w-3.5 text-white" />
             </button>
-          )}
-        </div>
-
-        {!collapsed && (
+          </div>
+        ) : (
+          /* Expanded: show the full themed wordmark logo + beta badge */
           <>
-            <div className="flex-1 truncate">
-              <Link
-                href={withWidget("/")}
-                onClick={onClose}
-                className="inline-flex items-center gap-1.5 text-xl font-bold tracking-tight text-strong outline-none focus-visible:ring-2 -tracking-tighter focus-visible:ring-accent"
-              >
-                Revisto
-                <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-warning/30 bg-warning-soft px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning-text">
-                  Beta
-                </span>
-              </Link>
-            </div>
+            <Link
+              href={withWidget("/")}
+              onClick={onClose}
+              aria-label="Dashboard"
+              className="inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <ThemedLogo width={130} height={36} className="h-9 w-auto" />
+              <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-warning/30 bg-warning-soft px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning-text">
+                Beta
+              </span>
+            </Link>
+            <div className="flex-1" />
             {!onClose && (
               <Tooltip label="Collapse" side="bottom">
                 <button

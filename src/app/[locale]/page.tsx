@@ -109,8 +109,16 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
     <Shell>
       <PageContent>
         <PageHeader
-          icon={() => <Image src="/icon.png" alt="Revisto" width={32} height={32} />}
-          iconClassName="rounded-xl bg-raised w-8 h-8"
+          icon={() => (
+            <Image
+              src={user.image || "/icon.png"}
+              alt={user.image ? user.name : "Revisto"}
+              width={32}
+              height={32}
+              className={user.image ? "rounded-full object-cover w-8 h-8" : ""}
+            />
+          )}
+          iconClassName={user.image ? "rounded-full bg-raised w-8 h-8 p-0 overflow-hidden" : "rounded-xl bg-raised w-8 h-8"}
           title={t(`greeting_${greetKey}`, { name: firstName })}
           subtitle={project ? project.name : t("snapshot", { open: openFeedbacks, unread })}
         />

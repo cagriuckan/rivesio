@@ -11,6 +11,19 @@ import type { FeedbackDetail } from "./Inbox";
 import { senderName } from "./ConversationList";
 import { ChatThreadSkeleton } from "./InboxSkeleton";
 
+// The feedback API prefixes element-picker notes with a localized marker line
+// (e.g. "1️⃣ numaralı seçili alan" / "📍 Selected element"). Detect that line so
+// the thread can render the same numbered badge that is drawn on the screenshot
+// instead of the raw text.
+const ANNOTATION_PREFIX =
+  /^(?:(\d+)️?⃣ (?:numaralı seçili alan|Selected element)|📍 (?:Seçili alan|Selected element))\n?/;
+
+function parseAnnotation(message: string): { index?: number; body: string } | null {
+  const m = message.match(ANNOTATION_PREFIX);
+  if (!m) return null;
+  return { index: m[1] ? Number(m[1]) : undefined, body: message.slice(m[0].length) };
+}
+
 interface ThreadMessage {
   id: string;
   author: "admin" | "user";
@@ -138,7 +151,21 @@ export default function ChatThread({
                             : "rounded-bl-md bg-surface text-primary ring-1 ring-line",
                         )}
                       >
-                        {m.message}
+                        {(() => {
+                          const ann = !isAdmin ? parseAnnotation(m.message) : null;
+                          if (!ann) return m.message;
+                          return (
+                            <>
+                              <span className="mb-1.5 flex items-center gap-2">
+                                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-[11px] font-bold text-white tnum">
+                                  {ann.index ?? "•"}
+                                </span>
+                                <span className="text-xs font-semibold text-subtle">{t("selectedElement")}</span>
+                              </span>
+                              {ann.body}
+                            </>
+                          );
+                        })()}
                         {m.attachmentIds && m.attachmentIds.length > 0 && (
                           <span className="mt-2 flex flex-wrap gap-2">
                             {m.attachmentIds.map((id) => (
