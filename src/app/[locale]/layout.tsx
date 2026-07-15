@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
@@ -8,9 +8,9 @@ import { routing } from "@/i18n/routing";
 import PwaRegister from "@/components/PwaRegister";
 import "../globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const inter = Inter({
+  variable: "--font-inter",
+  subsets: ["latin", "latin-ext"],
 });
 
 const geistMono = Geist_Mono({
@@ -41,8 +41,11 @@ export async function generateMetadata({
     title: t("title"),
     description: t("description"),
     icons: {
-      icon: "/icon.png",
-      shortcut: "/icon.png",
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/icon.png", type: "image/png" },
+      ],
+      shortcut: "/favicon.ico",
       apple: "/icon.png",
     },
   };
@@ -63,7 +66,7 @@ export default async function LocaleLayout({
     <html
       lang={locale}
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable}`}
+      className={`${inter.variable} ${geistMono.variable}`}
     >
       <head>
         <script

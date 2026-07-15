@@ -36,7 +36,7 @@ export default function ContentActions() {
       <Tooltip label={tt(theme)} side="bottom">
         <button
           onClick={cycleTheme}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line text-subtle transition-colors hover:border-line-strong hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-raised"
           aria-label={tt("label")}
         >
           <ThemeIcon className="h-5 w-5" />

@@ -1,15 +1,15 @@
 import { getTranslations } from "next-intl/server";
-import { redirect } from "next/navigation";
-import Image from "next/image";
+import LandingPage from "@/components/landing/LandingPage";
 import { Link } from "@/i18n/navigation";
 import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import BreakdownCard from "@/components/dashboard/BreakdownCard";
 import CategoryCard from "@/components/dashboard/CategoryCard";
 import SiteSummaryCard from "@/components/dashboard/SiteSummaryCard";
 import TrendChart from "@/components/dashboard/TrendChart";
-import MetricCard from "@/components/dashboard/MetricCard";
+import QuickOverview from "@/components/dashboard/QuickOverview";
 import InboxPreview from "@/components/dashboard/InboxPreview";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
@@ -40,7 +40,7 @@ function pctDelta(current: number, previous: number): number {
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const { w, period } = await searchParams;
   const user = await getSessionUser();
-  if (!user) redirect("/login");
+  if (!user) return <LandingPage />;
   const days = period === "7" ? 7 : period === "90" ? 90 : 30;
   const project = w ? await getOwnedProject(user.id, w) : undefined;
   const projectId = project?.id;
@@ -69,13 +69,6 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const unread = allFeedbacks.filter((f) => f.unread).length;
   const openFeedbacks = Math.max(0, stats.totalFeedbacks - stats.resolvedFeedbacks);
   const recent = allFeedbacks.slice(0, 6);
-
-  const buildPeriodHref = (d: number) => {
-    const p = new URLSearchParams();
-    if (projectId) p.set("w", projectId);
-    p.set("period", String(d));
-    return `/?${p}`;
-  };
 
   const hour = new Date().getHours();
   const greetKey = hour < 6 ? "night" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
@@ -108,75 +101,55 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   return (
     <Shell>
       <PageContent>
-        <PageHeader
-          icon={() => (
-            <Image
-              src={user.image || "/icon.png"}
-              alt={user.image ? user.name : "Revisto"}
-              width={32}
-              height={32}
-              className={user.image ? "rounded-full object-cover w-8 h-8" : ""}
-            />
-          )}
-          iconClassName={user.image ? "rounded-full bg-raised w-8 h-8 p-0 overflow-hidden" : "rounded-xl bg-raised w-8 h-8"}
+        <DashboardHeader
           title={t(`greeting_${greetKey}`, { name: firstName })}
           subtitle={project ? project.name : t("snapshot", { open: openFeedbacks, unread })}
+          image={user.image}
+          days={days}
+          projectId={projectId}
         />
 
-        {/* Period switcher */}
-        <div className="mb-4 flex items-center justify-end">
-          <div className="flex items-center gap-0.5 rounded-lg border border-line bg-raised p-0.5">
-            {[7, 30, 90].map((d) => (
-              <Link
-                key={d}
-                href={buildPeriodHref(d)}
-                className={`rounded px-2.5 py-1 text-xs font-medium transition-colors ${
-                  days === d ? "bg-surface text-primary shadow-sm" : "text-subtle hover:text-primary"
-                }`}
-              >
-                {d}g
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Metric strip */}
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <MetricCard
-            label={t("openFeedback")}
-            value={openFeedbacks}
-            meta={`${stats.totalFeedbacks} ${t("totalAllTime").toLowerCase()}`}
-            href={feedbacksHref}
-            icon={Icon.inbox}
-            tone="accent"
-            delta={{ value: pctDelta(trend.current.total, trend.previous.total) }}
-          />
-          <MetricCard
-            label={t("unread")}
-            value={unread}
-            meta={t("needsReply")}
-            href={feedbacksHref}
-            icon={Icon.bell}
-            tone="info"
-          />
-          <MetricCard
-            label={t("highPriority")}
-            value={trend.current.highPriority}
-            meta={t("periodLabelMeta", { period: periodLabel })}
-            href={feedbacksHref}
-            icon={Icon.alertTriangle}
-            tone="warning"
-          />
-          <MetricCard
-            label={t("resolutionRate")}
-            value={`%${trend.current.resolutionRate}`}
-            meta={t("previous", { value: `%${trend.previous.resolutionRate}` })}
-            href={feedbacksHref}
-            icon={Icon.checkCircle}
-            tone="success"
-            delta={{ value: trend.current.resolutionRate - trend.previous.resolutionRate }}
-          />
-        </div>
+        {/* Quick overview */}
+        <QuickOverview
+          title={t("quickOverview")}
+          subtitle={t("quickOverviewSubtitle")}
+          stats={[
+            {
+              label: t("openFeedback"),
+              value: openFeedbacks,
+              meta: `${stats.totalFeedbacks} ${t("totalAllTime").toLowerCase()}`,
+              href: feedbacksHref,
+              icon: Icon.inbox,
+              tone: "accent",
+              delta: { value: pctDelta(trend.current.total, trend.previous.total) },
+            },
+            {
+              label: t("unread"),
+              value: unread,
+              meta: t("needsReply"),
+              href: feedbacksHref,
+              icon: Icon.bell,
+              tone: "info",
+            },
+            {
+              label: t("highPriority"),
+              value: trend.current.highPriority,
+              meta: t("periodLabelMeta", { period: periodLabel }),
+              href: feedbacksHref,
+              icon: Icon.alertTriangle,
+              tone: "warning",
+            },
+            {
+              label: t("resolutionRate"),
+              value: `%${trend.current.resolutionRate}`,
+              meta: t("previous", { value: `%${trend.previous.resolutionRate}` }),
+              href: feedbacksHref,
+              icon: Icon.checkCircle,
+              tone: "success",
+              delta: { value: trend.current.resolutionRate - trend.previous.resolutionRate },
+            },
+          ]}
+        />
 
         {/* Trend + needs attention */}
         <div className="mt-4 grid gap-4 xl:grid-cols-[minmax(0,2fr)_minmax(300px,0.9fr)]">

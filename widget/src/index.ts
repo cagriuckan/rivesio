@@ -153,7 +153,7 @@ const UI = {
 } as const;
 
 // Compact Revisto brand mark for the widget footer.
-const BRAND_MARK = `<svg viewBox="0 0 24 24" fill="none" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="6" fill="var(--kf-accent, #6366f1)"/><path d="M17.5 13.2a1.4 1.4 0 0 1-1.4 1.4H9.3L6.5 17V8.2a1.4 1.4 0 0 1 1.4-1.4h8.2a1.4 1.4 0 0 1 1.4 1.4z" fill="#fff"/></svg>`;
+const BRAND_MARK = `<svg viewBox="0 0 24 24" fill="none" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="7" fill="#0B1437"/><ellipse cx="12" cy="11.2" rx="6.2" ry="5" fill="#fff"/><path d="M8.5 14.5 L7 18 L11.5 15.4 Z" fill="#fff"/><circle cx="9.4" cy="11.2" r="1" fill="#0B1437"/><circle cx="12" cy="11.2" r="1" fill="#0B1437"/><circle cx="14.6" cy="11.2" r="1" fill="#0B1437"/></svg>`;
 
 function submitErrorText(code: string | null, locale: WidgetLocale): string {
   const tr: Record<string, string> = {
@@ -310,7 +310,7 @@ function mount(
   root.className = "kf-root";
   root.dataset.pos = project.position || "bottom-right";
   root.dataset.fab = project.fabStyle || "label";
-  root.style.setProperty("--kf-accent", project.accentColor || "#6366f1");
+  root.style.setProperty("--kf-accent", project.accentColor || "#0B1437");
 
   // Theme: "auto" mirrors the host page's data-theme; otherwise force dark/light.
   const theme = project.theme || "auto";

@@ -75,8 +75,8 @@ export default function NotificationBell() {
           {...triggerProps}
           aria-label={t("label")}
           className={cn(
-            "relative inline-flex h-9 w-9 items-center justify-center rounded-full border border-line text-subtle transition-colors hover:border-line-strong hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent",
-            isOpen && "bg-raised text-primary",
+            "relative inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-raised",
+            isOpen && "bg-accent-soft text-primary",
           )}
         >
           <Icon.bell className="h-5 w-5" />

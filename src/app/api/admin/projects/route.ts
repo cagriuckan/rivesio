@@ -42,7 +42,7 @@ export async function POST(req: Request) {
       slug: d.slug,
       name: d.name,
       settings: {
-        accentColor: d.accentColor || "#4f46e5",
+        accentColor: d.accentColor || "#0B1437",
         position: d.position || "bottom-right",
         categories: d.categories?.length ? d.categories : DEFAULT_PROJECT_CATEGORIES,
       },

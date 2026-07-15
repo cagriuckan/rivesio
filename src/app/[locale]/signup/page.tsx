@@ -8,10 +8,13 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Field";
 import { Spinner } from "@/components/ui/Spinner";
 import AuthShell, { AuthError } from "@/components/auth/AuthShell";
+import SocialButtons from "@/components/auth/SocialButtons";
+import AuthDivider from "@/components/auth/AuthDivider";
 
 export default function SignupPage() {
   const t = useTranslations("signup");
   const tc = useTranslations("common");
+  const ta = useTranslations("auth");
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,6 +47,8 @@ export default function SignupPage() {
 
   return (
     <AuthShell title={t("title")} subtitle={t("subtitle")}>
+      <SocialButtons />
+      <AuthDivider label={ta("orContinueWithEmail")} />
       <form onSubmit={submit}>
         <div className="space-y-4">
           <Field label={t("name")}>

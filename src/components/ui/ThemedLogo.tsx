@@ -9,7 +9,7 @@ import Image from "next/image";
  * based on the current `data-theme` attribute on the root element.
  */
 export default function ThemedLogo({
-  width = 130,
+  width = 100,
   height = 36,
   className,
 }: {

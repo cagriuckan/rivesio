@@ -8,7 +8,7 @@ import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = Promise<{ w?: string; f?: string }>;
+type SearchParams = Promise<{ w?: string; f?: string; q?: string }>;
 
 export default async function FeedbacksPage({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
@@ -21,7 +21,7 @@ export default async function FeedbacksPage({ searchParams }: { searchParams: Se
   return (
     <Shell>
       <PageContent className="flex h-full max-w-none flex-col !px-0 !py-0">
-        <Inbox initialItems={feedbacks} initialSelectedId={initialSelectedId} projectId={project?.id} />
+        <Inbox initialItems={feedbacks} initialSelectedId={initialSelectedId} projectId={project?.id} initialQuery={sp.q} />
       </PageContent>
     </Shell>
   );

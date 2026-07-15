@@ -32,6 +32,10 @@
     "sites": "Sites",
     "widgets": "Widgets",
     "menu": "Menu",
+    "other": "Other",
+    "settings": "Settings",
+    "support": "Support",
+    "soon": "Soon",
     "mainMenu": "Main menu",
     "bottomNav": "Bottom navigation",
     "overviewShort": "Dashboard",
@@ -74,6 +78,12 @@
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
   },
+  "premium": {
+    "title": "Upgrade to Premium",
+    "desc": "Unlimited widgets, AI agents and priority support.",
+    "cta": "Upgrade",
+    "badge": "Pro"
+  },
   "widgetSwitcher": {
     "all": "All widgets",
     "allMerged": "{count} widgets merged",
@@ -107,6 +117,8 @@
   "dashboard": {
     "title": "Dashboard",
     "subtitle": "Feedback dashboard",
+    "searchPlaceholder": "Search feedback…",
+    "searchLabel": "Search feedback",
     "subtitleAll": "All widgets combined",
     "emptyTitle": "Create your first widget",
     "emptyBody": "Once you create a widget, you'll see feedback stats here.",
@@ -144,7 +156,11 @@
     "unread": "Unread",
     "needsReply": "Waiting for your reply",
     "periodLabelMeta": "in the {period}",
-    "youPrefix": "You"
+    "youPrefix": "You",
+    "quickOverview": "Quick overview",
+    "quickOverviewSubtitle": "A snapshot of your feedback activity",
+    "otherCategory": "Other",
+    "totalCount": "Total"
   },
   "trend": {
     "defaultLabel": "Daily feedback",
@@ -391,7 +407,17 @@
     "sourceManual": "Added manually",
     "firstSeen": "First seen",
     "noSiteSelected": "No site selected",
-    "noSiteSelectedBody": "Choose a site from the list to view its details."
+    "noSiteSelectedBody": "Choose a site from the list to view its details.",
+    "tableTitle": "Monitored Websites",
+    "quickAddTitle": "Start monitoring feedback for your site now",
+    "quickAddPlaceholder": "Enter a domain to add — yoursite.com",
+    "statsMonitored": "Sites Monitored",
+    "statsMonitoredMeta": "{count} approved",
+    "statsFeedback": "Total Feedback",
+    "statsFeedbackMeta": "Across all sites",
+    "statsPending": "Pending Review",
+    "statsPendingMeta": "Awaiting approval",
+    "closeDetails": "Close details"
   },
   "projects": {
     "title": "Widgets",
@@ -624,8 +650,151 @@
     "theme": "System Theme",
     "language": "Language",
     "themeLight": "Light",
-    "themeDark": "Dark",
-    "themeSystem": "System"
+    "themeDark": "Dark"
+  },
+  "landing": {
+    "nav": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "signIn": "Sign in",
+      "getStarted": "Get started free"
+    },
+    "hero": {
+      "badge": "Free during beta — no credit card required",
+      "title": "All your product feedback, finally in one place",
+      "subtitle": "Revisto is the feedback platform that grows with you. Collect feedback from every site you run with one lightweight widget, triage it in a shared inbox, and reply right from where you work.",
+      "ctaPrimary": "Start for free",
+      "ctaSecondary": "Sign in",
+      "mockInbox": "Inbox",
+      "mockFeedback1": "The checkout button is hidden on mobile",
+      "mockFeedback2": "Love the new dashboard — one suggestion…",
+      "mockFeedback3": "Dark mode contrast is too low on forms",
+      "mockStatusOpen": "Open",
+      "mockStatusInProgress": "In progress",
+      "mockStatusResolved": "Resolved",
+      "mockNew": "New feedback received · just now"
+    },
+    "bento": {
+      "annotation": "This looks off",
+      "annotation2": "Broken here",
+      "codeComment": "add before",
+      "launcher": "Feedback",
+      "notifTitle": "New feedback",
+      "liveFeed": "Live feed"
+    },
+    "stats": {
+      "setup": "5 min",
+      "setupLabel": "Average setup time",
+      "sites": "Unlimited",
+      "sitesLabel": "Sites per workspace",
+      "beta": "100% free",
+      "betaLabel": "During the beta",
+      "realtime": "Real-time",
+      "realtimeLabel": "Notifications & inbox"
+    },
+    "features": {
+      "title": "Everything you need to close the feedback loop",
+      "subtitle": "From the first bug report to the reply that wins the user back — Revisto covers the whole journey.",
+      "widget": {
+        "title": "Embeddable widget",
+        "desc": "One script tag adds a polished feedback widget to any site. Fully themeable to match your brand."
+      },
+      "screenshots": {
+        "title": "Screenshots & annotations",
+        "desc": "Users capture their screen and draw right on it, so you see exactly what they see."
+      },
+      "inbox": {
+        "title": "Multi-site inbox",
+        "desc": "Feedback from all your sites lands in one shared inbox with statuses, priorities and categories."
+      },
+      "chat": {
+        "title": "Two-way conversations",
+        "desc": "Reply to users directly from the inbox. They answer from the widget — no email ping-pong."
+      },
+      "agents": {
+        "title": "Real-time notifications",
+        "desc": "Get push and email notifications the moment new feedback lands — never miss a thing."
+      },
+      "analytics": {
+        "title": "Trends & analytics",
+        "desc": "Spot spikes, track resolution times and see which categories dominate — per site or across all of them."
+      }
+    },
+    "how": {
+      "title": "Up and running in minutes",
+      "subtitle": "No SDKs, no backend changes. If you can paste a script tag, you can use Revisto.",
+      "step1": {
+        "title": "Add the snippet",
+        "desc": "Paste one script tag into your site. The widget appears instantly, styled to your brand."
+      },
+      "step2": {
+        "title": "Collect feedback",
+        "desc": "Users report bugs, ideas and praise — with screenshots and annotations attached."
+      },
+      "step3": {
+        "title": "Triage & reply",
+        "desc": "Work through the shared inbox with your team and AI agents, and reply right where the feedback lives."
+      }
+    },
+    "highlight1": {
+      "badge": "Collect",
+      "title": "A widget your users actually want to click",
+      "desc": "One script tag drops a beautiful, brand-matched feedback widget onto any site. Users report bugs and ideas with screenshots and on-screen annotations — no forms, no friction.",
+      "point1": "Screenshot capture with drawing tools",
+      "point2": "Themeable to match your brand",
+      "point3": "Loads async — zero impact on page speed",
+      "mockTitle": "Send feedback",
+      "mockPlaceholder": "The save button doesn't work on…",
+      "mockAttach": "screenshot-annotated.png",
+      "mockSend": "Send"
+    },
+    "highlight2": {
+      "badge": "Triage",
+      "title": "Every site, one inbox, zero chaos",
+      "desc": "Feedback from all your sites streams into a single shared inbox in real time. Statuses, priorities and categories keep the team aligned — and two-way chat keeps users in the loop.",
+      "point1": "Real-time updates and push notifications",
+      "point2": "Statuses, priorities and categories built in",
+      "point3": "Reply in-thread — users answer from the widget"
+    },
+    "cta": {
+      "title": "Free while in beta. All features included.",
+      "subtitle": "No plans, no limits, no credit card. Help us shape Revisto and keep your early-supporter perks when we launch.",
+      "button": "Create your free account",
+      "secondary": "Already have an account? Sign in"
+    },
+    "footer": {
+      "tagline": "The feedback platform for every site you run.",
+      "product": "Product",
+      "featuresLink": "Features",
+      "howLink": "How it works",
+      "account": "Account",
+      "signIn": "Sign in",
+      "signUp": "Sign up",
+      "rights": "All rights reserved."
+    },
+    "highlight3": {
+      "badge": "Reply",
+      "title": "Close the loop right where feedback lives",
+      "desc": "Reply straight from the inbox; users see your answer in the widget on your site and respond from there. No email chains, no lost conversations.",
+      "point1": "Threaded two-way conversations",
+      "point2": "User replies land back in your inbox instantly",
+      "point3": "Keep users posted with status updates",
+      "mockUser": "User",
+      "mockUserText": "The export button throws an error when I select more than 50 rows.",
+      "mockYou": "You",
+      "mockYouText": "Thanks for the detailed report! We've reproduced the issue and a fix is on the way — we'll update you here as soon as it ships.",
+      "mockTagBug": "Bug",
+      "mockTagHigh": "High priority"
+    }
+  },
+  "auth": {
+    "tagline": "All your product feedback, in one place",
+    "taglineSub": "Collect, triage and reply to user feedback from every site you run — with one lightweight widget.",
+    "feature1": "Embeddable widget with screenshots & annotations",
+    "feature2": "Multi-site inbox with real-time notifications",
+    "feature3": "Two-way conversations, right inside the widget",
+    "continueWith": "Continue with {provider}",
+    "orContinueWithEmail": "Or continue with email",
+    "backToHome": "Back to home"
   }
-  
 }

@@ -32,6 +32,10 @@
     "sites": "Siteler",
     "widgets": "Widget'lar",
     "menu": "Menü",
+    "other": "Diğer",
+    "settings": "Ayarlar",
+    "support": "Destek",
+    "soon": "Yakında",
     "mainMenu": "Ana menü",
     "bottomNav": "Alt navigasyon",
     "overviewShort": "Bakış",
@@ -74,6 +78,12 @@
     "privacyPolicy": "Gizlilik Politikası",
     "termsOfService": "Kullanım Şartları"
   },
+  "premium": {
+    "title": "Premium'a Yükselt",
+    "desc": "Sınırsız widget, AI ajanları ve öncelikli destek.",
+    "cta": "Yükselt",
+    "badge": "Pro"
+  },
   "widgetSwitcher": {
     "all": "Tüm widget'lar",
     "allMerged": "{count} widget birleşik",
@@ -107,6 +117,8 @@
   "dashboard": {
     "title": "Genel Bakış",
     "subtitle": "Geri bildirim kontrol paneli",
+    "searchPlaceholder": "Geri bildirim ara…",
+    "searchLabel": "Geri bildirim ara",
     "subtitleAll": "Tüm widget'lar birleşik",
     "emptyTitle": "İlk widget'ını oluştur",
     "emptyBody": "Bir widget oluşturduğunda burada geri bildirim istatistiklerini göreceksin.",
@@ -144,7 +156,11 @@
     "unread": "Okunmamış",
     "needsReply": "Yanıtını bekliyor",
     "periodLabelMeta": "{period} içinde",
-    "youPrefix": "Sen"
+    "youPrefix": "Sen",
+    "quickOverview": "Genel bakış",
+    "quickOverviewSubtitle": "Geri bildirim etkinliğinizin özeti",
+    "otherCategory": "Diğer",
+    "totalCount": "Toplam"
   },
   "trend": {
     "defaultLabel": "Günlük geri bildirimler",
@@ -391,7 +407,17 @@
     "sourceManual": "Elle eklendi",
     "firstSeen": "İlk görülme",
     "noSiteSelected": "Site seçilmedi",
-    "noSiteSelectedBody": "Detaylarını görmek için listeden bir site seç."
+    "noSiteSelectedBody": "Detaylarını görmek için listeden bir site seç.",
+    "tableTitle": "İzlenen Siteler",
+    "quickAddTitle": "Sitenin geri bildirimlerini hemen izlemeye başla",
+    "quickAddPlaceholder": "Eklemek için bir alan adı gir — siteniz.com",
+    "statsMonitored": "İzlenen Site",
+    "statsMonitoredMeta": "{count} onaylı",
+    "statsFeedback": "Toplam Geri Bildirim",
+    "statsFeedbackMeta": "Tüm sitelerde",
+    "statsPending": "Onay Bekleyen",
+    "statsPendingMeta": "Onay bekliyor",
+    "closeDetails": "Detayları kapat"
   },
   "projects": {
     "title": "Widget'lar",
@@ -624,7 +650,151 @@
     "theme": "Sistem Teması",
     "language": "Dil",
     "themeLight": "Açık",
-    "themeDark": "Koyu",
-    "themeSystem": "Sistem"
+    "themeDark": "Koyu"
+  },
+  "landing": {
+    "nav": {
+      "features": "Özellikler",
+      "howItWorks": "Nasıl çalışır",
+      "signIn": "Giriş yap",
+      "getStarted": "Ücretsiz başla"
+    },
+    "hero": {
+      "badge": "Beta süresince ücretsiz — kredi kartı gerekmez",
+      "title": "Tüm ürün geri bildirimlerin, sonunda tek bir yerde",
+      "subtitle": "Revisto seninle birlikte büyüyen geri bildirim platformu. Yönettiğin her siteden geri bildirimleri tek bir hafif widget ile topla, ortak gelen kutusunda önceliklendir ve olduğun yerden yanıtla.",
+      "ctaPrimary": "Ücretsiz başla",
+      "ctaSecondary": "Giriş yap",
+      "mockInbox": "Gelen Kutusu",
+      "mockFeedback1": "Mobilde ödeme butonu görünmüyor",
+      "mockFeedback2": "Yeni paneli çok sevdim — bir önerim var…",
+      "mockFeedback3": "Karanlık temada form kontrastı çok düşük",
+      "mockStatusOpen": "Açık",
+      "mockStatusInProgress": "İşlemde",
+      "mockStatusResolved": "Çözüldü",
+      "mockNew": "Yeni geri bildirim geldi · az önce"
+    },
+    "bento": {
+      "annotation": "Burada bir sorun var",
+      "annotation2": "Burası bozuk",
+      "codeComment": "önce ekle",
+      "launcher": "Geri bildirim",
+      "notifTitle": "Yeni geri bildirim",
+      "liveFeed": "Canlı akış"
+    },
+    "stats": {
+      "setup": "5 dk",
+      "setupLabel": "Ortalama kurulum süresi",
+      "sites": "Sınırsız",
+      "sitesLabel": "Çalışma alanı başına site",
+      "beta": "%100 ücretsiz",
+      "betaLabel": "Beta süresince",
+      "realtime": "Gerçek zamanlı",
+      "realtimeLabel": "Bildirimler ve gelen kutusu"
+    },
+    "features": {
+      "title": "Geri bildirim döngüsünü kapatmak için gereken her şey",
+      "subtitle": "İlk hata bildiriminden kullanıcıyı geri kazanan yanıta kadar — Revisto tüm yolculuğu kapsar.",
+      "widget": {
+        "title": "Gömülebilir widget",
+        "desc": "Tek bir script etiketi, her siteye şık bir geri bildirim widget'ı ekler. Markana uyacak şekilde tamamen özelleştirilebilir."
+      },
+      "screenshots": {
+        "title": "Ekran görüntüsü ve işaretleme",
+        "desc": "Kullanıcılar ekranlarını yakalayıp üzerine çizim yapar; sen de tam olarak onların gördüğünü görürsün."
+      },
+      "inbox": {
+        "title": "Çok siteli gelen kutusu",
+        "desc": "Tüm sitelerindeki geri bildirimler durum, öncelik ve kategorilerle tek bir ortak gelen kutusunda toplanır."
+      },
+      "chat": {
+        "title": "Çift yönlü konuşmalar",
+        "desc": "Kullanıcılara doğrudan gelen kutusundan yanıt ver. Onlar da widget üzerinden cevaplasın — e-posta trafiği yok."
+      },
+      "agents": {
+        "title": "Anlık bildirimler",
+        "desc": "Yeni geri bildirim geldiğinde push ve e-posta bildirimi al — hiçbir şeyi kaçırma."
+      },
+      "analytics": {
+        "title": "Trendler ve analizler",
+        "desc": "Artışları yakala, çözüm sürelerini takip et ve hangi kategorilerin öne çıktığını gör — site bazında ya da tümünde."
+      }
+    },
+    "how": {
+      "title": "Dakikalar içinde hazır",
+      "subtitle": "SDK yok, backend değişikliği yok. Bir script etiketi yapıştırabiliyorsan Revisto'yu kullanabilirsin.",
+      "step1": {
+        "title": "Kodu ekle",
+        "desc": "Sitene tek bir script etiketi yapıştır. Widget anında, markana uygun şekilde görünür."
+      },
+      "step2": {
+        "title": "Geri bildirim topla",
+        "desc": "Kullanıcılar hataları, fikirleri ve övgüleri — ekran görüntüsü ve işaretlemelerle birlikte — iletir."
+      },
+      "step3": {
+        "title": "Önceliklendir ve yanıtla",
+        "desc": "Ortak gelen kutusunda ekibin ve yapay zekâ ajanlarıyla çalış, geri bildirimin olduğu yerden yanıt ver."
+      }
+    },
+    "highlight1": {
+      "badge": "Topla",
+      "title": "Kullanıcıların gerçekten tıklamak isteyeceği bir widget",
+      "desc": "Tek bir script etiketi, her siteye markana uygun, şık bir geri bildirim widget'ı ekler. Kullanıcılar hataları ve fikirleri ekran görüntüsü ve işaretlemelerle iletir — form yok, sürtünme yok.",
+      "point1": "Çizim araçlarıyla ekran görüntüsü yakalama",
+      "point2": "Markana uygun tema desteği",
+      "point3": "Asenkron yüklenir — sayfa hızına sıfır etki",
+      "mockTitle": "Geri bildirim gönder",
+      "mockPlaceholder": "Kaydet butonu şurada çalışmıyor…",
+      "mockAttach": "ekran-goruntusu.png",
+      "mockSend": "Gönder"
+    },
+    "highlight2": {
+      "badge": "Önceliklendir",
+      "title": "Her site, tek gelen kutusu, sıfır kaos",
+      "desc": "Tüm sitelerindeki geri bildirimler gerçek zamanlı olarak tek bir ortak gelen kutusuna akar. Durumlar, öncelikler ve kategoriler ekibi hizada tutar — çift yönlü sohbet kullanıcıyı süreçte tutar.",
+      "point1": "Gerçek zamanlı güncellemeler ve push bildirimleri",
+      "point2": "Durum, öncelik ve kategoriler hazır gelir",
+      "point3": "Konu içinde yanıtla — kullanıcı widget'tan cevaplar"
+    },
+    "cta": {
+      "title": "Beta süresince ücretsiz. Tüm özellikler dahil.",
+      "subtitle": "Plan yok, limit yok, kredi kartı yok. Revisto'yu birlikte şekillendir, lansmanla birlikte erken destekçi ayrıcalıklarını koru.",
+      "button": "Ücretsiz hesabını oluştur",
+      "secondary": "Zaten hesabın var mı? Giriş yap"
+    },
+    "footer": {
+      "tagline": "Yönettiğin her site için geri bildirim platformu.",
+      "product": "Ürün",
+      "featuresLink": "Özellikler",
+      "howLink": "Nasıl çalışır",
+      "account": "Hesap",
+      "signIn": "Giriş yap",
+      "signUp": "Kayıt ol",
+      "rights": "Tüm hakları saklıdır."
+    },
+    "highlight3": {
+      "badge": "Yanıtla",
+      "title": "Döngüyü geri bildirimin olduğu yerde kapat",
+      "desc": "Gelen kutusundan doğrudan yanıt ver; kullanıcı cevabını sitendeki widget üzerinden görür ve oradan yanıtlar. E-posta zincirleri yok, kayıp konuşmalar yok.",
+      "point1": "Konu bazlı çift yönlü sohbet",
+      "point2": "Kullanıcı yanıtları anında gelen kutusuna düşer",
+      "point3": "Durum güncellemeleriyle kullanıcıyı bilgilendir",
+      "mockUser": "Kullanıcı",
+      "mockUserText": "50'den fazla satır seçtiğimde dışa aktarma butonu hata veriyor.",
+      "mockYou": "Sen",
+      "mockYouText": "Detaylı bildirim için teşekkürler! Sorunu yeniden ürettik, düzeltme yolda — yayınlanır yayınlanmaz buradan haber vereceğiz.",
+      "mockTagBug": "Hata",
+      "mockTagHigh": "Yüksek öncelik"
+    }
+  },
+  "auth": {
+    "tagline": "Tüm ürün geri bildirimlerin tek bir yerde",
+    "taglineSub": "Tek bir hafif widget ile yönettiğin her sitedeki kullanıcı geri bildirimlerini topla, önceliklendir ve yanıtla.",
+    "feature1": "Ekran görüntüsü ve işaretleme destekli gömülebilir widget",
+    "feature2": "Gerçek zamanlı bildirimlerle çok siteli gelen kutusu",
+    "feature3": "Widget içinde çift yönlü konuşmalar",
+    "continueWith": "{provider} ile devam et",
+    "orContinueWithEmail": "Veya e-posta ile devam et",
+    "backToHome": "Anasayfaya dön"
   }
 }

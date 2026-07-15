@@ -41,6 +41,7 @@ export default function Sidebar({
 }) {
   const t = useTranslations("nav");
   const tu = useTranslations("user");
+  const tp = useTranslations("premium");
   const pathname = usePathname();
   const router = useRouter();
   const params = useSearchParams();
@@ -67,7 +68,7 @@ export default function Sidebar({
       style={{ width: collapsed ? "72px" : "var(--sidebar-w)" }}
     >
       {/* Brand */}
-      <div className={cn("flex items-center pt-3 pb-0", collapsed ? "justify-center px-2" : "gap-0 px-4")}>
+      <div className={cn("flex items-center py-3", collapsed ? "justify-center px-2" : "gap-0 px-4")}>
         {collapsed ? (
           /* Collapsed: show only the square icon with expand overlay */
           <div className="relative group/brand shrink-0">
@@ -102,7 +103,7 @@ export default function Sidebar({
               aria-label="Dashboard"
               className="inline-flex items-center gap-1.5 outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
-              <ThemedLogo width={130} height={36} className="h-9 w-auto" />
+              <ThemedLogo/>
               <span className="inline-flex h-5 shrink-0 items-center rounded-full border border-warning/30 bg-warning-soft px-1.5 py-0.5 text-[9px] font-bold uppercase text-warning-text">
                 Beta
               </span>
@@ -153,7 +154,7 @@ export default function Sidebar({
                       className={cn(
                         "group relative flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
                         active
-                          ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong"
+                          ? "bg-accent-soft text-accent"
                           : "text-muted hover:bg-raised hover:text-primary"
                       )}
                     >
@@ -174,25 +175,28 @@ export default function Sidebar({
                     aria-current={active ? "page" : undefined}
                     onClick={handleNavClick(n.href)}
                     className={cn(
-                      "group flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
+                      "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
                       active
-                        ? "bg-surface text-strong shadow-sm ring-1 ring-line-strong"
-                        : "text-muted hover:bg-raised hover:text-primary"
+                        ? "bg-accent-soft text-accent"
+                        : " hover:bg-raised hover:text-primary"
                     )}
                   >
+                    {active && (
+                      <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-accent" />
+                    )}
                     <NavIcon
                       className={cn(
                         "h-4 w-4 shrink-0 transition-colors",
                         active ? "text-accent" : "text-subtle group-hover:text-muted"
                       )}
                     />
-                    <span className="flex-1">{t(n.key)}</span>
+                    <span className={cn("flex-1", active && "")}>{t(n.key)}</span>
                     {count > 0 && (
                       <span
                         className={cn(
-                          "inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-xs font-semibold tnum",
+                          "inline-flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold tnum",
                           active
-                            ? "bg-accent-soft text-accent-text"
+                            ? "bg-accent text-white"
                             : "bg-raised text-muted group-hover:bg-surface"
                         )}
                       >
@@ -205,7 +209,115 @@ export default function Sidebar({
             );
           })}
         </ul>
+
+        {/* Other */}
+        {collapsed ? (
+          <div className="mx-2 my-2 h-px bg-line" />
+        ) : (
+          <div className="mb-1.5 px-2.5 pt-4 text-xs font-semibold uppercase tracking-wider text-faint">
+            {t("other")}
+          </div>
+        )}
+        <ul className="space-y-0.5" role="list">
+          <li>
+            {(() => {
+              const active = pathname.startsWith("/settings");
+              return collapsed ? (
+                <Tooltip label={t("settings")} side="right" className="w-full">
+                  <Link
+                    href="/settings"
+                    aria-current={active ? "page" : undefined}
+                    onClick={onClose}
+                    className={cn(
+                      "group flex w-full items-center justify-center rounded-xl py-2 text-sm font-medium transition-all",
+                      active ? "bg-accent-soft text-accent" : "text-muted hover:bg-raised hover:text-primary"
+                    )}
+                  >
+                    <Icon.settings className={cn("h-4 w-4 shrink-0", active ? "text-accent" : "text-subtle group-hover:text-muted")} />
+                  </Link>
+                </Tooltip>
+              ) : (
+                <Link
+                  href="/settings"
+                  aria-current={active ? "page" : undefined}
+                  onClick={onClose}
+                  className={cn(
+                    "group relative flex items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium transition-all",
+                    active ? "bg-accent-soft text-accent" : "text-muted hover:bg-raised hover:text-primary"
+                  )}
+                >
+                  {active && (
+                    <span className="absolute left-0 top-1/2 h-4 w-1 -translate-y-1/2 rounded-full bg-accent" />
+                  )}
+                  <Icon.settings className={cn("h-4 w-4 shrink-0 transition-colors", active ? "text-accent" : "text-subtle group-hover:text-muted")} />
+                  <span className={cn("flex-1", active && "")}>{t("settings")}</span>
+                </Link>
+              );
+            })()}
+          </li>
+          <li>
+            {collapsed ? (
+              <Tooltip label={`${t("support")} — ${t("soon")}`} side="right" className="w-full">
+                <span
+                  aria-disabled="true"
+                  className="flex w-full cursor-not-allowed items-center justify-center rounded-xl py-2 opacity-40"
+                >
+                  <Icon.helpCircle className="h-4 w-4 shrink-0 text-subtle" />
+                </span>
+              </Tooltip>
+            ) : (
+              <span
+                aria-disabled="true"
+                className="flex cursor-not-allowed items-center gap-3 rounded-xl px-2.5 py-2 text-sm font-medium text-muted opacity-40"
+              >
+                <Icon.helpCircle className="h-4 w-4 shrink-0 text-subtle" />
+                <span className="flex-1">{t("support")}</span>
+                <span className="inline-flex h-4 items-center rounded-full bg-raised px-1.5 text-[9px] font-bold uppercase text-faint">
+                  {t("soon")}
+                </span>
+              </span>
+            )}
+          </li>
+        </ul>
       </nav>
+
+      {/* Premium CTA */}
+      {collapsed ? (
+        <div className="flex justify-center pb-1">
+          <Tooltip label={tp("title")} side="right">
+            <Link
+              href="/settings"
+              onClick={onClose}
+              aria-label={tp("title")}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-grad-accent text-white shadow-accent transition-transform hover:scale-105"
+            >
+              <Icon.sparkles className="h-4 w-4" />
+            </Link>
+          </Tooltip>
+        </div>
+      ) : (
+        <div className="px-3 pb-1">
+          <div className="relative overflow-hidden rounded-2xl bg-grad-accent p-3.5 text-white shadow-accent">
+            <div className="pointer-events-none absolute -right-6 -top-8 h-24 w-24 rounded-full bg-white/10" />
+            <div className="pointer-events-none absolute -right-2 -bottom-10 h-20 w-20 rounded-full bg-white/5" />
+            <div className="flex items-center gap-2">
+              <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-white/15">
+                <Icon.sparkles className="h-4 w-4" />
+              </span>
+              <span className="text-sm font-semibold">{tp("title")}</span>
+            </div>
+            <p className="mt-1.5 text-xs leading-relaxed text-white/75">{tp("desc")}</p>
+            <Link
+              href="/settings"
+              onClick={onClose}
+              className="mt-2.5 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-lg bg-white/95 text-xs font-bold text-accent-text transition-colors hover:bg-white"
+            >
+              {tp("cta")}
+              <Icon.arrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div className={cn("px-3 py-2", collapsed && "flex justify-center")}>

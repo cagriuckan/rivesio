@@ -28,8 +28,9 @@ export async function middleware(req: NextRequest) {
 
   const { locale, rest } = splitLocale(pathname);
 
+  // "/" is public: it renders the landing page for signed-out visitors
+  // and the dashboard for signed-in users (see [locale]/page.tsx).
   const isProtectedPage =
-    rest === "/" ||
     rest.startsWith("/feedbacks") ||
     rest.startsWith("/sites") ||
     rest.startsWith("/projects") ||

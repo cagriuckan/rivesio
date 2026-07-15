@@ -29,8 +29,8 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
 
   return (
     <Shell>
-      <PageContent className="flex h-full max-w-none flex-col !p-0">
-        <div className="shrink-0 px-5 pt-5">
+      <PageContent>
+        <div className="mb-6 shrink-0 border-b border-line pb-4">
           <PageHeader
             icon={Icon.globe}
             title={t("title")}
@@ -39,9 +39,12 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
           />
         </div>
 
-        <div className="min-h-0 flex-1 border-t border-line">
-          <SitesPanel sites={sites} initialStatus={status ?? "all"} initialSelectedId={initialSelectedId} />
-        </div>
+          <SitesPanel
+            sites={sites}
+            projects={projects.map((p) => ({ id: p.id, name: p.name }))}
+            initialStatus={status ?? "all"}
+            initialSelectedId={initialSelectedId}
+          />
       </PageContent>
     </Shell>
   );

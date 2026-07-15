@@ -22,10 +22,12 @@ export default function Inbox({
   initialItems,
   initialSelectedId,
   projectId,
+  initialQuery,
 }: {
   initialItems: FeedbackWithMeta[];
   initialSelectedId: string | null;
   projectId?: string;
+  initialQuery?: string;
 }) {
   const t = useTranslations("feedbacks.inbox");
   const [items, setItems] = useState<FeedbackWithMeta[]>(initialItems);
@@ -36,7 +38,7 @@ export default function Inbox({
   const [sort, setSort] = useState<InboxSort>("recent");
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
   const [mobilePane, setMobilePane] = useState<MobilePane>(initialSelectedId ? "thread" : "list");
   // Details start open only on wide screens; on smaller ones it's a slide-over.
   // Starts false to match SSR, then syncs to the real viewport after mount.

@@ -67,7 +67,7 @@ interface InitialSettings {
 
 type Tab = "appearance" | "behavior" | "content" | "fields" | "agents";
 
-const ACCENT_SWATCHES = ["#4f46e5", "#6366f1", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6"];
+const ACCENT_SWATCHES = ["#0B1437", "#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6"];
 
 // Keep in sync with logoLimits in src/lib/env.ts.
 const MAX_LOGO_BYTES = 512 * 1024;

@@ -27,14 +27,121 @@ const SITE_SORTERS: Record<SiteSort, (a: SiteWithCounts, b: SiteWithCounts) => n
   feedbackAsc: (a, b) => a.feedback_count - b.feedback_count || b.last_seen - a.last_seen,
 };
 
+function StatCard({
+  label,
+  value,
+  meta,
+  bars,
+  barTone = "bg-line-strong",
+  lastBarTone = "bg-success",
+}: {
+  label: string;
+  value: number | string;
+  meta: string;
+  bars: number[];
+  barTone?: string;
+  lastBarTone?: string;
+}) {
+  const max = Math.max(1, ...bars);
+  return (
+    <div className="flex items-end justify-between gap-4 rounded-2xl border border-line bg-surface p-5">
+      <div className="min-w-0">
+        <p className="font-mono text-[11px] font-medium uppercase tracking-widest text-subtle">{label}</p>
+        <p className="mt-3 text-4xl font-extrabold leading-none tracking-tight text-strong tnum">{value}</p>
+        <p className="mt-2.5 truncate text-xs text-subtle">{meta}</p>
+      </div>
+      <div className="flex h-16 shrink-0 items-end gap-1" aria-hidden>
+        {bars.map((v, i) => (
+          <span
+            key={i}
+            className={cn("w-1.5 rounded-full", i === bars.length - 1 ? lastBarTone : barTone)}
+            style={{ height: `${Math.max(12, Math.round((v / max) * 100))}%` }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function QuickAddBanner({ projects }: { projects: { id: string; name: string }[] }) {
+  const t = useTranslations("sites");
+  const router = useRouter();
+  const [domain, setDomain] = useState("");
+  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function add() {
+    if (!projectId || !domain.trim() || busy) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/admin/sites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ projectId, domain: domain.trim() }),
+      });
+      if (res.ok) {
+        setDomain("");
+        router.refresh();
+      } else {
+        const d = await res.json().catch(() => ({}));
+        setError(d?.error === "site_exists" ? t("addExists") : t("addError"));
+      }
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (projects.length === 0) return null;
+
+  return (
+    <div className="rounded-2xl border border-line bg-raised/60 p-4 sm:p-5">
+      <p className="flex items-center gap-2 text-sm font-medium text-secondary">
+        <Icon.sparkles className="h-4 w-4 text-accent" />
+        {t("quickAddTitle")}
+      </p>
+      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+        <input
+          value={domain}
+          onChange={(e) => setDomain(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") add(); }}
+          placeholder={t("quickAddPlaceholder")}
+          aria-label={t("addSite")}
+          className="h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 text-sm text-primary placeholder:text-faint outline-none transition-colors focus:border-accent-line focus:ring-2 focus:ring-accent-soft"
+        />
+        {projects.length > 1 && (
+          <select
+            value={projectId}
+            onChange={(e) => setProjectId(e.target.value)}
+            aria-label={t("colWidget")}
+            className="h-10 rounded-xl border border-line bg-surface px-3 text-sm text-primary outline-none"
+          >
+            {projects.map((p) => (
+              <option key={p.id} value={p.id}>{p.name}</option>
+            ))}
+          </select>
+        )}
+        <Button type="button" variant="primary" onClick={add} disabled={busy || !domain.trim()} className="h-10 rounded-xl">
+          <Icon.plus className="h-4 w-4" />
+          {t("addSite")}
+        </Button>
+      </div>
+      {error && <p className="mt-2 text-xs text-danger-text">{error}</p>}
+    </div>
+  );
+}
+
 type MobilePane = "list" | "detail";
 
 export default function SitesPanel({
   sites,
+  projects = [],
   initialStatus = "all",
   initialSelectedId,
 }: {
   sites: SiteWithCounts[];
+  projects?: { id: string; name: string }[];
   initialStatus?: SiteStatus | "all";
   initialSelectedId?: string | null;
 }) {
@@ -47,7 +154,6 @@ export default function SitesPanel({
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
-  const [mobilePane, setMobilePane] = useState<MobilePane>(initialSelectedId ? "detail" : "list");
 
   useEffect(() => {
     setSelectedId((cur) => (cur && sites.some((s) => s.id === cur) ? cur : null));
@@ -70,6 +176,16 @@ export default function SitesPanel({
     );
   }, [query, sites, statusFilter]);
   const sortedSites = useMemo(() => [...filteredSites].sort(SITE_SORTERS[sort]), [filteredSites, sort]);
+
+  const totalFeedback = sites.reduce((sum, s) => sum + s.feedback_count, 0);
+  const feedbackBars = useMemo(
+    () => [...sites].sort((a, b) => a.feedback_count - b.feedback_count).slice(-7).map((s) => s.feedback_count),
+    [sites],
+  );
+  const activityBars = useMemo(
+    () => [...sites].sort((a, b) => a.last_seen - b.last_seen).slice(-7).map((s) => s.feedback_count + 1),
+    [sites],
+  );
 
   const sortOptions: ReadonlyArray<SortOption<SiteSort>> = [
     { key: "recent", label: t("sortRecent") },
@@ -98,11 +214,17 @@ export default function SitesPanel({
 
   function select(id: string) {
     setSelectedId(id);
-    setMobilePane("detail");
     const params = new URLSearchParams(window.location.search);
     params.set("s", id);
+    window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+  }
+
+  function closeDetails() {
+    setSelectedId(null);
+    const params = new URLSearchParams(window.location.search);
+    params.delete("s");
     const qs = params.toString();
-    window.history.replaceState(null, "", `${window.location.pathname}?${qs}`);
+    window.history.replaceState(null, "", `${window.location.pathname}${qs ? `?${qs}` : ""}`);
   }
 
   function toggleSelect(id: string) {
@@ -172,10 +294,7 @@ export default function SitesPanel({
         next.delete(id);
         return next;
       });
-      if (selectedId === id) {
-        setSelectedId(null);
-        setMobilePane("list");
-      }
+      if (selectedId === id) closeDetails();
       router.refresh();
     } finally {
       setBusyIds((current) => {
@@ -199,10 +318,7 @@ export default function SitesPanel({
         deletedIds.forEach((id) => next.delete(id));
         return next;
       });
-      if (selectedId && deletedIds.includes(selectedId)) {
-        setSelectedId(null);
-        setMobilePane("list");
-      }
+      if (selectedId && deletedIds.includes(selectedId)) closeDetails();
       router.refresh();
     } finally {
       setBusyIds((current) => {
@@ -214,14 +330,37 @@ export default function SitesPanel({
   }
 
   return (
-    <div className="relative flex h-full min-h-0 bg-canvas">
-      {/* Left: site list */}
-      <div
-        className={cn(
-          "w-full shrink-0 border-r border-line bg-base lg:block lg:w-80 xl:w-96",
-          mobilePane !== "list" && "hidden lg:block",
-        )}
-      >
+    <div className="relative h-full min-h-0 overflow-y-aut">
+      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+        {/* Stat cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <StatCard
+            label={t("statsMonitored")}
+            value={sites.length}
+            meta={t("statsMonitoredMeta", { count: statusCounts.get("approved") ?? 0 })}
+            bars={activityBars.length > 0 ? activityBars : [1]}
+            lastBarTone="bg-accent"
+          />
+          <StatCard
+            label={t("statsFeedback")}
+            value={totalFeedback}
+            meta={t("statsFeedbackMeta")}
+            bars={feedbackBars.length > 0 ? feedbackBars : [1]}
+            lastBarTone="bg-success"
+          />
+          <StatCard
+            label={t("statsPending")}
+            value={statusCounts.get("pending") ?? 0}
+            meta={t("statsPendingMeta")}
+            bars={activityBars.length > 0 ? [...activityBars].reverse() : [1]}
+            lastBarTone="bg-warning"
+          />
+        </div>
+
+        {/* Quick add */}
+        <QuickAddBanner projects={projects} />
+
+        {/* Table */}
         <SitesList
           items={sortedSites}
           selectedId={selectedId}
@@ -240,17 +379,25 @@ export default function SitesPanel({
         />
       </div>
 
-      {/* Right: site details */}
-      <div className={cn("min-w-0 flex-1 lg:flex", mobilePane !== "detail" && "hidden lg:flex")}>
-        {selectedSite ? (
-          <div className="flex h-full min-h-0 w-full flex-col">
-            <button
-              onClick={() => setMobilePane("list")}
-              className="flex h-10 shrink-0 items-center gap-1.5 border-b border-line px-3 text-xs font-semibold text-subtle lg:hidden"
-            >
-              <Icon.chevronLeft className="h-3.5 w-3.5" />
-              {t("title")}
-            </button>
+      {/* Details drawer */}
+      {selectedSite && (
+        <>
+          <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={closeDetails} />
+          <div
+            role="dialog"
+            aria-modal="true"
+            className="fixed inset-y-0 right-0 z-50 flex w-full max-w-md flex-col border-l border-line bg-base shadow-pop"
+          >
+            <div className="flex h-11 shrink-0 items-center justify-between border-b border-line px-3">
+              <span className="text-xs font-semibold text-subtle">{t("title")}</span>
+              <button
+                onClick={closeDetails}
+                aria-label={t("closeDetails")}
+                className="rounded-md p-1.5 text-subtle transition-colors hover:bg-raised hover:text-primary"
+              >
+                <Icon.close className="h-4 w-4" />
+              </button>
+            </div>
             <div className="min-h-0 flex-1">
               <SiteDetailsPanel
                 site={selectedSite}
@@ -260,21 +407,11 @@ export default function SitesPanel({
               />
             </div>
           </div>
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-3 text-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-raised">
-              <Icon.globe className="h-7 w-7 text-subtle" />
-            </div>
-            <div>
-              <h3 className="text-base font-semibold text-strong">{t("noSiteSelected")}</h3>
-              <p className="mt-1 text-sm text-subtle">{t("noSiteSelectedBody")}</p>
-            </div>
-          </div>
-        )}
-      </div>
+        </>
+      )}
 
       {selectedIds.length > 0 && (
-        <div className="absolute inset-x-3 bottom-3 z-10 flex flex-wrap items-center gap-2 rounded-xl border border-line bg-surface/95 px-3 py-2 shadow-pop backdrop-blur lg:inset-x-auto lg:left-3 lg:w-[19rem] xl:w-[23rem]">
+        <div className="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-2xl flex-wrap items-center gap-2 rounded-xl border border-line bg-surface/95 px-3 py-2 shadow-pop backdrop-blur">
           <div className="flex min-w-0 items-center gap-2 pr-1">
             <span className="inline-flex h-7 min-w-7 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent-text">
               <Icon.check className="h-3.5 w-3.5" />

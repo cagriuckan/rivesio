@@ -29,9 +29,16 @@ export default function UserMenu({
     router.refresh();
   }
 
-  const menuItems = [
+  const tp = useTranslations("premium");
+
+  const menuItems: {
+    label: string;
+    icon: (p: React.SVGProps<SVGSVGElement>) => React.ReactNode;
+    href: string;
+    badge?: string;
+  }[] = [
     { label: tu("settings"), icon: Icon.settings, href: "/settings" },
-    { label: tu("subscription"), icon: Icon.creditCard, href: "/settings" },
+    { label: tu("subscription"), icon: Icon.creditCard, href: "/settings", badge: tp("badge") },
     { label: tu("usage"), icon: Icon.barChart, href: "/settings" },
   ];
 
@@ -63,22 +70,38 @@ export default function UserMenu({
       {(close) => (
         <>
           {/* Identity */}
-          <div className="flex items-center gap-2.5 px-2 py-2">
+          <div className="mb-1 flex items-center gap-2.5 rounded-lg bg-raised px-2 py-2">
             <Avatar name={user} src={userInfo.image} size="md" />
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-strong">{user}</span>
               <span className="block truncate text-xs text-subtle">{userInfo.email}</span>
             </span>
+            <span className="inline-flex h-5 shrink-0 items-center rounded-full bg-accent-soft px-2 text-[10px] font-bold text-accent">
+              {tu("role")}
+            </span>
           </div>
-
-          <DropdownSeparator />
 
           {/* Items */}
           <div className="space-y-0.5">
-            {menuItems.map(({ label, icon, href }) => (
-              <DropdownItem key={label} icon={icon} onClick={() => { close(); router.push(href); }}>
-                {label}
-              </DropdownItem>
+            {menuItems.map(({ label, icon: ItemIcon, href, badge }) => (
+              <button
+                key={label}
+                type="button"
+                role="menuitem"
+                onClick={() => { close(); router.push(href); }}
+                className="group flex h-9 w-full items-center gap-2.5 rounded-lg px-2 text-left text-sm text-muted transition-colors hover:bg-accent-soft hover:text-accent"
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-raised text-subtle transition-colors group-hover:bg-accent-soft group-hover:text-accent">
+                  <ItemIcon className="h-3.5 w-3.5" />
+                </span>
+                <span className="flex-1 font-medium">{label}</span>
+                {badge && (
+                  <span className="inline-flex h-4 items-center rounded-full bg-grad-accent px-1.5 text-[9px] font-bold uppercase text-white">
+                    {badge}
+                  </span>
+                )}
+                <Icon.chevronRight className="h-3.5 w-3.5 shrink-0 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
+              </button>
             ))}
           </div>
 

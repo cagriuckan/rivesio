@@ -8,10 +8,13 @@ import { Button } from "@/components/ui/Button";
 import { Input, Field } from "@/components/ui/Field";
 import { Spinner } from "@/components/ui/Spinner";
 import AuthShell, { AuthError } from "@/components/auth/AuthShell";
+import SocialButtons from "@/components/auth/SocialButtons";
+import AuthDivider from "@/components/auth/AuthDivider";
 
 export default function LoginPage() {
   const t = useTranslations("login");
   const tc = useTranslations("common");
+  const ta = useTranslations("auth");
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -39,6 +42,8 @@ export default function LoginPage() {
 
   return (
     <AuthShell title={t("welcome")} subtitle={t("subtitle")}>
+      <SocialButtons />
+      <AuthDivider label={ta("orContinueWithEmail")} />
       <form onSubmit={submit}>
         <div className="space-y-4">
           <Field label={t("email")}>

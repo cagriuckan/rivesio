@@ -32,7 +32,7 @@ import {
 export const DEFAULT_PROJECT_CATEGORIES = ["Öneri", "Hata", "Tasarım", "Diğer"];
 
 const FALLBACK_SETTINGS: ProjectSettings = {
-  accentColor: "#4f46e5",
+  accentColor: "#0B1437",
   position: "bottom-right",
   fabStyle: "label",
   theme: "auto",
