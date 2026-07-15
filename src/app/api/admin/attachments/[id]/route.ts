@@ -1,13 +1,15 @@
 import { NextResponse } from "next/server";
-import { getAttachmentById } from "@/lib/admin-repo";
+import { requireAdminSession } from "@/lib/auth";
+import { getOwnedAttachment } from "@/lib/admin-repo";
 import { readAttachment } from "@/lib/storage";
 
 // Attachments live outside the public dir (and off the public bucket); they are
-// only served to authenticated admins (the /api/admin/* matcher in middleware
-// enforces the session).
+// only served to their owner's authenticated session.
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
+  const user = await requireAdminSession();
+  if (user instanceof NextResponse) return user;
   const { id } = await ctx.params;
-  const att = await getAttachmentById(id);
+  const att = await getOwnedAttachment(user.id, id);
   if (!att) return NextResponse.json({ error: "not_found" }, { status: 404 });
 
   const buf = await readAttachment(att.file_path);

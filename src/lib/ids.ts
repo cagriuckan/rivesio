@@ -9,3 +9,11 @@ export function generateWidgetKey(): string {
 export function generateId(): string {
   return randomUUID();
 }
+
+/**
+ * Unguessable capability token for a conversation. Returned to the end user on
+ * submit; whoever holds it can view and reply to that one conversation.
+ */
+export function generateConversationToken(): string {
+  return randomBytes(24).toString("base64url");
+}

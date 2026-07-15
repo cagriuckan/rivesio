@@ -48,6 +48,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
       name: project.name,
       accentColor: settings.accentColor,
       position: settings.position,
+      fabStyle: settings.fabStyle ?? "label",
+      theme: settings.theme ?? "auto",
       categories: settings.categories,
       text: settings.text,
       fields: settings.fields,

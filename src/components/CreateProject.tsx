@@ -69,7 +69,13 @@ function checkSlug(slug: string, signal: AbortSignal): Promise<{ valid?: boolean
   });
 }
 
-export default function CreateProject({ initialOpen = false }: { initialOpen?: boolean }) {
+export default function CreateProject({
+  initialOpen = false,
+  triggerSize = "md",
+}: {
+  initialOpen?: boolean;
+  triggerSize?: "sm" | "md";
+}) {
   const t = useTranslations("projects");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -152,8 +158,8 @@ export default function CreateProject({ initialOpen = false }: { initialOpen?: b
 
   if (!open) {
     return (
-      <Button variant="primary" onClick={() => setOpen(true)}>
-        <Icon.plus className="h-4 w-4" />
+      <Button variant="primary" size={triggerSize} onClick={() => setOpen(true)}>
+        <Icon.plus className={triggerSize === "sm" ? "h-3.5 w-3.5" : "h-4 w-4"} />
         {t("newWidget")}
       </Button>
     );

@@ -1,6 +1,6 @@
 import { corsJson, corsPreflight } from "@/lib/cors";
 import { guardSubmission } from "@/lib/guard";
-import { addAttachment, countAttachments, getFeedback } from "@/lib/repo";
+import { addAttachment, countAttachments, getFeedback, listReplies } from "@/lib/repo";
 import { saveAttachment } from "@/lib/storage";
 import { limits } from "@/lib/env";
 import { generateId } from "@/lib/ids";
@@ -49,6 +49,15 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     return corsJson({ error: "file_too_large" }, 400);
   }
 
+  // If this attachment belongs to a picked-element note, link it to that reply so it
+  // renders next to the note instead of always falling back to the origin message.
+  const replyIdRaw = form.get("reply_id");
+  let replyId: string | null = null;
+  if (typeof replyIdRaw === "string" && replyIdRaw) {
+    const replies = await listReplies(id);
+    if (replies.some((r) => r.id === replyIdRaw)) replyId = replyIdRaw;
+  }
+
   const buf = Buffer.from(await file.arrayBuffer());
   const fileId = generateId();
   const relPath = await saveAttachment(id, fileId, file.type, buf);
@@ -58,6 +67,7 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
     filePath: relPath,
     mime: file.type,
     size: buf.length,
+    replyId,
   });
 
   return corsJson({ ok: true, attachment_id: row.id });

@@ -7,20 +7,23 @@ import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/components/ui/cn";
 import { useUser } from "@/contexts/UserContext";
 import { useThemePref } from "@/hooks/useThemePref";
-import { Dropdown, DropdownSeparator } from "@/components/ui/Dropdown";
+import { Dropdown, DropdownItem, DropdownSeparator } from "@/components/ui/Dropdown";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { Tooltip } from "@/components/ui/Tooltip";
+import NotificationBell from "./NotificationBell";
+import { authClient } from "@/lib/auth-client";
 
 const THEME_ICON = { light: Icon.sun, dark: Icon.moon, system: Icon.monitor } as const;
 
 export default function ContentActions() {
-  const user = useUser();
+  const userInfo = useUser();
+  const user = userInfo.name || userInfo.email;
   const router = useRouter();
   const tt = useTranslations("theme");
   const { theme, setTheme, cycleTheme } = useThemePref();
 
   async function logout() {
-    await fetch("/api/admin/logout", { method: "POST" });
+    await authClient.signOut();
     router.replace("/login");
     router.refresh();
   }
@@ -33,117 +36,106 @@ export default function ContentActions() {
       <Tooltip label={tt(theme)} side="bottom">
         <button
           onClick={cycleTheme}
-          className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-raised"
           aria-label={tt("label")}
         >
-          <ThemeIcon className="h-4 w-4" />
+          <ThemeIcon className="h-5 w-5" />
         </button>
       </Tooltip>
 
       {/* Notifications */}
-      <Tooltip label="Notifications" side="bottom">
-        <button
-          className="relative inline-flex h-8 w-8 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-raised hover:text-primary outline-none focus-visible:ring-2 focus-visible:ring-accent"
-          aria-label="Notifications"
-        >
-          <Icon.bell className="h-4 w-4" />
-          <span className="absolute right-1.5 top-1.5 h-1.5 w-1.5 rounded-full bg-accent ring-1 ring-base" />
-        </button>
-      </Tooltip>
+      <NotificationBell />
 
       {/* Profile avatar */}
       <Dropdown
         align="right"
-        panelClassName="w-56"
+        panelClassName="w-52"
         trigger={({ open, triggerProps }) => (
           <button
             {...triggerProps}
             className={cn(
-              "flex items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-accent transition-opacity",
+              "flex items-center rounded-full outline-none transition-opacity f focus-visible:ring-accent",
               open ? "opacity-80" : "hover:opacity-80"
             )}
           >
-            <Avatar name={user} size="md" />
+            <Avatar name={user} src={userInfo.image} size="md" />
           </button>
         )}
       >
         {(close) => (
           <>
             {/* User info */}
-            <div className="flex items-center gap-2.5 px-2.5 py-2 mb-1">
-              <Avatar name={user} size="md" />
+            <div className="flex items-center gap-2.5 px-2 py-2">
+              <Avatar name={user} src={userInfo.image} size="md" />
               <div className="min-w-0">
                 <div className="truncate text-sm font-semibold text-strong">{user}</div>
-                <div className="text-xs text-subtle">Administrator</div>
+                <div className="text-xs text-subtle">{userInfo.email}</div>
               </div>
             </div>
 
             <DropdownSeparator />
+              {/* Settings */}
+              <DropdownItem
+              icon={Icon.settings}
+              onClick={() => {
+                close();
+                router.push("/settings");
+              }}
+            >
+              Settings
+            </DropdownItem>
 
-            {/* Language */}
-            <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-faint">Language</div>
-            <div className="px-1 pb-1.5">
-              <LanguageSwitcher className="w-full justify-center" />
-            </div>
+            {/* Logout */}
+            <DropdownItem icon={Icon.logout} onClick={logout}>
+              Log out
+            </DropdownItem>
 
             <DropdownSeparator />
 
+
+            {/* Language */}
+            <div className="px-2 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wider text-faint">Language</div>
+            <div className="px-1 pb-1">
+              <LanguageSwitcher className="w-full justify-center" />
+            </div>
+
             {/* Theme */}
-            <div className="px-2 pb-1 text-xs font-semibold uppercase tracking-wider text-faint">{tt("label")}</div>
-            <div className="flex items-center gap-0.5 rounded-lg bg-raised p-0.5 mx-1 mb-1.5">
+            <div className="px-2 pb-0.5 pt-1 text-[11px] font-semibold uppercase tracking-wider text-faint">{tt("label")}</div>
+            <div className="mx-1 mb-1 flex items-center gap-0.5 rounded-md bg-raised p-0.5">
               <button
                 onClick={() => setTheme("light")}
                 aria-pressed={theme === "light"}
                 className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                  "flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1 text-xs font-medium transition-colors",
                   theme === "light" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary"
                 )}
               >
-                <Icon.sun className="h-3.5 w-3.5" /> {tt("lightShort")}
+                <Icon.sun className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => setTheme("dark")}
                 aria-pressed={theme === "dark"}
                 className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                  "flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1 text-xs font-medium transition-colors",
                   theme === "dark" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary"
                 )}
               >
-                <Icon.moon className="h-3.5 w-3.5" /> {tt("darkShort")}
+                <Icon.moon className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => setTheme("system")}
                 aria-pressed={theme === "system"}
                 className={cn(
-                  "flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors",
+                  "flex flex-1 items-center justify-center gap-1.5 rounded px-2 py-1 text-xs font-medium transition-colors",
                   theme === "system" ? "bg-surface text-strong shadow-sm" : "text-subtle hover:text-primary"
                 )}
               >
-                <Icon.monitor className="h-3.5 w-3.5" /> {tt("systemShort")}
+                <Icon.monitor className="h-3.5 w-3.5" />
               </button>
             </div>
 
-            <DropdownSeparator />
 
-            {/* Settings */}
-            <button
-              role="menuitem"
-              onClick={close}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-primary"
-            >
-              <Icon.settings className="h-4 w-4 shrink-0 text-subtle" />
-              Settings
-            </button>
-
-            {/* Logout */}
-            <button
-              role="menuitem"
-              onClick={logout}
-              className="flex w-full items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm font-medium text-muted transition-colors hover:bg-raised hover:text-primary"
-            >
-              <Icon.logout className="h-4 w-4 shrink-0 text-subtle" />
-              Log out
-            </button>
+          
           </>
         )}
       </Dropdown>

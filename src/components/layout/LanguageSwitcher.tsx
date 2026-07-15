@@ -38,8 +38,8 @@ export default function LanguageSwitcher({ className }: { className?: string }) 
           onClick={() => switchTo(l)}
           aria-pressed={l === locale}
           className={cn(
-            "rounded px-2 py-0.5 text-xs font-semibold uppercase transition-colors",
-            l === locale ? "bg-surface text-primary" : "text-subtle hover:text-primary",
+            "rounded px-2 py-0.5 text-xs font-semibold uppercase transition-colors flex-auto",
+            l === locale ? "bg-surface text-primary" : "text-subtle hover:text-primary flex-auto",
           )}
         >
           {l}

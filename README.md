@@ -20,10 +20,10 @@ Kanthemes temaları için merkezi geri bildirim sistemi. İki parçadan oluşur:
 
 ## Teknoloji
 
-Next.js 15 (App Router) · MySQL (mysql2) · Cloudflare R2 (ekler) · Tailwind · jose (JWT) · zod · esbuild + html2canvas (widget).
+Next.js 15 (App Router) · PostgreSQL (Drizzle ORM + postgres.js) · Cloudflare R2 (ekler) · Resend (e-posta) · Tailwind · jose (JWT) · zod · esbuild + html2canvas (widget).
 
 > **Node sürümü:** 20–22 kullanın (`.nvmrc` → 22).
-> **Veritabanı:** MySQL/MariaDB (Hostinger uyumlu). Şema ilk açılışta otomatik oluşturulur.
+> **Veritabanı:** PostgreSQL 16. Şema, Drizzle migration'ları ile yönetilir (`drizzle/`).
 
 ## Yerel geliştirme
 
@@ -35,12 +35,20 @@ npm run hash -- "panel-parolaniz"   # çıkan ADMIN_PASSWORD_HASH satırını .e
 # .env içine JWT_SECRET üret:
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
+# PostgreSQL'i hazırla (lokal Docker örneği):
+docker run -d --name revisto-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
+  -e POSTGRES_DB=revisto -p 5432:5432 postgres:16-alpine
+# .env içindeki DATABASE_URL'i bu sunucuya göre ayarla, sonra şemayı uygula:
+npm run db:push    # geliştirme için (şemayı doğrudan senkronlar)
+# veya migration dosyalarıyla: npm run db:generate && npm run db:migrate
+
 npm run build      # önce widget'ı (esbuild) sonra Next'i derler
 npm start          # veya geliştirme için: npm run dev
 ```
 
-İlk çalıştırmada veritabanı ve **"Kanews"** projesi otomatik oluşturulur. Widget anahtarını
-panelin **Widget'lar** sayfasında görürsün.
+Henüz proje seed edilmez; panelin **Widget'lar** sayfasından bir widget oluştur, anahtarını
+oradan al. Migration komutları: `db:generate` (SQL üret), `db:migrate` (uygula),
+`db:push` (geliştirmede doğrudan senkronla), `db:studio` (Drizzle Studio).
 
 ### Tarayıcıda denemek
 
@@ -56,12 +64,12 @@ adresini kendi değerlerinle değiştir. Site ilk yüklemede **pending** gelir; 
 | `ADMIN_PASSWORD_HASH` | `npm run hash -- "..."` çıktısı (scrypt) |
 | `JWT_SECRET` | Oturum çerezini imzalayan uzun rastgele dizi |
 | `PUBLIC_BASE_URL` | Sunucunun herkese açık adresi (sonunda `/` yok) |
-| `DB_HOST` / `DB_PORT` | MySQL sunucusu (Hostinger'da genelde `127.0.0.1:3306`) |
-| `DB_USER` / `DB_PASSWORD` | MySQL kullanıcı bilgileri |
-| `DB_NAME` | MySQL veritabanı adı |
+| `DATABASE_URL` | PostgreSQL bağlantı dizesi (`postgres://kullanıcı:şifre@host:5432/revisto`) |
 | `UPLOAD_DIR` | Ekler için yerel fallback dizini (R2 ayarlıysa kullanılmaz) |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 (ekler) |
-| `AUTO_APPROVE_SITES` | `1` → yeni siteler otomatik onaylı; `0` (önerilen) → panelden onaylarsın |
+| `AUTO_APPROVE_SITES` | Yeni widget'lar için varsayılan otomatik onay (`1`/`0`). Widget bazında panelden değiştirilir |
+| `RESEND_API_KEY` | Resend API anahtarı. Boşsa e-postalar gönderilmez, konsola loglanır |
+| `EMAIL_FROM` | Gönderen adresi (token kurtarma & yanıt bildirimleri) |
 
 ## Hostinger Node.js'e kurulum
 
@@ -86,8 +94,8 @@ ortam değişkeninden alır).
    npm install --include=dev   # build için devDependencies (esbuild, typescript) gerekli
    npm run build               # önce widget (esbuild), sonra next build → .next
    ```
-4. **MySQL veritabanı:** hPanel → Veritabanları → MySQL'den bir veritabanı + kullanıcı
-   oluştur ve `DB_*` değişkenlerine gir. Tablolar uygulama ilk açıldığında otomatik kurulur.
+4. **PostgreSQL veritabanı:** Bir Postgres veritabanı oluştur ve `DATABASE_URL`'e gir.
+   Deploy sırasında şemayı `npm run db:migrate` ile uygula (migration dosyaları `drizzle/`).
 5. **Ortam değişkenleri:** Node.js panelinin "Environment variables" bölümünden yukarıdaki
    tabloyu gir. Ekler R2'ye gittiği için yerel kalıcı disk gerekmez. `PORT` GİRME (Passenger atar).
 6. **Restart App** ile uygulamayı yeniden başlat. `PUBLIC_BASE_URL`'i alan adına eşitle.
@@ -104,9 +112,9 @@ npm run build
 ardından panelden **Restart App**. (İstersen bu iki komutu Hostinger'ın deploy hook'una
 ekleyebilirsin.)
 
-> Rate limit sayaçları bellek-içidir (tek instance varsayılır). MySQL paylaşımlı
-> olduğundan veritabanı yatay ölçeklemede sorun değildir; yalnızca rate limit için
-> ortak bir depo (ör. Redis) gerekir.
+> Anlık (burst) rate limit sayaçları bellek-içidir (tek instance varsayılır). Günlük
+> gönderim limitleri ise kalıcı olarak veritabanından sayılır. Çok-instance dağıtımda
+> yalnızca burst rate limit için ortak bir depo (ör. Redis) gerekir.
 
 ## Tema entegrasyonu
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { corsJson, corsPreflight } from "@/lib/cors";
-import { guardRegister } from "@/lib/guard";
+import { checkSubmissionAllowed, guardRegister } from "@/lib/guard";
 import { parseSettings } from "@/lib/repo";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
 
@@ -40,6 +40,12 @@ export async function POST(req: Request) {
   }
 
   const settings = parseSettings(result.project);
+  const { config } = result;
+
+  // Site-level submit availability (support window + site daily cap). Per-visitor
+  // caps are enforced at submit time.
+  const allowed = await checkSubmissionAllowed(result.site, config);
+
   return corsJson({
     enabled: true,
     status: result.site.status,
@@ -47,9 +53,21 @@ export async function POST(req: Request) {
       name: result.project.name,
       accentColor: settings.accentColor,
       position: settings.position,
+      fabStyle: settings.fabStyle ?? "label",
+      theme: settings.theme ?? "auto",
       categories: settings.categories,
       text: settings.text,
       fields: settings.fields,
     },
+    conversation: {
+      enabled: config.allowConversation,
+      emailRequired: config.allowConversation,
+    },
+    support: {
+      unlimited: config.supportEndsAt === null,
+      endsAt: config.supportEndsAt,
+    },
+    canSubmit: allowed.ok,
+    blockedReason: allowed.ok ? null : allowed.error,
   });
 }

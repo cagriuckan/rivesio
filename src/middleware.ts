@@ -1,26 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { jwtVerify } from "jose";
+import { getSessionCookie } from "better-auth/cookies";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
 
-// Edge-compatible auth gate. Cannot import ./lib/env here (uses node:path),
-// so read the secret directly from process.env.
-const COOKIE_NAME = "kf_session";
-
 const intlMiddleware = createIntlMiddleware(routing);
-
-async function isValid(token: string | undefined): Promise<boolean> {
-  if (!token) return false;
-  try {
-    const secret = new TextEncoder().encode(
-      process.env.JWT_SECRET ?? "dev-insecure-secret-change-me"
-    );
-    const { payload } = await jwtVerify(token, secret, { algorithms: ["HS256"] });
-    return payload.role === "admin";
-  } catch {
-    return false;
-  }
-}
 
 /** Strips a leading /en or /tr, returning the locale and the locale-less path. */
 function splitLocale(pathname: string): { locale: string; rest: string } {
@@ -31,13 +14,13 @@ function splitLocale(pathname: string): { locale: string; rest: string } {
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
-  const token = req.cookies.get(COOKIE_NAME)?.value;
-  const authed = await isValid(token);
+  // Optimistic check (no DB roundtrip on edge). Real session verification
+  // happens per-route via requireAdminSession().
+  const authed = Boolean(getSessionCookie(req));
 
   // API routes are not localized: guard admin endpoints and skip intl routing.
   if (pathname.startsWith("/api")) {
-    const isAdminApi = pathname.startsWith("/api/admin") && pathname !== "/api/admin/login";
-    if (isAdminApi && !authed) {
+    if (pathname.startsWith("/api/admin") && !authed) {
       return NextResponse.json({ error: "unauthorized" }, { status: 401 });
     }
     return NextResponse.next();
@@ -45,11 +28,13 @@ export async function middleware(req: NextRequest) {
 
   const { locale, rest } = splitLocale(pathname);
 
+  // "/" is public: it renders the landing page for signed-out visitors
+  // and the dashboard for signed-in users (see [locale]/page.tsx).
   const isProtectedPage =
-    rest === "/" ||
     rest.startsWith("/feedbacks") ||
     rest.startsWith("/sites") ||
-    rest.startsWith("/projects");
+    rest.startsWith("/projects") ||
+    rest.startsWith("/settings");
 
   if (isProtectedPage && !authed) {
     const url = req.nextUrl.clone();
@@ -57,8 +42,8 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already logged in: keep them out of the login page.
-  if (rest === "/login" && authed) {
+  // Already logged in: keep them out of the auth pages.
+  if ((rest === "/login" || rest === "/signup") && authed) {
     const url = req.nextUrl.clone();
     url.pathname = `/${locale}`;
     return NextResponse.redirect(url);

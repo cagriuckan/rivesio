@@ -24,14 +24,13 @@
       <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
     </div>
 
-    <!-- WordPress dışı gömme örneği. Kendi değerlerinle değiştir. -->
+    <!-- Gömme örneği. WIDGET_KEY ve sunucu adresini kendi değerlerinle değiştir. -->
     <script>
-      window.KanewsFeedback = {
-        license: "DEMO-LICENSE",
-        theme: "kanews",
+      window.RevistoFeedback = {
         domain: location.host || "demo.local",
+        user: "demo-user",
       };
     </script>
-    <script src="http://localhost:3100/api/widget/WIDGET_KEY_BURAYA.js" async></script>
+    <script src="http://localhost:3000/api/widget/WIDGET_KEY_BURAYA.js" async></script>
   </body>
 </html>

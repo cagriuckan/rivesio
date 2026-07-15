@@ -17,19 +17,23 @@ function resolvePath(value: string): string {
 }
 
 export const env = {
-  adminUser: required("ADMIN_USER", "admin"),
-  adminPasswordHash: required("ADMIN_PASSWORD_HASH"),
-  jwtSecret: required("JWT_SECRET", "dev-insecure-secret-change-me"),
+  authSecret: required("BETTER_AUTH_SECRET", "dev-insecure-secret-change-me"),
   publicBaseUrl: (process.env.PUBLIC_BASE_URL ?? "http://localhost:3000").replace(/\/$/, ""),
   uploadDir: resolvePath(process.env.UPLOAD_DIR ?? "./data/uploads"),
-  db: {
-    host: process.env.DB_HOST ?? "127.0.0.1",
-    port: parseInt(process.env.DB_PORT ?? "3306", 10),
-    user: required("DB_USER", "root"),
-    password: process.env.DB_PASSWORD ?? "",
-    database: required("DB_NAME", "revisto"),
-  },
+  databaseUrl: required(
+    "DATABASE_URL",
+    "postgres://postgres:postgres@127.0.0.1:5432/revisto",
+  ),
   autoApproveSites: process.env.AUTO_APPROVE_SITES === "1",
+  email: {
+    resendApiKey: process.env.RESEND_API_KEY ?? "",
+    from: process.env.EMAIL_FROM ?? "Revisto <onboarding@resend.dev>",
+  },
+  vapid: {
+    publicKey: process.env.VAPID_PUBLIC_KEY ?? "",
+    privateKey: process.env.VAPID_PRIVATE_KEY ?? "",
+    subject: process.env.VAPID_SUBJECT ?? "mailto:admin@localhost",
+  },
   r2: {
     accountId: process.env.R2_ACCOUNT_ID ?? "",
     accessKeyId: process.env.R2_ACCESS_KEY_ID ?? "",
@@ -44,10 +48,24 @@ export const env = {
 export const r2Enabled =
   !!env.r2.accountId && !!env.r2.accessKeyId && !!env.r2.secretAccessKey && !!env.r2.bucket;
 
+/** True when a real Resend key is configured; otherwise emails are logged, not sent. */
+export const emailEnabled = !!env.email.resendApiKey;
+
+/** True when web-push VAPID keys are configured. */
+export const pushEnabled = !!env.vapid.publicKey && !!env.vapid.privateKey;
+
 /** Limits applied to public submissions. */
 export const limits = {
   maxAttachments: 4,
   maxAttachmentBytes: 5 * 1024 * 1024, // 5 MB per image
   maxMessageLength: 5000,
+  maxReplyLength: 5000,
   allowedMimeTypes: ["image/png", "image/jpeg", "image/webp", "image/gif"],
+};
+
+/** Limits for widget logo uploads. Tighter than attachments and email-safe. */
+export const logoLimits = {
+  maxBytes: 512 * 1024, // 512 KB
+  // GIF/SVG excluded: poor email-client support and SVG is an injection risk.
+  allowedMimeTypes: ["image/png", "image/jpeg", "image/webp"],
 };

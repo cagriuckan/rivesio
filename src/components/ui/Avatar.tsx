@@ -1,12 +1,12 @@
 import { cn } from "./cn";
 
 const COLORS = [
-  { bg: "#6e79d6", text: "#fff" },
-  { bg: "#3ecf8e", text: "#fff" },
-  { bg: "#f5a623", text: "#fff" },
-  { bg: "#4aa8ff", text: "#fff" },
-  { bg: "#a78bfa", text: "#fff" },
-  { bg: "#f5535b", text: "#fff" },
+  { bg: "#0B1437", text: "#fff" },
+  { bg: "#1f2f66", text: "#fff" },
+  { bg: "#33478c", text: "#fff" },
+  { bg: "#16224e", text: "#fff" },
+  { bg: "#3d54a5", text: "#fff" },
+  { bg: "#2a3f7e", text: "#fff" },
 ];
 
 function seedIndex(seed: string): number {
@@ -25,19 +25,32 @@ function initials(name: string): string {
 const SIZES = {
   xs: "h-5 w-5 text-[9px]",
   sm: "h-6 w-6 text-[10px]",
-  md: "h-8 w-8 text-xs",
-  lg: "h-10 w-10 text-sm",
+  md: "h-9 w-9 text-sm",
+  lg: "h-12 w-12 text-sm",
 };
 
 export function Avatar({
   name,
+  src,
   size = "md",
   className,
 }: {
   name: string;
+  /** Uploaded avatar URL, if any — rendered instead of the initials fallback. */
+  src?: string | null;
   size?: keyof typeof SIZES;
   className?: string;
 }) {
+  if (src) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={src}
+        alt=""
+        className={cn("inline-flex shrink-0 rounded-full object-cover", SIZES[size], className)}
+      />
+    );
+  }
   const c = COLORS[seedIndex(name)];
   return (
     <span

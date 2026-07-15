@@ -30,10 +30,21 @@ interface ServerConfig {
     name: string;
     accentColor: string;
     position: "bottom-right" | "bottom-left";
+    fabStyle?: "label" | "icon";
+    theme?: "auto" | "dark" | "light";
     categories: string[];
     text?: Record<WidgetLocale, WidgetText>;
     fields?: FormField[];
   };
+}
+
+/** Per-site runtime config resolved by /register (conversation, support, limits). */
+interface Runtime {
+  conversationEnabled: boolean;
+  emailRequired: boolean;
+  support: { unlimited: boolean; endsAt: number | null } | null;
+  canSubmit: boolean;
+  blockedReason: string | null;
 }
 
 const DEFAULT_TEXT: Record<WidgetLocale, WidgetText> = {
@@ -58,6 +69,110 @@ const DEFAULT_TEXT: Record<WidgetLocale, WidgetText> = {
     errorMessage: "Couldn't send. Please try again.",
   },
 };
+
+// Non-customizable UI chrome (tabs, history, conversation), localized in code.
+const UI = {
+  tr: {
+    tabForm: "Gönderim",
+    tabHistory: "Geçmiş",
+    historyEmpty: "Henüz bir konuşman yok.",
+    otpTitle: "Geçmişine eriş",
+    otpHint: "E-postana göndereceğimiz 6 haneli kodla tüm konuşmalarını görebilirsin.",
+    sendCode: "Kod gönder",
+    codePlaceholder: "6 haneli kod",
+    verify: "Doğrula",
+    codeSent: "Kod e-postana gönderildi.",
+    invalidCode: "Kod hatalı ya da süresi doldu.",
+    changeEmail: "Değiştir",
+    newReplyBadge: "Yeni yanıt",
+    open: "Aç",
+    emailPlaceholder: "E-posta adresin",
+    supportUnlimited: "Sınırsız destek",
+    supportLeft: (d: number) => `Destek: ${d} gün kaldı`,
+    supportLastDay: "Destek bugün sona eriyor",
+    supportEnded: "Destek süresi doldu",
+    emailLabel: "E-posta",
+    emailHint: "Yanıtları takip etmek ve kodunu kurtarmak için.",
+    tokenSaved: "Erişim kodun",
+    tokenHint: "Konuşmana Geçmiş sekmesinden e-postanla erişebilirsin.",
+    replyPlaceholder: "Yanıtını yaz…",
+    send: "Gönder",
+    sending: "Gönderiliyor…",
+    you: "Sen",
+    support: "Destek",
+    loadError: "Konuşma yüklenemedi.",
+    notFound: "Konuşma bulunamadı. Kodu kontrol et.",
+    closedNotice: "Destek süresi dolduğu için yeni yanıt eklenemiyor.",
+    back: "Geri",
+    copied: "Kopyalandı",
+    copy: "Kodu kopyala",
+    newSubmission: "Yeni gönderim",
+    addImage: "Görsel ekle",
+    attachmentSent: "📎 Ek gönderildi",
+    poweredBy: "Çalıştırdığımız platform",
+  },
+  en: {
+    tabForm: "Submit",
+    tabHistory: "History",
+    historyEmpty: "You have no conversations yet.",
+    otpTitle: "Access your history",
+    otpHint: "We'll email you a 6-digit code to see all your conversations.",
+    sendCode: "Send code",
+    codePlaceholder: "6-digit code",
+    verify: "Verify",
+    codeSent: "The code was sent to your email.",
+    invalidCode: "Wrong or expired code.",
+    changeEmail: "Change",
+    newReplyBadge: "New reply",
+    open: "Open",
+    emailPlaceholder: "Your email",
+    supportUnlimited: "Unlimited support",
+    supportLeft: (d: number) => `Support: ${d} days left`,
+    supportLastDay: "Support ends today",
+    supportEnded: "Support period ended",
+    emailLabel: "Email",
+    emailHint: "To follow replies and recover your code.",
+    tokenSaved: "Your access code",
+    tokenHint: "You can return to this conversation from the History tab with your email.",
+    replyPlaceholder: "Write your reply…",
+    send: "Send",
+    sending: "Sending…",
+    you: "You",
+    support: "Support",
+    loadError: "Couldn't load the conversation.",
+    notFound: "Conversation not found. Check the code.",
+    closedNotice: "Support period ended; new replies are disabled.",
+    back: "Back",
+    copied: "Copied",
+    copy: "Copy code",
+    newSubmission: "New submission",
+    addImage: "Add image",
+    attachmentSent: "📎 Attachment sent",
+    poweredBy: "Powered by",
+  },
+} as const;
+
+// Compact Revisto brand mark for the widget footer.
+const BRAND_MARK = `<svg viewBox="0 0 24 24" fill="none" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="7" fill="#0B1437"/><ellipse cx="12" cy="11.2" rx="6.2" ry="5" fill="#fff"/><path d="M8.5 14.5 L7 18 L11.5 15.4 Z" fill="#fff"/><circle cx="9.4" cy="11.2" r="1" fill="#0B1437"/><circle cx="12" cy="11.2" r="1" fill="#0B1437"/><circle cx="14.6" cy="11.2" r="1" fill="#0B1437"/></svg>`;
+
+function submitErrorText(code: string | null, locale: WidgetLocale): string {
+  const tr: Record<string, string> = {
+    support_ended: "Destek süresi doldu, yeni gönderim alınamıyor.",
+    daily_limit_site: "Bu site için günlük gönderim limitine ulaşıldı.",
+    daily_limit_visitor: "Günlük gönderim limitine ulaştın. Yarın tekrar dene.",
+    pending: "Bu site henüz onaylanmadı.",
+    blocked: "Bu site engellenmiş.",
+  };
+  const en: Record<string, string> = {
+    support_ended: "Support period ended; submissions are closed.",
+    daily_limit_site: "Daily submission limit for this site reached.",
+    daily_limit_visitor: "You've hit today's submission limit. Try again tomorrow.",
+    pending: "This site isn't approved yet.",
+    blocked: "This site is blocked.",
+  };
+  const dict = locale === "en" ? en : tr;
+  return dict[code ?? ""] ?? (locale === "en" ? "Couldn't send. Please try again." : "Gönderilemedi. Lütfen tekrar dene.");
+}
 
 /** Pick widget locale from the host page's <html lang>, default tr. */
 function detectLocale(): WidgetLocale {
@@ -89,6 +204,8 @@ interface Attachment {
 interface ElementAnnotation {
   id: string;
   kind: "element_annotation";
+  // 1-based pick order, matches the numbered badge drawn on the element's screenshot.
+  index: number;
   label: string;
   value: string;
   selector: string;
@@ -119,12 +236,11 @@ const ICONS = {
   close: icon('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
   check: icon('<polyline points="20 6 9 17 4 12"/>'),
   alert: icon('<circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>'),
+  clock: icon('<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>'),
+  infinity: icon('<path d="M18.6 6.62a4.38 4.38 0 1 0 0 6.76L12 12l-6.6 1.38a4.38 4.38 0 1 0 0-6.76L12 12z"/>'),
+  back: icon('<line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/>'),
   x: icon('<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>'),
 };
-
-function delay(ms: number) {
-  return new Promise((r) => setTimeout(r, ms));
-}
 
 function localId(): string {
   if (crypto?.randomUUID) return crypto.randomUUID();
@@ -138,7 +254,14 @@ async function boot() {
 
   const domain = host.domain || location.host;
 
-  let registration: { enabled: boolean; project?: ServerConfig["project"] };
+  let registration: {
+    enabled: boolean;
+    project?: ServerConfig["project"];
+    conversation?: { enabled: boolean; emailRequired: boolean };
+    support?: { unlimited: boolean; endsAt: number | null };
+    canSubmit?: boolean;
+    blockedReason?: string | null;
+  };
   try {
     const res = await fetch(`${server.base}/api/v1/register`, {
       method: "POST",
@@ -157,14 +280,22 @@ async function boot() {
   if (!registration.enabled) return;
 
   const cfg = { ...server.project, ...(registration.project ?? {}) };
-  mount(server, host, cfg, { domain });
+  const runtime: Runtime = {
+    conversationEnabled: registration.conversation?.enabled ?? false,
+    emailRequired: registration.conversation?.emailRequired ?? false,
+    support: registration.support ?? null,
+    canSubmit: registration.canSubmit ?? true,
+    blockedReason: registration.blockedReason ?? null,
+  };
+  mount(server, host, cfg, { domain }, runtime);
 }
 
 function mount(
   server: ServerConfig,
   host: HostConfig,
   project: ServerConfig["project"],
-  ctx: { domain: string }
+  ctx: { domain: string },
+  runtime: Runtime,
 ) {
   const containerHost = document.createElement("div");
   containerHost.id = "revisto-widget";
@@ -178,15 +309,24 @@ function mount(
   const root = document.createElement("div");
   root.className = "kf-root";
   root.dataset.pos = project.position || "bottom-right";
-  root.style.setProperty("--kf-accent", project.accentColor || "#6366f1");
+  root.dataset.fab = project.fabStyle || "label";
+  root.style.setProperty("--kf-accent", project.accentColor || "#0B1437");
 
-  // Mirror host page theme into widget
-  const pageTheme = document.documentElement.getAttribute("data-theme");
-  if (pageTheme === "light") root.dataset.theme = "light";
+  // Theme: "auto" mirrors the host page's data-theme; otherwise force dark/light.
+  const theme = project.theme || "auto";
+  if (theme === "light") {
+    root.dataset.theme = "light";
+  } else if (theme === "auto") {
+    const pageTheme = document.documentElement.getAttribute("data-theme");
+    if (pageTheme === "light") root.dataset.theme = "light";
+  }
+  // "dark" is the default styling; no data-theme needed.
 
   const locale = detectLocale();
   const txt: WidgetText = { ...DEFAULT_TEXT[locale], ...(project.text?.[locale]) };
+  const ui = UI[locale];
   const fields = project.fields ?? [];
+  const convo = runtime.conversationEnabled;
 
   const categoryOptions = (project.categories ?? ["Öneri"])
     .map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)
@@ -215,9 +355,17 @@ function mount(
     })
     .join("");
 
+  const emailFieldHtml = convo
+    ? `<div>
+         <label class="kf-label">${esc(ui.emailLabel)}${runtime.emailRequired ? " *" : ""}</label>
+         <input type="email" class="kf-input kf-email" placeholder="${esc(ui.emailPlaceholder)}" ${runtime.emailRequired ? "required" : ""}>
+         <div class="kf-token-hint">${esc(ui.emailHint)}</div>
+       </div>`
+    : "";
+
   root.innerHTML = `
-    <button class="kf-fab" type="button" aria-label="${esc(txt.fabLabel)}">
-      ${ICONS.chat}<span>${esc(txt.fabLabel)}</span>
+    <button class="kf-fab" type="button" aria-label="${esc(txt.fabLabel)}" data-tip="${esc(txt.fabLabel)}">
+      ${ICONS.chat}<span>${esc(txt.fabLabel)}</span><span class="kf-fab-badge" hidden></span>
     </button>
 
     <div class="kf-panel" role="dialog" aria-label="${esc(txt.title)}">
@@ -228,66 +376,102 @@ function mount(
           <span class="kf-title">${esc(txt.title)}</span>
         </div>
         <div class="kf-head-actions">
-          <button class="kf-icon-btn kf-history-toggle" type="button" aria-label="Geçmiş">${ICONS.history}</button>
-          <button class="kf-icon-btn kf-close-btn" type="button" aria-label="Kapat">${ICONS.close}</button>
+          <button class="kf-icon-btn kf-close-btn" type="button" aria-label="${esc(ui.back)}">${ICONS.close}</button>
         </div>
       </div>
 
+      <div class="kf-tabs">
+        <button class="kf-tab kf-tab-form" type="button" data-active="1">${ICONS.chat}<span>${esc(ui.tabForm)}</span></button>
+        <button class="kf-tab kf-tab-history" type="button" data-active="0">${ICONS.history}<span>${esc(ui.tabHistory)}</span><span class="kf-tab-badge" hidden></span></button>
+      </div>
+
+      <div class="kf-support" hidden></div>
       <div class="kf-msg" hidden></div>
 
-      <!-- History view -->
-      <div class="kf-view-history" hidden>
-        <p class="kf-history-empty" hidden>Henüz geri bildirim göndermediniz.</p>
-        <ul class="kf-history-list"></ul>
-      </div>
-
+      <!-- ── FORM TAB ── -->
       <div class="kf-view-form">
-      <div class="kf-body">
+        <div class="kf-body">
+          <div>
+            <label class="kf-label">${esc(txt.categoryLabel)}</label>
+            <select class="kf-select" aria-label="${esc(txt.categoryLabel)}">${categoryOptions}</select>
+          </div>
 
-        <div>
-          <label class="kf-label">${esc(txt.categoryLabel)}</label>
-          <select class="kf-select" aria-label="${esc(txt.categoryLabel)}">${categoryOptions}</select>
+          <div>
+            <label class="kf-label">${esc(txt.messageLabel)}</label>
+            <textarea class="kf-textarea" placeholder="${esc(txt.messagePlaceholder)}"></textarea>
+          </div>
+
+          ${emailFieldHtml}
+          ${customFieldsHtml}
+
+          <div class="kf-capture-row">
+            <button class="kf-chip kf-capture-full" type="button">${ICONS.camera} ${esc(locale === "en" ? "Full screen" : "Tüm ekran")}</button>
+            <button class="kf-chip kf-capture-area" type="button">${ICONS.crop} ${esc(locale === "en" ? "Select area" : "Alan seç")}</button>
+            <button class="kf-chip kf-element-select" type="button">${ICONS.target} ${esc(locale === "en" ? "Pick element" : "Öğe seç")}</button>
+            <button class="kf-chip kf-chip-upload kf-upload" type="button" aria-label="${esc(ui.addImage)}">${ICONS.upload}</button>
+          </div>
+
+          <div class="kf-attach-row"><span class="kf-counter">0 / ${MAX_ATTACHMENTS}</span></div>
+          <div class="kf-thumbs"></div>
+          <div class="kf-annotations" hidden></div>
+          <input class="kf-file" type="file" accept="image/*" multiple hidden />
+
+          <div class="kf-hint">${esc(locale === "en" ? "Tip:" : "İpucu:")} <kbd>⌘ / Ctrl + /</kbd></div>
         </div>
 
-        <div>
-          <label class="kf-label">${esc(txt.messageLabel)}</label>
-          <textarea class="kf-textarea" placeholder="${esc(txt.messagePlaceholder)}"></textarea>
+        <div class="kf-foot">
+          <button class="kf-btn kf-btn-ghost kf-cancel" type="button">${esc(locale === "en" ? "Cancel" : "Vazgeç")}</button>
+          <button class="kf-btn kf-btn-primary kf-submit" type="button">${esc(txt.submitLabel)}</button>
         </div>
-
-        ${customFieldsHtml}
-
-        <div class="kf-capture-row">
-          <button class="kf-chip kf-capture-full" type="button">
-            ${ICONS.camera} Tüm ekran
-          </button>
-          <button class="kf-chip kf-capture-area" type="button">
-            ${ICONS.crop} Alan seç
-          </button>
-          <button class="kf-chip kf-element-select" type="button">
-            ${ICONS.target} Öğe seç
-          </button>
-          <button class="kf-chip kf-chip-upload kf-upload" type="button" aria-label="Görsel yükle">
-            ${ICONS.upload}
-          </button>
-        </div>
-
-        <div class="kf-attach-row">
-          <span class="kf-counter">0 / ${MAX_ATTACHMENTS}</span>
-        </div>
-
-        <div class="kf-thumbs"></div>
-        <div class="kf-annotations" hidden></div>
-        <input class="kf-file" type="file" accept="image/*" multiple hidden />
-
-        <div class="kf-hint">İpucu: <kbd>⌘ / Ctrl + /</kbd> ile her yerden aç</div>
       </div>
 
-      </div> <!-- /kf-view-form -->
+      <!-- ── HISTORY TAB ── -->
+      <div class="kf-view-history" hidden>
+        <div class="kf-history-main">
+          <div class="kf-session-bar" hidden>
+            <span class="kf-session-email"></span>
+            <button class="kf-link kf-session-change" type="button">${esc(ui.changeEmail)}</button>
+          </div>
+          <ul class="kf-history-list"></ul>
+          <p class="kf-history-empty" hidden>${esc(ui.historyEmpty)}</p>
+          ${convo ? `
+          <div class="kf-otp">
+            <div class="kf-recover-title">${esc(ui.otpTitle)}</div>
+            <div class="kf-otp-hint">${esc(ui.otpHint)}</div>
+            <div class="kf-recover-row kf-otp-step1">
+              <input type="email" class="kf-input kf-otp-email" placeholder="${esc(ui.emailPlaceholder)}">
+              <button class="kf-btn kf-btn-primary kf-otp-send" type="button">${esc(ui.sendCode)}</button>
+            </div>
+            <div class="kf-recover-row kf-otp-step2" hidden>
+              <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="kf-input kf-otp-code" placeholder="${esc(ui.codePlaceholder)}">
+              <button class="kf-btn kf-btn-primary kf-otp-verify" type="button">${esc(ui.verify)}</button>
+            </div>
+          </div>` : ""}
+        </div>
 
-      <div class="kf-foot">
-        <button class="kf-btn kf-btn-ghost kf-cancel" type="button">${esc(locale === "en" ? "Cancel" : "Vazgeç")}</button>
-        <button class="kf-btn kf-btn-primary kf-submit" type="button">${esc(txt.submitLabel)}</button>
+        <div class="kf-convo" hidden>
+          <div class="kf-convo-head">
+            <button class="kf-back" type="button">${ICONS.back} ${esc(ui.back)}</button>
+            <span class="kf-convo-cat"></span>
+          </div>
+          <div class="kf-thread"></div>
+          <div class="kf-reply-box">
+            <textarea class="kf-reply-input kf-textarea" placeholder="${esc(ui.replyPlaceholder)}" style="min-height:64px"></textarea>
+            <div class="kf-reply-foot">
+              <span class="kf-counter kf-reply-counter">0 / ${MAX_ATTACHMENTS}</span>
+              <button class="kf-chip kf-reply-upload" type="button" aria-label="${esc(ui.addImage)}">${ICONS.upload}</button>
+              <button class="kf-btn kf-btn-primary kf-reply-send" type="button">${esc(ui.send)}</button>
+            </div>
+            <input class="kf-reply-file" type="file" accept="image/*" multiple hidden />
+          </div>
+          <div class="kf-convo-closed" hidden>${esc(ui.closedNotice)}</div>
+        </div>
       </div>
+
+      <a class="kf-powered" href="${esc(server.base)}" target="_blank" rel="noopener noreferrer">
+        <span>${esc(ui.poweredBy)}</span>
+        <span class="kf-brand">${BRAND_MARK}<span class="kf-brand-name">Revisto</span></span>
+      </a>
 
     </div>
   `;
@@ -295,9 +479,9 @@ function mount(
 
   const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
   const fab            = $<HTMLButtonElement>(".kf-fab");
-  const panel          = $<HTMLDivElement>(".kf-panel");
   const closeBtn       = $<HTMLButtonElement>(".kf-close-btn");
-  const historyToggle  = $<HTMLButtonElement>(".kf-history-toggle");
+  const tabForm        = $<HTMLButtonElement>(".kf-tab-form");
+  const tabHistory     = $<HTMLButtonElement>(".kf-tab-history");
   const cancelBtn      = $<HTMLButtonElement>(".kf-cancel");
   const submitBtn      = $<HTMLButtonElement>(".kf-submit");
   const capFullBtn     = $<HTMLButtonElement>(".kf-capture-full");
@@ -305,108 +489,294 @@ function mount(
   const elementBtn     = $<HTMLButtonElement>(".kf-element-select");
   const uploadBtn      = $<HTMLButtonElement>(".kf-upload");
   const fileInput      = $<HTMLInputElement>(".kf-file");
-  const textarea       = $<HTMLTextAreaElement>(".kf-textarea");
-  const select         = $<HTMLSelectElement>(".kf-select");
+  const textarea       = $<HTMLTextAreaElement>(".kf-view-form .kf-textarea");
+  const emailInput     = root.querySelector<HTMLInputElement>(".kf-email");
+  const select         = $<HTMLSelectElement>(".kf-view-form .kf-select");
   const thumbs         = $<HTMLDivElement>(".kf-thumbs");
-  const counter        = $<HTMLSpanElement>(".kf-counter");
+  const counter        = $<HTMLSpanElement>(".kf-attach-row .kf-counter");
   const annotationsEl  = $<HTMLDivElement>(".kf-annotations");
   const msg            = $<HTMLDivElement>(".kf-msg");
+  const supportEl      = $<HTMLDivElement>(".kf-support");
   const viewForm       = $<HTMLDivElement>(".kf-view-form");
+  const formBody       = $<HTMLDivElement>(".kf-view-form .kf-body");
+  const formFoot       = $<HTMLDivElement>(".kf-view-form .kf-foot");
   const viewHistory    = $<HTMLDivElement>(".kf-view-history");
+  const historyMain    = $<HTMLDivElement>(".kf-history-main");
   const historyList    = $<HTMLUListElement>(".kf-history-list");
   const historyEmpty   = $<HTMLParagraphElement>(".kf-history-empty");
-  const footEl         = $<HTMLDivElement>(".kf-foot");
+  const convoEl        = $<HTMLDivElement>(".kf-convo");
+  const convoCat       = $<HTMLSpanElement>(".kf-convo-cat");
+  const threadEl       = $<HTMLDivElement>(".kf-thread");
+  const replyBox       = $<HTMLDivElement>(".kf-reply-box");
+  const replyInput     = $<HTMLTextAreaElement>(".kf-reply-input");
+  const replyFile      = $<HTMLInputElement>(".kf-reply-file");
+  const replyUpload    = $<HTMLButtonElement>(".kf-reply-upload");
+  const replySend      = $<HTMLButtonElement>(".kf-reply-send");
+  const replyCounter   = $<HTMLSpanElement>(".kf-reply-counter");
+  const convoClosed    = $<HTMLDivElement>(".kf-convo-closed");
+  const backBtn        = $<HTMLButtonElement>(".kf-back");
+  const fabBadge       = $<HTMLSpanElement>(".kf-fab-badge");
+  const tabBadge       = $<HTMLSpanElement>(".kf-tab-badge");
+  const sessionBar     = $<HTMLDivElement>(".kf-session-bar");
+  const sessionEmail   = $<HTMLSpanElement>(".kf-session-email");
+  const sessionChange  = $<HTMLButtonElement>(".kf-session-change");
+  const otpBox         = root.querySelector<HTMLDivElement>(".kf-otp");
+  const otpEmail       = root.querySelector<HTMLInputElement>(".kf-otp-email");
+  const otpSendBtn     = root.querySelector<HTMLButtonElement>(".kf-otp-send");
+  const otpStep2       = root.querySelector<HTMLDivElement>(".kf-otp-step2");
+  const otpCode        = root.querySelector<HTMLInputElement>(".kf-otp-code");
+  const otpVerifyBtn   = root.querySelector<HTMLButtonElement>(".kf-otp-verify");
 
   const attachments: Attachment[] = [];
   const annotations: ElementAnnotation[] = [];
+  const replyAttachments: File[] = [];
 
-  // ── History (localStorage) ────────────────────────────────────────
+  // ── Support badge ─────────────────────────────────────────────────
+  function renderSupport() {
+    const s = runtime.support;
+    if (!s) { supportEl.hidden = true; return; }
+    supportEl.hidden = false;
+    if (s.unlimited || s.endsAt === null) {
+      supportEl.dataset.expired = "0";
+      supportEl.innerHTML = `${ICONS.infinity}<span>${esc(ui.supportUnlimited)}</span>`;
+      return;
+    }
+    const daysLeft = Math.ceil((s.endsAt - Date.now()) / 86_400_000);
+    if (daysLeft <= 0) {
+      supportEl.dataset.expired = "1";
+      supportEl.innerHTML = `${ICONS.alert}<span>${esc(ui.supportEnded)}</span>`;
+    } else {
+      supportEl.dataset.expired = "0";
+      const label = daysLeft === 1 ? ui.supportLastDay : ui.supportLeft(daysLeft);
+      supportEl.innerHTML = `${ICONS.clock}<span>${esc(label)}</span>`;
+    }
+  }
 
+  // ── History (localStorage + verified email session) ───────────────
   const HISTORY_KEY = `kf_history_${server.widgetKey}`;
+  const SESSION_KEY = `kf_session_${server.widgetKey}`;
+  const SEEN_KEY = `kf_seen_${server.widgetKey}`;
 
   interface HistoryEntry {
     id: string;
+    token?: string;
     category: string;
     page: string;
     date: number;
   }
 
+  interface ConversationSummary {
+    token: string;
+    category: string;
+    created_at: number;
+    last_activity_at: number;
+    last_message: string;
+    last_admin_reply_at: number | null;
+  }
+
+  interface EmailSession {
+    email: string;
+    conversations: ConversationSummary[];
+    verifiedAt: number;
+  }
+
   function loadHistory(): HistoryEntry[] {
     try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch { return []; }
   }
-
   function saveToHistory(entry: HistoryEntry) {
     const list = loadHistory();
     list.unshift(entry);
     localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
   }
 
+  function loadSession(): EmailSession | null {
+    try { return JSON.parse(localStorage.getItem(SESSION_KEY) || "null"); } catch { return null; }
+  }
+  function saveSession(s: EmailSession | null) {
+    if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+    else localStorage.removeItem(SESSION_KEY);
+  }
+
+  function loadSeen(): Record<string, number> {
+    try { return JSON.parse(localStorage.getItem(SEEN_KEY) || "{}"); } catch { return {}; }
+  }
+  function markSeen(token: string) {
+    const seen = loadSeen();
+    seen[token] = Date.now();
+    localStorage.setItem(SEEN_KEY, JSON.stringify(seen));
+    updateBadges();
+  }
+
   function formatDate(ts: number): string {
-    return new Date(ts).toLocaleDateString("tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+    return new Date(ts).toLocaleDateString(locale === "en" ? "en-US" : "tr-TR", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+  }
+  function formatTime(ts: number): string {
+    return new Date(ts).toLocaleTimeString(locale === "en" ? "en-US" : "tr-TR", { hour: "2-digit", minute: "2-digit" });
+  }
+  function formatDay(ts: number): string {
+    return new Date(ts).toLocaleDateString(locale === "en" ? "en-US" : "tr-TR", { day: "numeric", month: "long", year: "numeric" });
+  }
+
+  // ── Unread tracking (checked once on load) ────────────────────────
+  // token → last admin reply timestamp reported by the server.
+  const adminReplyAt: Record<string, number> = {};
+
+  function knownTokens(): string[] {
+    const session = loadSession();
+    const tokens = new Set<string>();
+    for (const c of session?.conversations ?? []) tokens.add(c.token);
+    for (const e of loadHistory()) if (e.token) tokens.add(e.token);
+    return Array.from(tokens);
+  }
+
+  function isUnread(token: string): boolean {
+    const at = adminReplyAt[token];
+    if (!at) return false;
+    return (loadSeen()[token] ?? 0) < at;
+  }
+
+  function unreadCount(): number {
+    return knownTokens().filter(isUnread).length;
+  }
+
+  function updateBadges() {
+    const n = unreadCount();
+    fabBadge.hidden = n === 0;
+    fabBadge.textContent = n > 9 ? "9+" : String(n);
+    tabBadge.hidden = n === 0;
+    tabBadge.textContent = n > 9 ? "9+" : String(n);
+  }
+
+  async function checkUnread() {
+    if (!convo) return;
+    const tokens = knownTokens().slice(0, 50);
+    if (!tokens.length) return;
+    try {
+      const res = await fetch(`${server.base}/api/v1/conversation/status`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ widget_key: server.widgetKey, tokens }),
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      for (const [token, s] of Object.entries<{ last_admin_reply_at: number | null }>(data.statuses ?? {})) {
+        if (s.last_admin_reply_at) adminReplyAt[token] = s.last_admin_reply_at;
+      }
+      updateBadges();
+    } catch {
+      // Offline — badges stay hidden.
+    }
+  }
+
+  function historyRow(args: {
+    title: string;
+    snippet: string;
+    date: number;
+    token?: string;
+    id?: string;
+    unread: boolean;
+  }): HTMLLIElement {
+    const li = document.createElement("li");
+    li.className = "kf-history-item";
+    if (args.unread) li.dataset.unread = "1";
+    li.innerHTML = `
+      <div class="kf-hi-left">
+        <span class="kf-hi-cat">${esc(args.title)}${args.unread ? `<span class="kf-hi-dot" title="${esc(ui.newReplyBadge)}"></span>` : ""}</span>
+        <span class="kf-hi-page">${esc(args.snippet)}</span>
+      </div>
+      <div class="kf-hi-right">
+        <span class="kf-hi-date">${esc(formatDate(args.date))}</span>
+      </div>`;
+    if (convo && args.token) {
+      li.addEventListener("click", () => openConversation(args.token!));
+    } else {
+      li.style.cursor = "default";
+    }
+    return li;
   }
 
   function renderHistory() {
-    const entries = loadHistory();
+    const session = loadSession();
     historyList.innerHTML = "";
-    historyEmpty.hidden = entries.length > 0;
 
-    entries.forEach((e) => {
-      const li = document.createElement("li");
-      li.className = "kf-history-item";
-      li.innerHTML = `
-        <div class="kf-hi-left">
-          <span class="kf-hi-cat">${esc(e.category)}</span>
-          <span class="kf-hi-page">${esc(e.page)}</span>
-        </div>
-        <div class="kf-hi-right">
-          <span class="kf-hi-id" title="Kopyala">#${esc(e.id.slice(0, 8))}</span>
-          <span class="kf-hi-date">${esc(formatDate(e.date))}</span>
-        </div>`;
-      li.querySelector(".kf-hi-id")!.addEventListener("click", () => copyId(e.id));
-      historyList.appendChild(li);
-    });
+    // Verified session bar + OTP box visibility.
+    sessionBar.hidden = !session;
+    if (session) sessionEmail.textContent = session.email;
+    if (otpBox) otpBox.hidden = !!session;
+
+    const rows: HTMLLIElement[] = [];
+    const seenTokens = new Set<string>();
+
+    for (const c of session?.conversations ?? []) {
+      seenTokens.add(c.token);
+      rows.push(historyRow({
+        title: c.category,
+        snippet: c.last_message,
+        date: c.last_activity_at,
+        token: c.token,
+        unread: isUnread(c.token),
+      }));
+    }
+    // Local (this-device) submissions not already covered by the session list.
+    for (const e of loadHistory()) {
+      if (e.token && seenTokens.has(e.token)) continue;
+      rows.push(historyRow({
+        title: e.category,
+        snippet: e.page,
+        date: e.date,
+        token: e.token,
+        id: e.id,
+        unread: e.token ? isUnread(e.token) : false,
+      }));
+    }
+
+    historyEmpty.hidden = rows.length > 0;
+    rows.forEach((r) => historyList.appendChild(r));
   }
 
-  // ── View toggle ───────────────────────────────────────────────────
+  // ── Tabs ──────────────────────────────────────────────────────────
 
-  let inHistory = false;
+  // Restore the form after a success screen (form body + footer hidden on submit).
+  function restoreForm() {
+    formBody.hidden = false;
+    formFoot.hidden = false;
+  }
 
-  function showFormView() {
-    inHistory = false;
+  function showForm() {
+    tabForm.dataset.active = "1";
+    tabHistory.dataset.active = "0";
     viewForm.hidden = false;
     viewHistory.hidden = true;
-    footEl.hidden = false;
-    historyToggle.title = "Geçmiş";
-    historyToggle.innerHTML = ICONS.history;
+    restoreForm();
+    supportEl.hidden = !runtime.support;
+    renderSupport();
     setMessage("", null);
   }
-
-  function showHistoryView() {
-    inHistory = true;
+  function showHistory() {
+    tabForm.dataset.active = "0";
+    tabHistory.dataset.active = "1";
     viewForm.hidden = true;
     viewHistory.hidden = false;
-    footEl.hidden = true;
-    historyToggle.title = "Forma dön";
-    historyToggle.innerHTML = ICONS.close;
-    renderHistory();
+    supportEl.hidden = true;
     setMessage("", null);
+    closeConversation();
+    renderHistory();
   }
-
-  historyToggle.addEventListener("click", () => inHistory ? showFormView() : showHistoryView());
+  tabForm.addEventListener("click", showForm);
+  tabHistory.addEventListener("click", showHistory);
 
   // ── Copy helper ────────────────────────────────────────────────────
-
-  function copyId(id: string, btn?: Element) {
-    navigator.clipboard?.writeText(id).catch(() => {});
+  function copyText(text: string, btn?: Element) {
+    navigator.clipboard?.writeText(text).catch(() => {});
     if (btn) {
       btn.classList.add("copied");
+      const prev = btn.innerHTML;
       btn.innerHTML = ICONS.check;
-      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = ICONS.copy; }, 1800);
+      setTimeout(() => { btn.classList.remove("copied"); btn.innerHTML = prev; }, 1600);
     }
   }
 
   // ── UI helpers ────────────────────────────────────────────────────
-
   function setMessage(text: string, kind: "ok" | "err" | null) {
     if (!kind) { msg.hidden = true; msg.innerHTML = ""; return; }
     msg.hidden = false;
@@ -475,12 +845,11 @@ function mount(
     renderAttachments();
   }
 
-  function open()   { root.dataset.open = "1"; if (!inHistory) setTimeout(() => textarea.focus(), 60); }
-  function close()  { root.dataset.open = "0"; showFormView(); }
+  function open()   { root.dataset.open = "1"; if (!viewForm.hidden) setTimeout(() => textarea.focus(), 60); }
+  function close()  { root.dataset.open = "0"; showForm(); }
   function toggle() { root.dataset.open === "1" ? close() : open(); }
 
   // ── Events ────────────────────────────────────────────────────────
-
   fab.addEventListener("click", toggle);
   closeBtn.addEventListener("click", close);
   cancelBtn.addEventListener("click", close);
@@ -493,34 +862,32 @@ function mount(
     fileInput.value = "";
   });
 
-  // Full-viewport screenshot via getDisplayMedia (no html2canvas distortion)
   capFullBtn.addEventListener("click", async () => {
     capFullBtn.disabled = true;
-    capFullBtn.innerHTML = `${ICONS.camera} Bekleniyor…`;
+    capFullBtn.innerHTML = `${ICONS.camera} ${esc(locale === "en" ? "Waiting…" : "Bekleniyor…")}`;
     try {
       const blob = await captureViewport(containerHost);
       if (blob) addAttachment(blob, "screenshot");
-      else setMessage("Ekran paylaşımı iptal edildi.", "err");
+      else setMessage(locale === "en" ? "Screen share cancelled." : "Ekran paylaşımı iptal edildi.", "err");
     } catch {
-      setMessage("Ekran yakalanamadı.", "err");
+      setMessage(locale === "en" ? "Couldn't capture screen." : "Ekran yakalanamadı.", "err");
     } finally {
-      capFullBtn.innerHTML = `${ICONS.camera} Tüm ekran`;
+      capFullBtn.innerHTML = `${ICONS.camera} ${esc(locale === "en" ? "Full screen" : "Tüm ekran")}`;
       renderAttachments();
     }
   });
 
-  // Area selection: capture first, then draw selection on the screenshot overlay
   capAreaBtn.addEventListener("click", async () => {
     capAreaBtn.disabled = true;
-    capAreaBtn.innerHTML = `${ICONS.crop} Bekleniyor…`;
+    capAreaBtn.innerHTML = `${ICONS.crop} ${esc(locale === "en" ? "Waiting…" : "Bekleniyor…")}`;
     try {
       const blob = await selectAndCapture(containerHost);
       if (blob) addAttachment(blob, "screenshot");
-      else setMessage("Alan seçimi iptal edildi.", "err");
+      else setMessage(locale === "en" ? "Area selection cancelled." : "Alan seçimi iptal edildi.", "err");
     } catch {
-      setMessage("Ekran yakalanamadı.", "err");
+      setMessage(locale === "en" ? "Couldn't capture screen." : "Ekran yakalanamadı.", "err");
     } finally {
-      capAreaBtn.innerHTML = `${ICONS.crop} Alan seç`;
+      capAreaBtn.innerHTML = `${ICONS.crop} ${esc(locale === "en" ? "Select area" : "Alan seç")}`;
       renderAttachments();
     }
   });
@@ -532,10 +899,10 @@ function mount(
     }
     close();
     elementBtn.disabled = true;
-    elementBtn.innerHTML = `${ICONS.target} Bekleniyor…`;
+    elementBtn.innerHTML = `${ICONS.target} ${esc(locale === "en" ? "Waiting…" : "Bekleniyor…")}`;
     const frame = await captureElementFrame(containerHost);
     if (!frame) {
-      elementBtn.innerHTML = `${ICONS.target} Öğe seç`;
+      elementBtn.innerHTML = `${ICONS.target} ${esc(locale === "en" ? "Pick element" : "Öğe seç")}`;
       elementBtn.disabled = false;
       open();
       setMessage(locale === "en" ? "Screen capture was cancelled." : "Ekran paylaşımı iptal edildi.", "err");
@@ -543,14 +910,12 @@ function mount(
       return;
     }
     try {
-      const ann = await selectElementAnnotation(containerHost, locale);
+      const pickIndex = annotations.length + 1;
+      const ann = await selectElementAnnotation(containerHost, locale, pickIndex);
       if (ann) {
         const blob = await renderHighlightedElement(frame, {
-          x: ann.rect.x,
-          y: ann.rect.y,
-          w: ann.rect.width,
-          h: ann.rect.height,
-        }, annotations.length + 1);
+          x: ann.rect.x, y: ann.rect.y, w: ann.rect.width, h: ann.rect.height,
+        }, pickIndex);
         annotations.push(ann);
         if (blob) addAttachment(blob, "screenshot", ann.id);
         else setMessage(locale === "en" ? "Element screenshot couldn't be captured." : "Öğe ekran görüntüsü alınamadı.", "err");
@@ -558,7 +923,7 @@ function mount(
       }
     } finally {
       releaseFrame(frame);
-      elementBtn.innerHTML = `${ICONS.target} Öğe seç`;
+      elementBtn.innerHTML = `${ICONS.target} ${esc(locale === "en" ? "Pick element" : "Öğe seç")}`;
       elementBtn.disabled = false;
       open();
       renderAttachments();
@@ -566,7 +931,6 @@ function mount(
   });
 
   // ── Submit ────────────────────────────────────────────────────────
-
   function collectCustomFields(): { ok: boolean; values: { label: string; value: string }[] } {
     const els = root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(".kf-cf");
     const values: { label: string; value: string }[] = [];
@@ -585,11 +949,28 @@ function mount(
     return { ok: true, values };
   }
 
+  function applySubmitGate() {
+    if (!runtime.canSubmit) {
+      submitBtn.disabled = true;
+      setMessage(submitErrorText(runtime.blockedReason, locale), "err");
+    }
+  }
+
   async function submit() {
+    if (!runtime.canSubmit) {
+      setMessage(submitErrorText(runtime.blockedReason, locale), "err");
+      return;
+    }
     const message = textarea.value.trim();
     if (!message) {
       setMessage(locale === "en" ? "Please write a description." : "Lütfen bir açıklama yaz.", "err");
       textarea.focus();
+      return;
+    }
+    const email = emailInput?.value.trim() || "";
+    if (emailInput?.hasAttribute("required") && !email) {
+      setMessage(locale === "en" ? "Please enter your email." : "Lütfen e-postanı gir.", "err");
+      emailInput.focus();
       return;
     }
     const custom = collectCustomFields();
@@ -610,17 +991,26 @@ function mount(
           domain: ctx.domain,
           category: select.value,
           message,
+          email: email || undefined,
           page_url: location.href,
           viewport: `${window.innerWidth}x${window.innerHeight}`,
           wp_user: host.user,
+          locale,
           custom_fields: [...custom.values, ...annotations],
         }),
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        setMessage(txt.errorMessage, "err");
+        setMessage(submitErrorText(data?.error ?? null, locale), "err");
         return;
       }
+
+      // Each picked element became its own reply message server-side; map the
+      // local annotation id to that reply id so its screenshot attaches to the
+      // right message instead of falling back onto the main feedback message.
+      const annotationReplyIds = new Map<string, string>(
+        ((data.annotation_replies ?? []) as { id: string; reply_id: string }[]).map((r) => [r.id, r.reply_id]),
+      );
 
       let failedAttachments = 0;
       for (const att of attachments) {
@@ -630,17 +1020,18 @@ function mount(
         fd.append("kind", att.kind);
         const ext = att.blob.type === "image/png" ? "png" : "jpg";
         fd.append("file", att.blob, `${att.kind}.${ext}`);
+        const replyId = att.annotationId ? annotationReplyIds.get(att.annotationId) : undefined;
+        if (replyId) fd.append("reply_id", replyId);
         const ok = await fetch(`${server.base}/api/v1/feedback/${data.feedback_id}/attachment`, {
-          method: "POST",
-          body: fd,
+          method: "POST", body: fd,
         }).then((r) => r.ok).catch(() => false);
         if (!ok) failedAttachments++;
       }
 
       const fid: string = data.feedback_id;
-      saveToHistory({ id: fid, category: select.value, page: location.pathname, date: Date.now() });
+      const token: string | undefined = data.token;
+      saveToHistory({ id: fid, token, category: select.value, page: location.pathname, date: Date.now() });
 
-      // Show success with copyable reference ID, plus a warning if any attachment failed to upload
       const warningHtml = failedAttachments > 0
         ? `<div class="kf-msg kf-warn">${ICONS.alert} ${esc(
             locale === "en"
@@ -648,21 +1039,42 @@ function mount(
               : `${failedAttachments} ek yüklenemedi.`
           )}</div>`
         : "";
+      const copyValue = fid;
+      const codeLabel = locale === "en" ? "Reference" : "Referans no";
+      const codeText = `#${fid.slice(0, 8)}`;
+      const codeHint = convo && token ? `<div class="kf-token-hint">${esc(ui.tokenHint)}</div>` : "";
+
+      // Success screen: hide the form and show only the confirmation + copyable code.
+      formBody.hidden = true;
+      formFoot.hidden = true;
+      supportEl.hidden = true;
       msg.hidden = false;
-      msg.className = "kf-msg kf-ok";
+      msg.className = "kf-msg kf-ok kf-success";
       msg.innerHTML = `
-        ${ICONS.check} ${esc(txt.successMessage)}
-        <div class="kf-ref-box">
-          <span class="kf-ref-label">${esc(locale === "en" ? "Reference" : "Referans no")}</span>
-          <span class="kf-ref-id" title="${esc(fid)}">#${esc(fid.slice(0, 8))}</span>
-          <button class="kf-ref-copy" type="button" aria-label="Kopyala">${ICONS.copy}</button>
+        <div class="kf-success-head">${ICONS.check}<span>${esc(txt.successMessage)}</span></div>
+        <div class="kf-token-box">
+          <span class="kf-token-label">${esc(codeLabel)}</span>
+          <div class="kf-token-row">
+            <span class="kf-token-val" title="${esc(copyValue)}">${esc(codeText)}</span>
+          </div>
+          <button class="kf-btn kf-btn-primary kf-token-copy" type="button">${ICONS.copy}<span>${esc(ui.copy)}</span></button>
+          ${codeHint}
         </div>
-        ${warningHtml}`;
-      msg.querySelector(".kf-ref-copy")!.addEventListener("click", (e) =>
-        copyId(fid, e.currentTarget as Element)
+        ${warningHtml}
+        <button class="kf-btn kf-btn-ghost kf-new-submit" type="button">${esc(ui.newSubmission)}</button>`;
+      msg.querySelector(".kf-token-copy")?.addEventListener("click", (e) =>
+        copyText(copyValue, e.currentTarget as Element),
       );
+      msg.querySelector(".kf-new-submit")?.addEventListener("click", () => {
+        restoreForm();
+        supportEl.hidden = !runtime.support;
+        renderSupport();
+        setMessage("", null);
+        textarea.focus();
+      });
 
       textarea.value = "";
+      if (emailInput) emailInput.value = email; // keep email for convenience
       root.querySelectorAll<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(".kf-cf").forEach((el) => {
         if (el.dataset.cfType === "checkbox") (el as HTMLInputElement).checked = false;
         else el.value = "";
@@ -671,7 +1083,6 @@ function mount(
       annotations.splice(0);
       renderAttachments();
       renderAnnotations();
-      setTimeout(close, failedAttachments > 0 ? 7000 : 4000);
     } catch {
       setMessage(locale === "en" ? "Connection error. Please try again." : "Bağlantı hatası. Lütfen tekrar dene.", "err");
     } finally {
@@ -679,16 +1090,239 @@ function mount(
       submitBtn.textContent = txt.submitLabel;
     }
   }
-
   submitBtn.addEventListener("click", submit);
+
+  // ── Conversation ──────────────────────────────────────────────────
+  let currentToken: string | null = null;
+
+  function closeConversation() {
+    currentToken = null;
+    convoEl.hidden = true;
+    historyMain.hidden = false;
+    replyAttachments.splice(0);
+  }
+
+  backBtn.addEventListener("click", () => { closeConversation(); renderHistory(); });
+
+  async function openConversation(token: string) {
+    currentToken = token;
+    historyMain.hidden = true;
+    convoEl.hidden = false;
+    threadEl.innerHTML = `<p class="kf-history-empty">…</p>`;
+    convoClosed.hidden = true;
+    replyBox.hidden = true;
+    try {
+      const res = await fetch(`${server.base}/api/v1/conversation/${encodeURIComponent(token)}`);
+      if (res.status === 404) { threadEl.innerHTML = `<p class="kf-history-empty">${esc(ui.notFound)}</p>`; return; }
+      if (!res.ok) { threadEl.innerHTML = `<p class="kf-history-empty">${esc(ui.loadError)}</p>`; return; }
+      const data = await res.json();
+      renderThread(data.conversation, token);
+      markSeen(token);
+      const canReply = !!data.can_reply;
+      replyBox.hidden = !canReply;
+      convoClosed.hidden = canReply;
+      renderReplyCounter();
+    } catch {
+      threadEl.innerHTML = `<p class="kf-history-empty">${esc(ui.loadError)}</p>`;
+    }
+  }
+
+  function bubble(args: {
+    author: string;
+    ts: number;
+    body: string;
+    mine: boolean;
+    imgs?: { url: string }[];
+  }): string {
+    const imgHtml = args.imgs?.length
+      ? `<div class="kf-convo-imgs">${args.imgs.map((i) => `<img src="${esc(i.url)}" alt="ek">`).join("")}</div>`
+      : "";
+    return `<div class="kf-msg-row ${args.mine ? "kf-mine" : "kf-theirs"}">
+      <div class="kf-bubble">
+        <div class="kf-bubble-body">${esc(args.body)}</div>${imgHtml}
+      </div>
+      <div class="kf-bubble-time">${esc(args.author)} · ${esc(formatTime(args.ts))}</div>
+    </div>`;
+  }
+
+  interface ConvoData {
+    category: string;
+    message: string;
+    created_at: number;
+    attachments: { url: string; kind: string; reply_id: string | null }[];
+    replies: { id: string; author: "admin" | "user"; message: string; created_at: number }[];
+  }
+
+  function renderThread(c: ConvoData, _token: string) {
+    convoCat.textContent = c.category;
+    const originImgs = c.attachments.filter((a) => !a.reply_id).map((a) => ({ url: a.url }));
+    const messages = [
+      { author: "user" as const, message: c.message, created_at: c.created_at, imgs: originImgs },
+      ...c.replies.map((r) => ({
+        ...r,
+        imgs: c.attachments.filter((a) => a.reply_id === r.id).map((a) => ({ url: a.url })),
+      })),
+    ];
+    let html = "";
+    let lastDay = "";
+    for (const m of messages) {
+      const day = formatDay(m.created_at);
+      if (day !== lastDay) {
+        html += `<div class="kf-day-sep"><span>${esc(day)}</span></div>`;
+        lastDay = day;
+      }
+      const isUser = m.author === "user";
+      html += bubble({
+        author: isUser ? ui.you : ui.support,
+        ts: m.created_at,
+        body: m.message,
+        mine: isUser,
+        imgs: m.imgs,
+      });
+    }
+    threadEl.innerHTML = html;
+    threadEl.querySelectorAll<HTMLImageElement>(".kf-convo-imgs img").forEach((img) => {
+      img.addEventListener("click", () => window.open(img.src, "_blank"));
+    });
+    threadEl.scrollTop = threadEl.scrollHeight;
+  }
+
+  function renderReplyCounter() {
+    replyCounter.textContent = `${replyAttachments.length} / ${MAX_ATTACHMENTS}`;
+    replyUpload.toggleAttribute("disabled", replyAttachments.length >= MAX_ATTACHMENTS);
+  }
+
+  replyUpload.addEventListener("click", () => replyFile.click());
+  replyFile.addEventListener("change", () => {
+    Array.from(replyFile.files ?? [])
+      .filter((f) => f.type.startsWith("image/"))
+      .slice(0, MAX_ATTACHMENTS - replyAttachments.length)
+      .forEach((f) => replyAttachments.push(f));
+    replyFile.value = "";
+    renderReplyCounter();
+  });
+
+  async function sendReply() {
+    if (!currentToken) return;
+    const message = replyInput.value.trim();
+    if (!message && replyAttachments.length === 0) { replyInput.focus(); return; }
+    replySend.disabled = true;
+    replySend.textContent = ui.sending;
+    try {
+      // Attachments must be pinned to a reply row so they render next to the
+      // message that sent them, rather than being lost/misattributed to the
+      // very first message in the thread. If the user only attached images
+      // with no text, create a placeholder reply to hold them.
+      let replyId: string | null = null;
+      if (message || replyAttachments.length > 0) {
+        const res = await fetch(`${server.base}/api/v1/conversation/${encodeURIComponent(currentToken)}/reply`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: message || ui.attachmentSent, page_url: location.href }),
+        });
+        if (!res.ok) {
+          const d = await res.json().catch(() => ({}));
+          setMessage(submitErrorText(d?.error ?? null, locale), "err");
+          return;
+        }
+        const data = await res.json().catch(() => null);
+        replyId = data?.reply?.id ?? null;
+      }
+      for (const file of replyAttachments) {
+        const fd = new FormData();
+        fd.append("file", file, file.name || "image.jpg");
+        if (replyId) fd.append("reply_id", replyId);
+        await fetch(`${server.base}/api/v1/conversation/${encodeURIComponent(currentToken)}/attachment`, {
+          method: "POST", body: fd,
+        }).catch(() => {});
+      }
+      replyInput.value = "";
+      replyAttachments.splice(0);
+      renderReplyCounter();
+      await openConversation(currentToken);
+    } finally {
+      replySend.disabled = false;
+      replySend.textContent = ui.send;
+    }
+  }
+  replySend.addEventListener("click", sendReply);
+
+  // Enter = send, Shift+Enter = newline in reply textarea
+  replyInput.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendReply();
+    }
+  });
+
+  // ── Email OTP history access ───────────────────────────────────────
+  otpSendBtn?.addEventListener("click", async () => {
+    const email = otpEmail?.value.trim();
+    if (!email || !email.includes("@")) { otpEmail?.focus(); return; }
+    otpSendBtn.disabled = true;
+    try {
+      await fetch(`${server.base}/api/v1/conversation/request-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ widget_key: server.widgetKey, domain: ctx.domain, email }),
+      }).catch(() => {});
+      setMessage(ui.codeSent, "ok");
+      if (otpStep2) otpStep2.hidden = false;
+      otpCode?.focus();
+    } finally {
+      otpSendBtn.disabled = false;
+    }
+  });
+
+  async function verifyOtpCode() {
+    const email = otpEmail?.value.trim();
+    const code = otpCode?.value.trim();
+    if (!email || !code || code.length !== 6) { otpCode?.focus(); return; }
+    if (otpVerifyBtn) otpVerifyBtn.disabled = true;
+    try {
+      const res = await fetch(`${server.base}/api/v1/conversation/verify-code`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ widget_key: server.widgetKey, email, code }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.ok) {
+        setMessage(ui.invalidCode, "err");
+        return;
+      }
+      saveSession({ email, conversations: data.conversations ?? [], verifiedAt: Date.now() });
+      if (otpCode) otpCode.value = "";
+      if (otpStep2) otpStep2.hidden = true;
+      setMessage("", null);
+      checkUnread().then(renderHistory);
+      renderHistory();
+    } catch {
+      setMessage(ui.invalidCode, "err");
+    } finally {
+      if (otpVerifyBtn) otpVerifyBtn.disabled = false;
+    }
+  }
+  otpVerifyBtn?.addEventListener("click", verifyOtpCode);
+  otpCode?.addEventListener("keydown", (e: KeyboardEvent) => {
+    if (e.key === "Enter") { e.preventDefault(); verifyOtpCode(); }
+  });
+
+  sessionChange.addEventListener("click", () => {
+    saveSession(null);
+    renderHistory();
+  });
 
   window.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && e.key === "/") { e.preventDefault(); toggle(); }
     if (e.key === "Escape" && root.dataset.open === "1") close();
   });
 
+  renderSupport();
   renderAttachments();
   renderAnnotations();
+  applySubmitGate();
+  // One-shot unread check on load: badge on the FAB + history tab.
+  checkUnread().then(renderHistory);
 }
 
 function esc(s: string): string {
@@ -729,13 +1363,14 @@ function cssEscape(value: string): string {
 }
 
 function textSnippet(el: Element): string {
-  return (el.textContent || "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 140);
+  return (el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 140);
 }
 
-function selectElementAnnotation(widgetHost: HTMLElement, locale: WidgetLocale): Promise<ElementAnnotation | null> {
+function selectElementAnnotation(
+  widgetHost: HTMLElement,
+  locale: WidgetLocale,
+  pickIndex: number,
+): Promise<ElementAnnotation | null> {
   return new Promise((resolve) => {
     const highlight = document.createElement("div");
     highlight.className = "revisto-element-highlight";
@@ -838,12 +1473,24 @@ function selectElementAnnotation(widgetHost: HTMLElement, locale: WidgetLocale):
       const rect = target.getBoundingClientRect();
       editor?.remove();
       editor = document.createElement("div");
+      const editorWidth = Math.min(320, window.innerWidth - 24);
+      const editorHeight = 190;
+      const spaceBelow = window.innerHeight - rect.bottom - 10;
+      const spaceAbove = rect.top - 10;
+      // Prefer below; fall back to above if not enough space
+      let topPos: number;
+      if (spaceBelow >= editorHeight || spaceBelow >= spaceAbove) {
+        topPos = Math.min(window.innerHeight - editorHeight - 8, rect.bottom + 10);
+      } else {
+        topPos = Math.max(8, rect.top - editorHeight - 10);
+      }
+      const leftPos = Math.min(window.innerWidth - editorWidth - 8, Math.max(8, rect.left));
       Object.assign(editor.style, {
         position: "fixed",
         zIndex: "2147483647",
-        width: "min(320px, calc(100vw - 24px))",
-        left: `${Math.min(window.innerWidth - 332, Math.max(12, rect.left))}px`,
-        top: `${Math.min(window.innerHeight - 190, Math.max(12, rect.bottom + 10))}px`,
+        width: `${editorWidth}px`,
+        left: `${leftPos}px`,
+        top: `${Math.max(8, topPos)}px`,
         background: "#ffffff",
         border: "1px solid rgba(15,23,42,.14)",
         borderRadius: "12px",
@@ -875,6 +1522,7 @@ function selectElementAnnotation(widgetHost: HTMLElement, locale: WidgetLocale):
         finish({
           id: localId(),
           kind: "element_annotation",
+          index: pickIndex,
           label: locale === "en" ? "Element note" : "Öğe notu",
           value,
           selector,

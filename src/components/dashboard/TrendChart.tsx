@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Tooltip } from "@/components/ui/Tooltip";
 import type { TrendPoint } from "@/lib/admin-repo";
 
 function shortDate(date: string) {
@@ -40,16 +41,16 @@ export default function TrendChart({
           const filled = d.count > 0;
           const heightPct = filled ? Math.max(4, (d.count / max) * 100) : 1.5;
           return (
-            <div
-              key={d.date}
-              className="flex-1 rounded-[2px]"
-              style={{
-                height: `${heightPct}%`,
-                background: filled ? "var(--color-accent)" : "var(--color-line-strong)",
-                opacity: filled ? 0.75 : 1,
-              }}
-              title={`${shortDate(d.date)}: ${d.count}`}
-            />
+            <Tooltip key={d.date} label={`${shortDate(d.date)}: ${d.count}`} side="top" className="flex-1 self-stretch items-end">
+              <div
+                className="w-full rounded-[2px]"
+                style={{
+                  height: `${heightPct}%`,
+                  background: filled ? "var(--color-accent)" : "var(--color-line-strong)",
+                  opacity: filled ? 0.75 : 1,
+                }}
+              />
+            </Tooltip>
           );
         })}
       </div>
