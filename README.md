@@ -1,154 +1,129 @@
-# Kanews Feedback
+# Rivesio
 
-Kanthemes temaları için merkezi geri bildirim sistemi. İki parçadan oluşur:
+Centralized feedback widget server and admin panel.
 
-1. **Sunucu + panel** (bu repo) — Next.js 15 uygulaması. Gömülebilir widget'ı servis eder,
-   geri bildirimleri toplar ve yönetmen için bir admin panel sunar. Hostinger Node.js'te çalışır.
-2. **Tema entegrasyonu** — Kanews temasındaki `class/Feedback/FeedbackWidget.php`, widget'ı
-   yalnızca yöneticilere, lisans anahtarıyla birlikte yükler.
+Drop a lightweight script on any site, collect bug reports and ideas into a shared inbox, and reply from the dashboard — with screenshots, attachments, site approval, and team agents.
 
-## Özellikler
+## Features
 
-- Sağ altta "Geri bildirim" butonu; popup form (kategori, açıklama, **ekran yakala**, görsel
-  yükle 0/4), `⌘/Ctrl + /` kısayolu.
-- **Lisans + tema + onay kontrolü**: her site `widget_key` + lisans + domain ile kaydolur;
-  yalnızca panelden onayladığın siteler geri bildirim gönderebilir.
-- Panelden site **engelleme/onaylama**, geri bildirimleri okuma, durum/öncelik/çözüm notu ile
-  **planlama**, ekran görüntüsü/görsel eklerini görüntüleme.
-- **Her tema için ayrı widget** (proje): farklı `widget_key`, renk, kategori, konum.
-- Tek yöneticili giriş (env'deki kullanıcı + scrypt parola hash + imzalı çerez).
+- Embeddable feedback widget (categories, message, **screen capture**, up to 4 image attachments, `⌘/Ctrl + /` shortcut)
+- Multi-tenant accounts via **Better Auth** (sign up / login)
+- Per-project widgets: own `widget_key`, colors, categories, and placement
+- Site registration with domain + approval / block controls
+- Shared inbox: status, priority, replies, attachments
+- **Widget agents** — invite teammates into a project inbox without handing over ownership
+- Email notifications (Resend) and optional web push (VAPID)
+- Attachments on Cloudflare R2 (local disk fallback)
+- i18n panel (`en` / `tr`) via next-intl
 
-## Teknoloji
+## Stack
 
-Next.js 15 (App Router) · PostgreSQL (Drizzle ORM + postgres.js) · Cloudflare R2 (ekler) · Resend (e-posta) · Tailwind · jose (JWT) · zod · esbuild + html2canvas (widget).
+Next.js 15 (App Router) · React 19 · PostgreSQL + Drizzle · Better Auth · Cloudflare R2 · Resend · web-push · Tailwind v4 · esbuild (widget)
 
-> **Node sürümü:** 20–22 kullanın (`.nvmrc` → 22).
-> **Veritabanı:** PostgreSQL 16. Şema, Drizzle migration'ları ile yönetilir (`drizzle/`).
+> **Node:** 20–22 (see `.nvmrc`).  
+> **Database:** PostgreSQL 16. Schema lives under `drizzle/`.
 
-## Yerel geliştirme
+## Local development
 
 ```bash
 nvm use            # node 22
 npm install
-cp .env.example .env
-npm run hash -- "panel-parolaniz"   # çıkan ADMIN_PASSWORD_HASH satırını .env'e yapıştır
-# .env içine JWT_SECRET üret:
-node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
-# PostgreSQL'i hazırla (lokal Docker örneği):
-docker run -d --name rivesio-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
-  -e POSTGRES_DB=rivesio -p 5432:5432 postgres:16-alpine
-# .env içindeki DATABASE_URL'i bu sunucuya göre ayarla, sonra şemayı uygula:
-npm run db:push    # geliştirme için (şemayı doğrudan senkronlar)
-# veya migration dosyalarıyla: npm run db:generate && npm run db:migrate
+# Copy or create .env (see Environment variables below)
+# Minimum for local: DATABASE_URL, BETTER_AUTH_SECRET, PUBLIC_BASE_URL
 
-npm run build      # önce widget'ı (esbuild) sonra Next'i derler
-npm start          # veya geliştirme için: npm run dev
+# PostgreSQL (Docker example):
+docker run -d --name rivesio-pg \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_DB=rivesio \
+  -p 5432:5432 postgres:16-alpine
+
+npm run db:push    # sync schema (dev)
+# or: npm run db:generate && npm run db:migrate
+
+npm run dev        # http://localhost:3000
+# production-style:
+# npm run build && npm start
 ```
 
-Henüz proje seed edilmez; panelin **Widget'lar** sayfasından bir widget oluştur, anahtarını
-oradan al. Migration komutları: `db:generate` (SQL üret), `db:migrate` (uygula),
-`db:push` (geliştirmede doğrudan senkronla), `db:studio` (Drizzle Studio).
+Create a project/widget from the panel, copy its widget key, then try `demo.html` (set `WIDGET_KEY` and the server URL). New sites start as **pending** until you approve them under **Sites**.
 
-### Tarayıcıda denemek
+### Useful scripts
 
-`demo.html` dosyasını aç (veya bir statik sunucuyla servis et), içindeki `WIDGET_KEY` ve sunucu
-adresini kendi değerlerinle değiştir. Site ilk yüklemede **pending** gelir; panelin
-**Siteler** sayfasından onayladıktan sonra buton görünür.
-
-## Ortam değişkenleri (.env)
-
-| Değişken | Açıklama |
+| Script | Purpose |
 |---|---|
-| `ADMIN_USER` | Panel kullanıcı adı |
-| `ADMIN_PASSWORD_HASH` | `npm run hash -- "..."` çıktısı (scrypt) |
-| `JWT_SECRET` | Oturum çerezini imzalayan uzun rastgele dizi |
-| `PUBLIC_BASE_URL` | Sunucunun herkese açık adresi (sonunda `/` yok) |
-| `DATABASE_URL` | PostgreSQL bağlantı dizesi (`postgres://kullanıcı:şifre@host:5432/rivesio`) |
-| `UPLOAD_DIR` | Ekler için yerel fallback dizini (R2 ayarlıysa kullanılmaz) |
-| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 (ekler) |
-| `AUTO_APPROVE_SITES` | Yeni widget'lar için varsayılan otomatik onay (`1`/`0`). Widget bazında panelden değiştirilir |
-| `RESEND_API_KEY` | Resend API anahtarı. Boşsa e-postalar gönderilmez, konsola loglanır |
-| `EMAIL_FROM` | Gönderen adresi (token kurtarma & yanıt bildirimleri) |
+| `npm run dev` | Next.js dev server |
+| `npm run build` | Build widget (esbuild) then Next |
+| `npm start` | Production server via `server.js` |
+| `npm run build:widget` | Widget bundle only → `public/widget.bundle.js` |
+| `npm run icons` | Derive `icon-192.png` / favicon from `public/icon.png` |
+| `npm run db:push` / `db:migrate` / `db:studio` | Drizzle schema tools |
 
-## Hostinger Node.js'e kurulum
+## Embed the widget
 
-> ⚠️ **Bu bir Node.js sunucu uygulamasıdır, statik site DEĞİLDİR.** Hostinger'ın
-> "statik site / website build" Git akışı bunu deploy edemez ve **"No output directory
-> found after build"** hatası verir. Mutlaka **hPanel → Gelişmiş → Node.js** (Phusion
-> Passenger) altında bir **Node.js uygulaması** olarak kur.
+```html
+<script>
+  window.RivesioFeedback = {
+    domain: location.host,
+    // optional: user: "signed-in-user-id"
+  };
+</script>
+<script src="https://YOUR_HOST/api/widget/YOUR_WIDGET_KEY.js" async></script>
+```
 
-Hostinger Node.js uygulamaları `npm start` çalıştırmaz; bir **başlangıç dosyası** yükler.
-Bu repoda o dosya `server.js`'tir (Next.js'i production modda başlatır, portu `PORT`
-ortam değişkeninden alır).
+## Environment variables
 
-1. **Node.js uygulaması oluştur** (hPanel → Gelişmiş → Node.js):
-   - **Node sürümü:** 20 veya 22
-   - **Uygulama kökü (application root):** reponun bulunduğu klasör
-   - **Başlangıç dosyası (application startup file):** `server.js`
-   - **Uygulama URL'si:** alan adın/subdomain
-2. **Kodu getir (Git auto-deploy):** repoyu uygulama köküne bağla/çek. Git yalnızca kodu
-   indirir — derlemeyi aşağıdaki adımda sen tetiklersin.
-3. **Bağımlılıklar + derleme** (SSH ya da Node.js panelindeki "Run NPM install" / script):
+| Variable | Description |
+|---|---|
+| `BETTER_AUTH_SECRET` | Auth secret (required in production) |
+| `PUBLIC_BASE_URL` | Public origin, no trailing slash (e.g. `http://localhost:3000`) |
+| `DATABASE_URL` | Postgres URL (`postgres://user:pass@host:5432/rivesio`) |
+| `UPLOAD_DIR` | Local attachment fallback dir (unused when R2 is configured) |
+| `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 for attachments |
+| `R2_ENDPOINT` | Optional custom S3 endpoint |
+| `AUTO_APPROVE_SITES` | Default auto-approve for new sites (`1` / `0`) |
+| `RESEND_API_KEY` | Resend API key; if empty, emails are logged only |
+| `EMAIL_FROM` | From address (password reset, reply notifications) |
+| `VAPID_PUBLIC_KEY` / `VAPID_PRIVATE_KEY` / `VAPID_SUBJECT` | Web push (optional) |
+
+## Deploy (Node host / Hostinger)
+
+This is a **Node.js server app**, not a static site. Use a Node runtime that can run `server.js` (Hostinger: **hPanel → Advanced → Node.js** / Phusion Passenger).
+
+1. Create a Node.js app (Node 20 or 22).
+2. **Application root:** repo directory  
+   **Startup file:** `server.js`  
+   Do **not** set `PORT` yourself on Passenger — it assigns the port.
+3. Install and build:
+
    ```bash
-   npm install --include=dev   # build için devDependencies (esbuild, typescript) gerekli
-   npm run build               # önce widget (esbuild), sonra next build → .next
+   npm install --include=dev
+   npm run build
+   npm run db:migrate
    ```
-4. **PostgreSQL veritabanı:** Bir Postgres veritabanı oluştur ve `DATABASE_URL`'e gir.
-   Deploy sırasında şemayı `npm run db:migrate` ile uygula (migration dosyaları `drizzle/`).
-5. **Ortam değişkenleri:** Node.js panelinin "Environment variables" bölümünden yukarıdaki
-   tabloyu gir. Ekler R2'ye gittiği için yerel kalıcı disk gerekmez. `PORT` GİRME (Passenger atar).
-6. **Restart App** ile uygulamayı yeniden başlat. `PUBLIC_BASE_URL`'i alan adına eşitle.
 
-### Her güncellemede (Git push sonrası)
+4. Set environment variables from the table above. Set `PUBLIC_BASE_URL` to your domain.
+5. Restart the app after each deploy (`npm install` if deps changed, then `npm run build`, then restart).
 
-Git auto-deploy kodu çeker ama Passenger eski süreci çalıştırmaya devam eder. Yeni kodun
-yayına girmesi için:
+Burst rate limits are in-memory (single instance). Daily submission limits are stored in the database.
 
-```bash
-npm install        # package.json değiştiyse
-npm run build
-```
-ardından panelden **Restart App**. (İstersen bu iki komutu Hostinger'ın deploy hook'una
-ekleyebilirsin.)
+## API (overview)
 
-> Anlık (burst) rate limit sayaçları bellek-içidir (tek instance varsayılır). Günlük
-> gönderim limitleri ise kalıcı olarak veritabanından sayılır. Çok-instance dağıtımda
-> yalnızca burst rate limit için ortak bir depo (ör. Redis) gerekir.
-
-## Tema entegrasyonu
-
-`class/Feedback/FeedbackWidget.php` temaya dâhildir ve `functions.php` sonunda başlatılır.
-WordPress yöneticisinde **Ayarlar → Geri Bildirim** sayfasından:
-
-- Widget'ı aç/kapat,
-- Sunucu adresini ve **widget anahtarını** gir (panelden alınır).
-
-Alternatif olarak `wp-config.php` ile sabitleyebilirsin:
-
-```php
-define( 'KANEWS_FEEDBACK_URL', 'https://feedback.kanthemes.com' );
-define( 'KANEWS_FEEDBACK_WIDGET_KEY', 'wk_xxx' );
-```
-
-Lisans anahtarı, temanın mevcut **sipariş anahtarı** ayarından (`kanews_order_auth`) otomatik
-okunur. Widget yalnızca `manage_options` yetkili (yönetici) kullanıcılara yüklenir.
-
-## API uçları
-
-| Uç | Açıklama |
+| Endpoint | Description |
 |---|---|
-| `GET /api/widget/<key>.js` | Projeye özel konfigle gömülen widget JS'i |
-| `POST /api/v1/register` | Site kaydı/yenileme; `enabled` + `status` döner |
-| `POST /api/v1/feedback` | Geri bildirim oluşturur (lisans/tema/onay zorunlu) |
-| `POST /api/v1/feedback/<id>/attachment` | Ekran görüntüsü/görsel yükler (maks 4, image/*) |
-| `POST /api/admin/login` · `logout` | Yönetici oturumu |
-| Panel sayfaları | `/` `/feedbacks` `/sites` `/projects` (çerezle korumalı) |
+| `GET /api/widget/<key>.js` | Project-configured embeddable widget |
+| `POST /api/v1/register` | Site register / refresh; returns `enabled` + `status` |
+| `POST /api/v1/feedback` | Create feedback (key + approval required) |
+| `POST /api/v1/feedback/<id>/attachment` | Upload screenshot/image (max 4, `image/*`) |
+| `/api/auth/*` | Better Auth (login, signup, session) |
+| `/api/admin/*` | Authenticated panel APIs (projects, sites, feedbacks, agents, …) |
+| `/api/v1/conversation/*` | End-user conversation / reply flows |
 
-## Güvenlik notları
+Panel routes (locale-prefixed): `/`, `/feedbacks`, `/sites`, `/projects`, `/settings`, `/login`, `/signup`.
 
-- Public uçlarda CORS açıktır; güvenlik origin yerine `widget_key` + lisans + domain + onay
-  kontrolüyle sağlanır.
-- Yüklenen ekler uygulama kökü dışında (UPLOAD_DIR) tutulur ve yalnızca oturum açmış
-  yöneticiye `/api/admin/attachments/<id>` üzerinden servis edilir.
-- Giriş ve gönderim uçlarında IP bazlı rate limit vardır.
+## Security notes
+
+- Public endpoints allow CORS; access is gated by `widget_key`, domain, and site approval — not by origin alone.
+- Attachments are stored outside the app root (or on R2) and served to signed-in users via admin APIs.
+- Login and public submit routes are rate-limited by IP.
