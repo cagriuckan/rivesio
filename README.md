@@ -36,8 +36,8 @@ npm run hash -- "panel-parolaniz"   # çıkan ADMIN_PASSWORD_HASH satırını .e
 node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
 
 # PostgreSQL'i hazırla (lokal Docker örneği):
-docker run -d --name revisto-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
-  -e POSTGRES_DB=revisto -p 5432:5432 postgres:16-alpine
+docker run -d --name rivesio-pg -e POSTGRES_PASSWORD=postgres -e POSTGRES_USER=postgres \
+  -e POSTGRES_DB=rivesio -p 5432:5432 postgres:16-alpine
 # .env içindeki DATABASE_URL'i bu sunucuya göre ayarla, sonra şemayı uygula:
 npm run db:push    # geliştirme için (şemayı doğrudan senkronlar)
 # veya migration dosyalarıyla: npm run db:generate && npm run db:migrate
@@ -64,7 +64,7 @@ adresini kendi değerlerinle değiştir. Site ilk yüklemede **pending** gelir; 
 | `ADMIN_PASSWORD_HASH` | `npm run hash -- "..."` çıktısı (scrypt) |
 | `JWT_SECRET` | Oturum çerezini imzalayan uzun rastgele dizi |
 | `PUBLIC_BASE_URL` | Sunucunun herkese açık adresi (sonunda `/` yok) |
-| `DATABASE_URL` | PostgreSQL bağlantı dizesi (`postgres://kullanıcı:şifre@host:5432/revisto`) |
+| `DATABASE_URL` | PostgreSQL bağlantı dizesi (`postgres://kullanıcı:şifre@host:5432/rivesio`) |
 | `UPLOAD_DIR` | Ekler için yerel fallback dizini (R2 ayarlıysa kullanılmaz) |
 | `R2_ACCOUNT_ID` / `R2_ACCESS_KEY_ID` / `R2_SECRET_ACCESS_KEY` / `R2_BUCKET` | Cloudflare R2 (ekler) |
 | `AUTO_APPROVE_SITES` | Yeni widget'lar için varsayılan otomatik onay (`1`/`0`). Widget bazında panelden değiştirilir |

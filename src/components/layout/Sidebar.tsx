@@ -80,7 +80,7 @@ export default function Sidebar({
             >
               <Image
                 src="/icon.png"
-                alt="Revisto"
+                alt="Rivesio"
                 width={48}
                 height={48}
                 className="rounded-xl"

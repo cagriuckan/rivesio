@@ -2,8 +2,8 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Revisto Feedback",
-    short_name: "Revisto",
+    name: "Rivesio Feedback",
+    short_name: "Rivesio",
     description: "Feedback widget admin panel",
     start_url: "/",
     display: "standalone",

@@ -25,7 +25,7 @@ app
   .then(() => {
     createServer((req, res) => handle(req, res)).listen(port, () => {
       // eslint-disable-next-line no-console
-      console.log(`Revisto ready on http://${hostname}:${port}`);
+      console.log(`Rivesio ready on http://${hostname}:${port}`);
     });
   })
   .catch((err) => {

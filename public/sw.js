@@ -1,4 +1,4 @@
-// Revisto service worker: web push + notification clicks.
+// Rivesio service worker: web push + notification clicks.
 // Intentionally no fetch handler — the panel is fully dynamic and
 // installability no longer requires offline caching.
 
@@ -11,7 +11,7 @@ self.addEventListener("activate", (event) => {
 });
 
 self.addEventListener("push", (event) => {
-  let data = { title: "Revisto", body: "", link: "/" };
+  let data = { title: "Rivesio", body: "", link: "/" };
   try {
     data = { ...data, ...event.data.json() };
   } catch {

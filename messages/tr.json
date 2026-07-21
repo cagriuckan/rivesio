@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "Revisto",
+    "brand": "Rivesio",
     "save": "Kaydet",
     "saving": "Kaydediliyor…",
     "saved": "Kaydedildi",
@@ -526,7 +526,7 @@
   "agents": {
     "sectionTitle": "Ajanlar",
     "sectionDescription": "Bu widget'ın geri bildirimlerini yanıtlamana yardımcı olması için ekip arkadaşlarını davet et.",
-    "premiumBlurb": "Ajanlar, Revisto'nun öne çıkan işbirliği özelliklerinden biri — widget'ın sahipliğinden ödün vermeden ekibini gelen kutusuna dahil et.",
+    "premiumBlurb": "Ajanlar, Rivesio'nun öne çıkan işbirliği özelliklerinden biri — widget'ın sahipliğinden ödün vermeden ekibini gelen kutusuna dahil et.",
     "inviteEmailLabel": "E-posta ile davet et",
     "inviteEmailPlaceholder": "ekip-arkadasi@ornek.com",
     "inviteButton": "Davet gönder",
@@ -558,14 +558,14 @@
     "acceptMismatchHint": "Kabul etmek için davet edilen e-posta ile çıkış yapıp tekrar giriş yap.",
     "acceptInvalidTitle": "Davet bulunamadı",
     "acceptInvalidBody": "Bu davet linki geçersiz, süresi dolmuş ya da iptal edilmiş.",
-    "acceptBackHome": "Revisto'ya dön",
+    "acceptBackHome": "Rivesio'ya dön",
     "acceptAlreadyTitle": "Zaten üyesin",
     "acceptAlreadyBody": "{project} üzerinde zaten aktif bir ajansın.",
     "acceptGoToInbox": "Gelen kutusuna git"
   },
   "metadata": {
-    "title": "Revisto Feedback",
-    "description": "Revisto geri bildirim yönetim paneli"
+    "title": "Rivesio Feedback",
+    "description": "Rivesio geri bildirim yönetim paneli"
   },
   "signup": {
     "title": "Hesabını oluştur",
@@ -662,7 +662,7 @@
     "hero": {
       "badge": "Beta süresince ücretsiz — kredi kartı gerekmez",
       "title": "Tüm ürün geri bildirimlerin, sonunda tek bir yerde",
-      "subtitle": "Revisto seninle birlikte büyüyen geri bildirim platformu. Yönettiğin her siteden geri bildirimleri tek bir hafif widget ile topla, ortak gelen kutusunda önceliklendir ve olduğun yerden yanıtla.",
+      "subtitle": "Rivesio seninle birlikte büyüyen geri bildirim platformu. Yönettiğin her siteden geri bildirimleri tek bir hafif widget ile topla, ortak gelen kutusunda önceliklendir ve olduğun yerden yanıtla.",
       "ctaPrimary": "Ücretsiz başla",
       "ctaSecondary": "Giriş yap",
       "mockInbox": "Gelen Kutusu",
@@ -694,7 +694,7 @@
     },
     "features": {
       "title": "Geri bildirim döngüsünü kapatmak için gereken her şey",
-      "subtitle": "İlk hata bildiriminden kullanıcıyı geri kazanan yanıta kadar — Revisto tüm yolculuğu kapsar.",
+      "subtitle": "İlk hata bildiriminden kullanıcıyı geri kazanan yanıta kadar — Rivesio tüm yolculuğu kapsar.",
       "widget": {
         "title": "Gömülebilir widget",
         "desc": "Tek bir script etiketi, her siteye şık bir geri bildirim widget'ı ekler. Markana uyacak şekilde tamamen özelleştirilebilir."
@@ -722,7 +722,7 @@
     },
     "how": {
       "title": "Dakikalar içinde hazır",
-      "subtitle": "SDK yok, backend değişikliği yok. Bir script etiketi yapıştırabiliyorsan Revisto'yu kullanabilirsin.",
+      "subtitle": "SDK yok, backend değişikliği yok. Bir script etiketi yapıştırabiliyorsan Rivesio'yu kullanabilirsin.",
       "step1": {
         "title": "Kodu ekle",
         "desc": "Sitene tek bir script etiketi yapıştır. Widget anında, markana uygun şekilde görünür."
@@ -758,7 +758,7 @@
     },
     "cta": {
       "title": "Beta süresince ücretsiz. Tüm özellikler dahil.",
-      "subtitle": "Plan yok, limit yok, kredi kartı yok. Revisto'yu birlikte şekillendir, lansmanla birlikte erken destekçi ayrıcalıklarını koru.",
+      "subtitle": "Plan yok, limit yok, kredi kartı yok. Rivesio'yu birlikte şekillendir, lansmanla birlikte erken destekçi ayrıcalıklarını koru.",
       "button": "Ücretsiz hesabını oluştur",
       "secondary": "Zaten hesabın var mı? Giriş yap"
     },

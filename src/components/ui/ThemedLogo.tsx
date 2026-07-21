@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 
 /**
- * Renders the Revisto wordmark logo, automatically switching between
+ * Renders the Rivesio wordmark logo, automatically switching between
  * `/logo-light.png` (for dark theme) and `/logo-dark.png` (for light theme)
  * based on the current `data-theme` attribute on the root element.
  */
@@ -38,7 +38,7 @@ export default function ThemedLogo({
   return (
     <Image
       src={isDark ? "/logo-dark.png" : "/logo-light.png"}
-      alt="Revisto"
+      alt="Rivesio"
       width={width}
       height={height}
       className={className}

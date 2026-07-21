@@ -1,4 +1,4 @@
-# Revisto — Proje Panosu
+# Rivesio — Proje Panosu
 
 > Her oturum sonunda güncellenir. Son güncelleme: **2026-07-06**
 
@@ -19,7 +19,7 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 (App Router, `[local
 - 2026-07: Landing page kök `/` route'unda yaşıyor (ayrı route yok): girişsiz → landing, girişli → dashboard. Beta boyunca fiyatlandırma bölümü yok
 - 2026-07: Tipografi Inter + kompakt ölçek: font tokenları `globals.css @theme`'de, base metin 14px, tüm spacing utility'leri `--spacing: 0.225rem` üzerinden %10 daha sıkı
 - 2026-07: İkon tek kaynak: `public/icon.png` (512px master). `icon-192.png` `npm run icons` ile türetilir; favicon.ico/apple-icon/icon-512/svg'ler silindi, tüm referanslar icon.png'ye bağlı
-- Mimari kararlar için bkz. Claude memory: `revisto-architecture-v2`, `db-architecture`
+- Mimari kararlar için bkz. Claude memory: `rivesio-architecture-v2`, `db-architecture`
 
 ## Faydalı Komutlar
 | Komut | Ne yapar |

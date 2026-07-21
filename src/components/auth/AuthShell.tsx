@@ -29,12 +29,12 @@ function BrowserPreview() {
         <span className="h-2.5 w-2.5 rounded-full bg-[#34d399]" />
         <div className="mx-auto flex items-center gap-1.5 rounded-full bg-white px-3 py-1 text-[11px] text-subtle ring-1 ring-line">
           <Icon.lock className="h-3 w-3" />
-          app.revisto.io
+          app.rivesio.io
         </div>
       </div>
       {/* crop to the header + metric cards + chart — the most legible, colorful part at this size */}
       <div className="relative h-52 w-full">
-        <Image src="/dashboard-preview.png" alt="Revisto dashboard" fill priority className="object-cover object-top" />
+        <Image src="/dashboard-preview.png" alt="Rivesio dashboard" fill priority className="object-cover object-top" />
       </div>
     </div>
   );
@@ -70,7 +70,7 @@ export default function AuthShell({
       {/* top bar */}
       <header className="relative z-10 mx-auto flex w-full max-w-6xl items-center justify-between px-6 py-7 sm:px-8">
         <div>
-          <Image src="/logo-light.png" alt="Revisto" width={130} height={36} className="h-8 w-auto" priority />
+          <Image src="/logo-light.png" alt="Rivesio" width={130} height={36} className="h-8 w-auto" priority />
           <p className="mt-1.5 text-sm text-subtle">{t("tagline")}</p>
         </div>
         <Link href="/" className="flex items-center gap-1.5 text-sm font-medium text-subtle transition hover:text-primary">
