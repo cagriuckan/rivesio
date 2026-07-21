@@ -152,7 +152,7 @@ const UI = {
   },
 } as const;
 
-// Compact Revisto brand mark for the widget footer.
+// Compact Rivesio brand mark for the widget footer.
 const BRAND_MARK = `<svg viewBox="0 0 24 24" fill="none" width="14" height="14" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="7" fill="#0B1437"/><ellipse cx="12" cy="11.2" rx="6.2" ry="5" fill="#fff"/><path d="M8.5 14.5 L7 18 L11.5 15.4 Z" fill="#fff"/><circle cx="9.4" cy="11.2" r="1" fill="#0B1437"/><circle cx="12" cy="11.2" r="1" fill="#0B1437"/><circle cx="14.6" cy="11.2" r="1" fill="#0B1437"/></svg>`;
 
 function submitErrorText(code: string | null, locale: WidgetLocale): string {
@@ -188,7 +188,7 @@ interface HostConfig {
 declare global {
   interface Window {
     __KF_CONFIG__?: ServerConfig;
-    RevistoFeedback?: HostConfig;
+    RivesioFeedback?: HostConfig;
   }
 }
 
@@ -250,7 +250,7 @@ function localId(): string {
 async function boot() {
   const server = window.__KF_CONFIG__;
   if (!server) return;
-  const host: HostConfig = window.RevistoFeedback ?? {};
+  const host: HostConfig = window.RivesioFeedback ?? {};
 
   const domain = host.domain || location.host;
 
@@ -298,7 +298,7 @@ function mount(
   runtime: Runtime,
 ) {
   const containerHost = document.createElement("div");
-  containerHost.id = "revisto-widget";
+  containerHost.id = "rivesio-widget";
   document.body.appendChild(containerHost);
   const shadow = containerHost.attachShadow({ mode: "open" });
 
@@ -470,7 +470,7 @@ function mount(
 
       <a class="kf-powered" href="${esc(server.base)}" target="_blank" rel="noopener noreferrer">
         <span>${esc(ui.poweredBy)}</span>
-        <span class="kf-brand">${BRAND_MARK}<span class="kf-brand-name">Revisto</span></span>
+        <span class="kf-brand">${BRAND_MARK}<span class="kf-brand-name">Rivesio</span></span>
       </a>
 
     </div>
@@ -1342,7 +1342,7 @@ function elementSelector(el: Element): string {
       break;
     }
     const classes = Array.from(node.classList)
-      .filter((c) => c && !c.startsWith("revisto-") && !c.startsWith("kf-"))
+      .filter((c) => c && !c.startsWith("rivesio-") && !c.startsWith("kf-"))
       .slice(0, 2);
     if (classes.length) part += `.${classes.map(cssEscape).join(".")}`;
     const parent = node.parentElement;
@@ -1373,7 +1373,7 @@ function selectElementAnnotation(
 ): Promise<ElementAnnotation | null> {
   return new Promise((resolve) => {
     const highlight = document.createElement("div");
-    highlight.className = "revisto-element-highlight";
+    highlight.className = "rivesio-element-highlight";
     Object.assign(highlight.style, {
       position: "fixed",
       zIndex: "2147483645",

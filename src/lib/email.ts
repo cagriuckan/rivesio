@@ -4,7 +4,7 @@ import { emailEnabled, env } from "./env";
 const resend = emailEnabled ? new Resend(env.email.resendApiKey) : null;
 
 const DEFAULT_ACCENT = "#0B1437";
-const DEFAULT_BRAND = "Revisto";
+const DEFAULT_BRAND = "Rivesio";
 
 export interface EmailBrand {
   /** Accent color, taken from the related widget/site. */
@@ -15,8 +15,8 @@ export interface EmailBrand {
   logo?: string;
 }
 
-/** Public Revisto logo, always shown in the email footer. */
-const REVISTO_LOGO_URL = `${env.publicBaseUrl}/icon-192.png`;
+/** Public Rivesio logo, always shown in the email footer. */
+const RIVESIO_LOGO_URL = `${env.publicBaseUrl}/icon-192.png`;
 
 function esc(s: string): string {
   return s.replace(/[&<>"']/g, (c) =>
@@ -85,9 +85,9 @@ function wrapEmail(opts: { brand?: EmailBrand; title: string; content: string; c
             <tr>
               <td style="padding-top:16px;vertical-align:middle">
                 <a href="${esc(env.publicBaseUrl)}" style="text-decoration:none;color:#94a3b8">
-                  <img src="${esc(REVISTO_LOGO_URL)}" alt="Revisto" width="18" height="18" style="vertical-align:middle;width:18px;height:18px;border-radius:5px;border:0" />
+                  <img src="${esc(RIVESIO_LOGO_URL)}" alt="Rivesio" width="18" height="18" style="vertical-align:middle;width:18px;height:18px;border-radius:5px;border:0" />
                   <span style="vertical-align:middle;padding-left:7px;font-size:12px;color:#94a3b8">
-                    ${brandName === DEFAULT_BRAND ? "" : `${brandName} · `}Revisto ile gönderildi
+                    ${brandName === DEFAULT_BRAND ? "" : `${brandName} · `}Rivesio ile gönderildi
                   </span>
                 </a>
               </td>

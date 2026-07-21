@@ -153,7 +153,7 @@ function CodeViz() {
           {"\n  "}
           <span className="text-sky-300">src</span>
           <span className="text-white/50">=</span>
-          <span className="text-emerald-300">{'"cdn.revisto.io/w.js"'}</span>
+          <span className="text-emerald-300">{'"cdn.rivesio.io/w.js"'}</span>
           {"\n  "}
           <span className="text-sky-300">data-key</span>
           <span className="text-white/50">=</span>

@@ -1,6 +1,6 @@
 {
   "common": {
-    "brand": "Revisto",
+    "brand": "Rivesio",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved",
@@ -526,7 +526,7 @@
   "agents": {
     "sectionTitle": "Agents",
     "sectionDescription": "Invite teammates to help triage and answer this widget's feedback.",
-    "premiumBlurb": "Agents is one of Revisto's flagship collaboration features — bring your team into the inbox without giving up ownership of the widget.",
+    "premiumBlurb": "Agents is one of Rivesio's flagship collaboration features — bring your team into the inbox without giving up ownership of the widget.",
     "inviteEmailLabel": "Invite by email",
     "inviteEmailPlaceholder": "teammate@example.com",
     "inviteButton": "Send invite",
@@ -558,14 +558,14 @@
     "acceptMismatchHint": "Sign out and sign back in with the invited email to accept.",
     "acceptInvalidTitle": "Invite not found",
     "acceptInvalidBody": "This invite link is invalid, expired, or has been revoked.",
-    "acceptBackHome": "Back to Revisto",
+    "acceptBackHome": "Back to Rivesio",
     "acceptAlreadyTitle": "Already a member",
     "acceptAlreadyBody": "You're already an active agent on {project}.",
     "acceptGoToInbox": "Go to inbox"
   },
   "metadata": {
-    "title": "Revisto Feedback",
-    "description": "Revisto feedback management panel"
+    "title": "Rivesio Feedback",
+    "description": "Rivesio feedback management panel"
   },
   "signup": {
     "title": "Create your account",
@@ -662,7 +662,7 @@
     "hero": {
       "badge": "Free during beta — no credit card required",
       "title": "All your product feedback, finally in one place",
-      "subtitle": "Revisto is the feedback platform that grows with you. Collect feedback from every site you run with one lightweight widget, triage it in a shared inbox, and reply right from where you work.",
+      "subtitle": "Rivesio is the feedback platform that grows with you. Collect feedback from every site you run with one lightweight widget, triage it in a shared inbox, and reply right from where you work.",
       "ctaPrimary": "Start for free",
       "ctaSecondary": "Sign in",
       "mockInbox": "Inbox",
@@ -694,7 +694,7 @@
     },
     "features": {
       "title": "Everything you need to close the feedback loop",
-      "subtitle": "From the first bug report to the reply that wins the user back — Revisto covers the whole journey.",
+      "subtitle": "From the first bug report to the reply that wins the user back — Rivesio covers the whole journey.",
       "widget": {
         "title": "Embeddable widget",
         "desc": "One script tag adds a polished feedback widget to any site. Fully themeable to match your brand."
@@ -722,7 +722,7 @@
     },
     "how": {
       "title": "Up and running in minutes",
-      "subtitle": "No SDKs, no backend changes. If you can paste a script tag, you can use Revisto.",
+      "subtitle": "No SDKs, no backend changes. If you can paste a script tag, you can use Rivesio.",
       "step1": {
         "title": "Add the snippet",
         "desc": "Paste one script tag into your site. The widget appears instantly, styled to your brand."
@@ -758,7 +758,7 @@
     },
     "cta": {
       "title": "Free while in beta. All features included.",
-      "subtitle": "No plans, no limits, no credit card. Help us shape Revisto and keep your early-supporter perks when we launch.",
+      "subtitle": "No plans, no limits, no credit card. Help us shape Rivesio and keep your early-supporter perks when we launch.",
       "button": "Create your free account",
       "secondary": "Already have an account? Sign in"
     },

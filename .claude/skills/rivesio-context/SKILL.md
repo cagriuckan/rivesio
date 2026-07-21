@@ -1,9 +1,9 @@
 ---
-name: revisto-context
-description: Project map and conventions for the Revisto codebase. Load at the start of any coding task in this repo instead of re-exploring from scratch — covers stack, directory layout, DB conventions, and gotchas.
+name: rivesio-context
+description: Project map and conventions for the Rivesio codebase. Load at the start of any coding task in this repo instead of re-exploring from scratch — covers stack, directory layout, DB conventions, and gotchas.
 ---
 
-# Revisto Context
+# Rivesio Context
 
 Centralized feedback widget server + admin panel.
 

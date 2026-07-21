@@ -21,11 +21,11 @@ type Listener = (event: AppEvent) => void;
 declare global {
   // Survives Next.js dev hot reloads (module re-evaluation).
   // eslint-disable-next-line no-var
-  var __revistoEventListeners: Set<Listener> | undefined;
+  var __rivesioEventListeners: Set<Listener> | undefined;
 }
 
 function listeners(): Set<Listener> {
-  return (globalThis.__revistoEventListeners ??= new Set());
+  return (globalThis.__rivesioEventListeners ??= new Set());
 }
 
 export function publish(event: Omit<AppEvent, "ts">): void {

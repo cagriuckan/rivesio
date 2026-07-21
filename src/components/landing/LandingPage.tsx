@@ -76,7 +76,7 @@ export default async function LandingPage() {
           style={{ background: "rgba(13,13,24,0.7)", border: `1px solid ${c.cardBorder}` }}
         >
           <Link href="/" className="shrink-0">
-            <Image src="/logo-dark.png" alt="Revisto" width={104} height={28} priority />
+            <Image src="/logo-dark.png" alt="Rivesio" width={104} height={28} priority />
           </Link>
           <nav className="hidden items-center gap-6 text-sm text-white/65 md:flex">
             <a href="#features" className="transition hover:text-white">{t("nav.features")}</a>
@@ -158,7 +158,7 @@ export default async function LandingPage() {
             <div className="overflow-hidden rounded-[1.4rem]">
               <Image
                 src="/dashboard-preview.png"
-                alt="Revisto dashboard"
+                alt="Rivesio dashboard"
                 width={2880}
                 height={1800}
                 priority
@@ -401,7 +401,7 @@ export default async function LandingPage() {
       <footer style={{ borderTop: `1px solid ${c.cardBorder}` }}>
         <div className="mx-auto flex max-w-6xl flex-col gap-10 px-4 py-14 sm:px-6 md:flex-row md:justify-between">
           <div className="max-w-xs">
-            <Image src="/logo-dark.png" alt="Revisto" width={104} height={28} />
+            <Image src="/logo-dark.png" alt="Rivesio" width={104} height={28} />
             <p className="mt-4 text-sm text-white/50">{t("footer.tagline")}</p>
           </div>
           <div className="flex gap-16 text-sm">
@@ -422,7 +422,7 @@ export default async function LandingPage() {
           </div>
         </div>
         <div className="py-6 text-center text-xs text-white/35" style={{ borderTop: `1px solid rgba(255,255,255,0.06)` }}>
-          © {year} Revisto. {t("footer.rights")}
+          © {year} Rivesio. {t("footer.rights")}
         </div>
       </footer>
     </div>

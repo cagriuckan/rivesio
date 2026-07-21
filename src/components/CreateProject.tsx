@@ -186,10 +186,10 @@ export default function CreateProject({
         <div className="space-y-4 p-5">
           <div className="grid gap-4">
             <Field label={t("fieldName")}>
-              <Input value={name} onChange={(e) => updateName(e.target.value)} placeholder="Revisto" autoFocus />
+              <Input value={name} onChange={(e) => updateName(e.target.value)} placeholder="Rivesio" autoFocus />
             </Field>
             <Field label={t("fieldSlug")}>
-              <Input value={slug} onChange={(e) => updateSlug(e.target.value)} placeholder="revisto" />
+              <Input value={slug} onChange={(e) => updateSlug(e.target.value)} placeholder="rivesio" />
               <FieldHint tone={slugStatus === "available" ? "success" : slugStatus === "taken" || slugStatus === "invalid" ? "danger" : "neutral"}>
                 {slugStatus === "checking" && t("slugChecking")}
                 {slugStatus === "available" && t("slugAvailable")}

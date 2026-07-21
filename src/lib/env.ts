@@ -22,12 +22,12 @@ export const env = {
   uploadDir: resolvePath(process.env.UPLOAD_DIR ?? "./data/uploads"),
   databaseUrl: required(
     "DATABASE_URL",
-    "postgres://postgres:postgres@127.0.0.1:5432/revisto",
+    "postgres://postgres:postgres@127.0.0.1:5432/rivesio",
   ),
   autoApproveSites: process.env.AUTO_APPROVE_SITES === "1",
   email: {
     resendApiKey: process.env.RESEND_API_KEY ?? "",
-    from: process.env.EMAIL_FROM ?? "Revisto <onboarding@resend.dev>",
+    from: process.env.EMAIL_FROM ?? "Rivesio <onboarding@resend.dev>",
   },
   vapid: {
     publicKey: process.env.VAPID_PUBLIC_KEY ?? "",
