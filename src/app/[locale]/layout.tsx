@@ -6,6 +6,16 @@ import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import PwaRegister from "@/components/PwaRegister";
+import {
+  OG_IMAGE_HEIGHT,
+  OG_IMAGE_PATH,
+  OG_IMAGE_WIDTH,
+  SITE_NAME,
+  THEME_COLOR,
+  languageAlternates,
+  localePath,
+  siteOrigin,
+} from "@/lib/seo";
 import "../globals.css";
 
 const inter = Inter({
@@ -24,6 +34,10 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: "cover",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: THEME_COLOR },
+    { media: "(prefers-color-scheme: dark)", color: "#8da2e3" },
+  ],
 };
 
 export function generateStaticParams() {
@@ -37,17 +51,66 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "metadata" });
+  const title = t("title");
+  const description = t("description");
+  const ogAlt = t("ogImageAlt");
+  const canonical = localePath(locale);
+
   return {
-    title: t("title"),
-    description: t("description"),
+    metadataBase: new URL(siteOrigin()),
+    title: {
+      default: `${SITE_NAME} — ${title}`,
+      template: `${SITE_NAME} — %s`,
+    },
+    description,
+    applicationName: SITE_NAME,
+    authors: [{ name: SITE_NAME }],
+    creator: SITE_NAME,
+    publisher: SITE_NAME,
+    // keywords omitted — Google/Bing do not use them for Western markets (seo.config.md).
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: { index: true, follow: true },
+    },
+    alternates: {
+      canonical,
+      languages: languageAlternates("/"),
+    },
+    openGraph: {
+      type: "website",
+      siteName: SITE_NAME,
+      locale: locale === "tr" ? "tr_TR" : "en_US",
+      alternateLocale: locale === "tr" ? ["en_US"] : ["tr_TR"],
+      url: canonical,
+      title: `${SITE_NAME} — ${title}`,
+      description,
+      images: [
+        {
+          url: OG_IMAGE_PATH,
+          width: OG_IMAGE_WIDTH,
+          height: OG_IMAGE_HEIGHT,
+          alt: ogAlt,
+          type: "image/png",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${SITE_NAME} — ${title}`,
+      description,
+      images: [{ url: OG_IMAGE_PATH, alt: ogAlt }],
+    },
     icons: {
       icon: [
         { url: "/favicon.ico", sizes: "48x48" },
-        { url: "/icon.png", type: "image/png" },
+        { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+        { url: "/icon-192.png", type: "image/png", sizes: "192x192" },
       ],
       shortcut: "/favicon.ico",
-      apple: "/icon.png",
+      apple: [{ url: "/icon-512.png", sizes: "180x180", type: "image/png" }],
     },
+    manifest: "/manifest.webmanifest",
   };
 }
 

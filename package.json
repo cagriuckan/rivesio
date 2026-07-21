@@ -13,7 +13,7 @@
     "start": "node server.js",
     "lint": "next lint",
     "hash": "node scripts/hash-password.mjs",
-    "icons": "sips -Z 192 public/icon.png --out public/icon-192.png && for s in 16 32 48; do sips -Z $s public/icon.png --out public/fav-$s.png; done && node scripts/build-favicon.mjs",
+    "icons": "sips -Z 192 public/icon-512.png --out public/icon-192.png && for s in 16 32 48; do sips -Z $s public/icon-512.png --out public/fav-$s.png; done && node scripts/build-favicon.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",

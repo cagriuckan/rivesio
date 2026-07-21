@@ -17,7 +17,7 @@ Centralized feedback widget server + admin panel.
 - `src/components/` — feature folders: `agents`, `auth`, `dashboard`, `feedbacks`, `sites`, `projects`, `settings`, `layout` (Header/Sidebar), `ui` (Avatar, Dropdown, ThemedLogo…).
 - App routes: `feedbacks`, `sites`, `projects`, `settings`, `login`, `signup`, `agent-invite`.
 - Branding: use `src/components/ui/ThemedLogo.tsx` with `public/logo-light.png` / `logo-dark.png` — don't hardcode logo `<img>`s.
-- Icons: single source of truth is `public/icon.png` (512px). `npm run icons` derives `icon-192.png` (sips) and `favicon.ico` (sips + `scripts/build-favicon.mjs`, PNG-in-ICO 16/32/48). Metadata (`[locale]/layout.tsx`) points at `/favicon.ico` + `/icon.png`; `manifest.ts` at `/icon.png` + `/icon-192.png`. To change the icon: replace `icon.png`, run `npm run icons`.
+- Icons: single source of truth is `public/icon-512.png`. `npm run icons` derives `icon-192.png` (sips) and `favicon.ico` (sips + `scripts/build-favicon.mjs`, PNG-in-ICO 16/32/48). Metadata (`[locale]/layout.tsx`) points at `/favicon.ico` + `/icon-512.png`; `manifest.ts` at `/icon-512.png` + `/icon-192.png`. To change the icon: replace `icon-512.png`, run `npm run icons`.
 - Brand color is `#0B1437` (navy) — accent vars in `globals.css`, manifest `theme_color`, email `DEFAULT_ACCENT`, Avatar palette. Dark-theme accent is light navy `#8da2e3`.
 
 ## Gotchas

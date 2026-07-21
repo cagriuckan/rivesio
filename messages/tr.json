@@ -564,8 +564,14 @@
     "acceptGoToInbox": "Gelen kutusuna git"
   },
   "metadata": {
-    "title": "Rivesio Feedback",
-    "description": "Rivesio geri bildirim yönetim paneli"
+    "siteName": "Rivesio",
+    "title": "Her site için geri bildirim",
+    "description": "Tek hafif widget ile her siteden geri bildirim topla. Ortak gelen kutusunda önceliklendir, çalıştığın yerden yanıtla — beta süresince ücretsiz.",
+    "ogImageAlt": "Rivesio paneli — geri bildirim gelen kutusu önizlemesi",
+    "loginTitle": "Giriş",
+    "signupTitle": "Kayıt",
+    "notFoundTitle": "Sayfa bulunamadı",
+    "notFoundDescription": "Bu sayfa yok veya taşınmış olabilir."
   },
   "signup": {
     "title": "Hesabını oluştur",

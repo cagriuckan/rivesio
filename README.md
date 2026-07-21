@@ -57,7 +57,7 @@ Create a project/widget from the panel, copy its widget key, then try `demo.html
 | `npm run build` | Build widget (esbuild) then Next |
 | `npm start` | Production server via `server.js` |
 | `npm run build:widget` | Widget bundle only → `public/widget.bundle.js` |
-| `npm run icons` | Derive `icon-192.png` / favicon from `public/icon.png` |
+| `npm run icons` | Derive `icon-192.png` / favicon from `public/icon-512.png` |
 | `npm run db:push` / `db:migrate` / `db:studio` | Drizzle schema tools |
 
 ## Embed the widget

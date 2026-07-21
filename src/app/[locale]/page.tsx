@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import LandingPage from "@/components/landing/LandingPage";
 import { Link } from "@/i18n/navigation";
 import Shell from "@/components/layout/Shell";
@@ -13,6 +13,7 @@ import QuickOverview from "@/components/dashboard/QuickOverview";
 import InboxPreview from "@/components/dashboard/InboxPreview";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
+import JsonLd from "@/components/seo/JsonLd";
 import {
   getStats,
   getStatsWithTrend,
@@ -27,6 +28,8 @@ import {
 import { getSessionUser } from "@/lib/auth";
 import { FEEDBACK_STATUSES, PRIORITIES } from "@/lib/types";
 import { FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
+import { buildOrganizationWebsiteJsonLd } from "@/lib/seo";
+import type { Locale } from "@/i18n/routing";
 
 export const dynamic = "force-dynamic";
 
@@ -40,7 +43,17 @@ function pctDelta(current: number, previous: number): number {
 export default async function DashboardPage({ searchParams }: { searchParams: SearchParams }) {
   const { w, period } = await searchParams;
   const user = await getSessionUser();
-  if (!user) return <LandingPage />;
+  if (!user) {
+    const locale = (await getLocale()) as Locale;
+    const t = await getTranslations("metadata");
+    const jsonLd = buildOrganizationWebsiteJsonLd(locale, t("description"));
+    return (
+      <>
+        <JsonLd data={jsonLd} />
+        <LandingPage />
+      </>
+    );
+  }
   const days = period === "7" ? 7 : period === "90" ? 90 : 30;
   const project = w ? await getOwnedProject(user.id, w) : undefined;
   const projectId = project?.id;
