@@ -534,13 +534,11 @@ function mount(
   // ── Support badge ─────────────────────────────────────────────────
   function renderSupport() {
     const s = runtime.support;
-    if (!s) { supportEl.hidden = true; return; }
-    supportEl.hidden = false;
-    if (s.unlimited || s.endsAt === null) {
-      supportEl.dataset.expired = "0";
-      supportEl.innerHTML = `${ICONS.infinity}<span>${esc(ui.supportUnlimited)}</span>`;
+    if (!s || s.unlimited || s.endsAt === null) {
+      supportEl.hidden = true;
       return;
     }
+    supportEl.hidden = false;
     const daysLeft = Math.ceil((s.endsAt - Date.now()) / 86_400_000);
     if (daysLeft <= 0) {
       supportEl.dataset.expired = "1";
