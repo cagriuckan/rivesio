@@ -565,13 +565,15 @@
   },
   "metadata": {
     "siteName": "Rivesio",
-    "title": "Feedback for every site",
-    "description": "Collect feedback from every site with one lightweight widget. Triage in a shared inbox and reply where you work — free during beta.",
-    "ogImageAlt": "Rivesio dashboard preview showing the feedback inbox",
+    "title": "Feedback Widget with Screenshots & Inbox Chat",
+    "description": "Collect product feedback with screenshots and annotations. Triage every site in one shared inbox and reply in-thread from the widget — free during beta.",
+    "ogImageAlt": "Rivesio inbox showing site feedback, screenshot attachments, and conversation replies",
     "loginTitle": "Sign in",
-    "signupTitle": "Sign up",
+    "loginDescription": "Sign in to Rivesio to manage feedback, screenshots, and conversations from every site.",
+    "signupTitle": "Create account",
+    "signupDescription": "Create a free Rivesio account and start collecting product feedback with screenshots in minutes.",
     "notFoundTitle": "Page not found",
-    "notFoundDescription": "This page does not exist or was moved."
+    "notFoundDescription": "This page does not exist or was moved. Return to Rivesio to collect and manage site feedback."
   },
   "signup": {
     "title": "Create your account",
@@ -661,136 +663,96 @@
   "landing": {
     "nav": {
       "features": "Features",
-      "howItWorks": "How it works",
+      "faq": "FAQ",
+      "label": "Primary navigation",
+      "beta": "Beta",
       "signIn": "Sign in",
       "getStarted": "Get started free"
     },
     "hero": {
-      "badge": "Free during beta — no credit card required",
-      "title": "All your product feedback, finally in one place",
-      "subtitle": "Rivesio is the feedback platform that grows with you. Collect feedback from every site you run with one lightweight widget, triage it in a shared inbox, and reply right from where you work.",
+      "eyebrow": "Feedback that starts a conversation",
+      "title": "See what users see. Fix what matters.",
+      "subtitle": "Collect clear feedback with screenshots, understand the exact context, and talk with users in the same thread — from one focused inbox.",
       "ctaPrimary": "Start for free",
-      "ctaSecondary": "Sign in",
-      "mockInbox": "Inbox",
-      "mockFeedback1": "The checkout button is hidden on mobile",
-      "mockFeedback2": "Love the new dashboard — one suggestion…",
-      "mockFeedback3": "Dark mode contrast is too low on forms",
-      "mockStatusOpen": "Open",
-      "mockStatusInProgress": "In progress",
-      "mockStatusResolved": "Resolved",
-      "mockNew": "New feedback received · just now"
-    },
-    "bento": {
-      "annotation": "This looks off",
-      "annotation2": "Broken here",
-      "codeComment": "add before",
-      "launcher": "Feedback",
-      "notifTitle": "New feedback",
-      "liveFeed": "Live feed"
-    },
-    "stats": {
-      "setup": "5 min",
-      "setupLabel": "Average setup time",
-      "sites": "Unlimited",
-      "sitesLabel": "Sites per workspace",
-      "beta": "100% free",
-      "betaLabel": "During the beta",
-      "realtime": "Real-time",
-      "realtimeLabel": "Notifications & inbox"
+      "ctaSecondary": "Explore features",
+      "note": "Free during beta · No credit card required",
+      "previewAlt": "Rivesio feedback inbox dashboard"
     },
     "features": {
-      "title": "Everything you need to close the feedback loop",
-      "subtitle": "From the first bug report to the reply that wins the user back — Rivesio covers the whole journey.",
-      "widget": {
-        "title": "Embeddable widget",
-        "desc": "One script tag adds a polished feedback widget to any site. Fully themeable to match your brand."
+      "eyebrow": "Focused by design",
+      "title": "The feedback loop, without the noise",
+      "subtitle": "Capture context, talk with users, close the loop — in one inbox.",
+      "capture": {
+        "title": "Collect feedback",
+        "desc": "A lightweight widget on any site. Users report bugs and ideas without leaving your product."
       },
       "screenshots": {
-        "title": "Screenshots & annotations",
-        "desc": "Users capture their screen and draw right on it, so you see exactly what they see."
+        "title": "Screenshots & markup",
+        "desc": "Capture the screen, highlight the broken area, and attach images — so every report shows exactly what the user saw."
       },
       "inbox": {
-        "title": "Multi-site inbox",
-        "desc": "Feedback from all your sites lands in one shared inbox with statuses, priorities and categories."
+        "title": "One shared inbox",
+        "desc": "Feedback from every site lands in a single place. Read, filter, and act without hopping between tools."
       },
       "chat": {
-        "title": "Two-way conversations",
-        "desc": "Reply to users directly from the inbox. They answer from the widget — no email ping-pong."
+        "title": "Chat on the feedback",
+        "desc": "Reply in the thread. Users answer from the widget. No email chain — the conversation stays with the report."
       },
-      "agents": {
-        "title": "Real-time notifications",
-        "desc": "Get push and email notifications the moment new feedback lands — never miss a thing."
+      "organize": {
+        "title": "Status, priority, categories",
+        "desc": "Triage bugs vs ideas in seconds. Keep every report moving from open to resolved."
       },
-      "analytics": {
-        "title": "Trends & analytics",
-        "desc": "Spot spikes, track resolution times and see which categories dominate — per site or across all of them."
+      "notifications": {
+        "title": "Instant alerts",
+        "desc": "Know when new feedback arrives or a user replies — in-app, email, or push."
       }
     },
-    "how": {
-      "title": "Up and running in minutes",
-      "subtitle": "No SDKs, no backend changes. If you can paste a script tag, you can use Rivesio.",
-      "step1": {
-        "title": "Add the snippet",
-        "desc": "Paste one script tag into your site. The widget appears instantly, styled to your brand."
+    "visual": {
+      "feedback": "Feedback",
+      "captured": "Captured",
+      "chatUser": "The export button fails on larger reports.",
+      "chatReply": "Thanks — we reproduced it and a fix is on the way.",
+      "open": "Open",
+      "inProgress": "In progress",
+      "resolved": "Resolved",
+      "notifTitle": "New feedback",
+      "notifBody": "A user reported an issue on checkout."
+    },
+    "faq": {
+      "eyebrow": "Questions, answered",
+      "title": "Everything you need to know",
+      "subtitle": "Straight answers about adding Rivesio to your product and working with feedback.",
+      "one": {
+        "question": "How do I add Rivesio to my site?",
+        "answer": "Create a widget, copy its script tag, and paste it into your site. It loads asynchronously and does not require an SDK or backend change."
       },
-      "step2": {
-        "title": "Collect feedback",
-        "desc": "Users report bugs, ideas and praise — with screenshots and annotations attached."
+      "two": {
+        "question": "Can users attach screenshots?",
+        "answer": "Yes. Users can capture their current screen, annotate the exact area that needs attention, or upload images with their feedback."
       },
-      "step3": {
-        "title": "Triage & reply",
-        "desc": "Work through the shared inbox with your team and AI agents, and reply right where the feedback lives."
+      "three": {
+        "question": "Can I reply to a user after they send feedback?",
+        "answer": "Yes. Reply from the Rivesio inbox and the user sees the response in the widget. Both sides can continue the conversation in the same thread."
+      },
+      "four": {
+        "question": "Can I manage feedback from multiple sites?",
+        "answer": "Yes. Each site can use its own widget configuration while all feedback stays accessible from one workspace."
+      },
+      "five": {
+        "question": "Is Rivesio free?",
+        "answer": "Rivesio is free during beta, with all current features included and no credit card required."
       }
-    },
-    "highlight1": {
-      "badge": "Collect",
-      "title": "A widget your users actually want to click",
-      "desc": "One script tag drops a beautiful, brand-matched feedback widget onto any site. Users report bugs and ideas with screenshots and on-screen annotations — no forms, no friction.",
-      "point1": "Screenshot capture with drawing tools",
-      "point2": "Themeable to match your brand",
-      "point3": "Loads async — zero impact on page speed",
-      "mockTitle": "Send feedback",
-      "mockPlaceholder": "The save button doesn't work on…",
-      "mockAttach": "screenshot-annotated.png",
-      "mockSend": "Send"
-    },
-    "highlight2": {
-      "badge": "Triage",
-      "title": "Every site, one inbox, zero chaos",
-      "desc": "Feedback from all your sites streams into a single shared inbox in real time. Statuses, priorities and categories keep the team aligned — and two-way chat keeps users in the loop.",
-      "point1": "Real-time updates and push notifications",
-      "point2": "Statuses, priorities and categories built in",
-      "point3": "Reply in-thread — users answer from the widget"
     },
     "cta": {
+      "badge": "Free during beta",
       "title": "Free while in beta. All features included.",
       "subtitle": "No plans, no limits, no credit card. Help us shape Rivesio and keep your early-supporter perks when we launch.",
-      "button": "Create your free account",
-      "secondary": "Already have an account? Sign in"
+      "button": "Create your free account"
     },
     "footer": {
       "tagline": "The feedback platform for every site you run.",
-      "product": "Product",
-      "featuresLink": "Features",
-      "howLink": "How it works",
-      "account": "Account",
-      "signIn": "Sign in",
       "signUp": "Sign up",
       "rights": "All rights reserved."
-    },
-    "highlight3": {
-      "badge": "Reply",
-      "title": "Close the loop right where feedback lives",
-      "desc": "Reply straight from the inbox; users see your answer in the widget on your site and respond from there. No email chains, no lost conversations.",
-      "point1": "Threaded two-way conversations",
-      "point2": "User replies land back in your inbox instantly",
-      "point3": "Keep users posted with status updates",
-      "mockUser": "User",
-      "mockUserText": "The export button throws an error when I select more than 50 rows.",
-      "mockYou": "You",
-      "mockYouText": "Thanks for the detailed report! We've reproduced the issue and a fix is on the way — we'll update you here as soon as it ships.",
-      "mockTagBug": "Bug",
-      "mockTagHigh": "High priority"
     }
   },
   "auth": {

@@ -3,30 +3,28 @@
 > Her oturum sonunda güncellenir. Son güncelleme: **2026-07-21**
 
 ## Proje Özeti
-Merkezi feedback widget sunucusu + admin paneli. Next.js 15 (App Router, `[locale]` ile next-intl), React 19, Tailwind v4, Postgres + Drizzle (local port 5433, snake_case Row mapping, epoch-ms bigint), Better Auth (multi-tenant), Resend e-posta, web-push, S3. Widget ayrı build edilir (`npm run build:widget`), custom `server.js` ile servis edilir.
+Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19, Tailwind v4, Postgres + Drizzle, Better Auth, Resend, web-push, R2.
 
 ## Mevcut Durum
-- **Klasör:** `/Users/cagri/dev/Rivesio`
-- **GitHub:** https://github.com/cagriuckan/rivesio
-- **Branch:** `feat/issues-1-2-3`
-- Landing SEO tamam: meta/OG/Twitter, robots.txt, sitemap (`/en`+`/tr`), hreflang, Organization+WebSite JSON-LD, panel `noindex` — kararlar `seo.config.md`
+- **Repo:** https://github.com/cagriuckan/rivesio · `feat/issues-1-2-3`
+- **Prod:** rivesio.com · DB: Neon (migrate uygulandı)
+- Landing: hero → feature bento → FAQ → CTA → footer; Beta badge logo yanında
+- Varsayılan widget: `wk_9M0Uw9noVWCAPE-s8yiYBPMk` locale layout’ta
+- SEO meta güçlendirildi (title ~55, desc ~150; googleBot max-preview)
 
 ## Kalanlar / Yapılacaklar
-- [ ] PR’ı gözden geçirip main’e merge et
-- [ ] Prod `PUBLIC_BASE_URL` ile sitemap/canonical doğrula
-- [ ] İdeal OG: 1200×630 `og.png` (şimdilik `dashboard-preview.png`)
-- [ ] Logo asset’lerinde eski “Revisto” yazısı varsa güncelle
+- [ ] Değişiklikleri commit/push + Hostinger redeploy
+- [ ] Prod signup smoke test
+- [ ] İdeal OG 1200×630
 
 ## Alınan Kararlar
-- 2026-07-21: SEO tipik set (A1/B1/C1/D1/E1/F1) — title `Page | Rivesio`, index yalnız landing, AI bot serbest, schema without sameAs/SearchAction
-- 2026-07-21: Ürün adı **Rivesio**; repo `cagriuckan/rivesio`
-- 2026-07: Tema duyarlı logo `ThemedLogo`; landing kök `/`; beta’da fiyatlandırma yok
-- 2026-07: İkon tek kaynak `public/icon.png`
-- Mimari: Claude memory `rivesio-architecture-v2`, `db-architecture`
+- 2026-07-21: Landing sade set; özellikler feedback / screenshot / chat odaklı
+- 2026-07-21: Prod widget script site-wide; Neon DB; `PUBLIC_BASE_URL=https://rivesio.com`
+- 2026-07-21: Title `Rivesio — %s`; keywords meta yok
 
 ## Faydalı Komutlar
 | Komut | Ne yapar |
 |---|---|
-| `npm run dev` | Next dev sunucusu |
+| `npm run dev` | Next dev |
 | `npm run build` | Widget + Next build |
-| `npm run db:push` / `db:studio` | Drizzle şema push / studio |
+| `npm run db:migrate` | Drizzle migrate |

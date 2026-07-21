@@ -565,13 +565,15 @@
   },
   "metadata": {
     "siteName": "Rivesio",
-    "title": "Her site için geri bildirim",
-    "description": "Tek hafif widget ile her siteden geri bildirim topla. Ortak gelen kutusunda önceliklendir, çalıştığın yerden yanıtla — beta süresince ücretsiz.",
-    "ogImageAlt": "Rivesio paneli — geri bildirim gelen kutusu önizlemesi",
+    "title": "Ekran Görüntülü Site Geri Bildirim Widget'ı",
+    "description": "Ekran görüntüsü ve işaretlemeyle ürün geri bildirimi topla. Tüm siteleri tek gelen kutusunda yönet, widget üzerinden yanıtla — beta süresince ücretsiz.",
+    "ogImageAlt": "Rivesio gelen kutusu: site geri bildirimleri, ekran görüntüleri ve sohbet yanıtları",
     "loginTitle": "Giriş",
-    "signupTitle": "Kayıt",
+    "loginDescription": "Rivesio'ya giriş yap; sitelerindeki geri bildirimleri, ekran görüntülerini ve konuşmaları yönet.",
+    "signupTitle": "Hesap oluştur",
+    "signupDescription": "Ücretsiz Rivesio hesabı oluştur; dakikalar içinde ekran görüntülü ürün geri bildirimi toplamaya başla.",
     "notFoundTitle": "Sayfa bulunamadı",
-    "notFoundDescription": "Bu sayfa yok veya taşınmış olabilir."
+    "notFoundDescription": "Bu sayfa yok veya taşınmış olabilir. Site geri bildirimi için Rivesio ana sayfasına dön."
   },
   "signup": {
     "title": "Hesabını oluştur",
@@ -661,136 +663,96 @@
   "landing": {
     "nav": {
       "features": "Özellikler",
-      "howItWorks": "Nasıl çalışır",
+      "faq": "SSS",
+      "label": "Ana navigasyon",
+      "beta": "Beta",
       "signIn": "Giriş yap",
       "getStarted": "Ücretsiz başla"
     },
     "hero": {
-      "badge": "Beta süresince ücretsiz — kredi kartı gerekmez",
-      "title": "Tüm ürün geri bildirimlerin, sonunda tek bir yerde",
-      "subtitle": "Rivesio seninle birlikte büyüyen geri bildirim platformu. Yönettiğin her siteden geri bildirimleri tek bir hafif widget ile topla, ortak gelen kutusunda önceliklendir ve olduğun yerden yanıtla.",
+      "eyebrow": "Sohbete dönüşen geri bildirim",
+      "title": "Kullanıcının gördüğünü gör. Önemli olanı düzelt.",
+      "subtitle": "Ekran görüntüleriyle net geri bildirim topla, sorunun bağlamını anla ve kullanıcıyla aynı konu üzerinden konuş — tek, odaklı bir gelen kutusunda.",
       "ctaPrimary": "Ücretsiz başla",
-      "ctaSecondary": "Giriş yap",
-      "mockInbox": "Gelen Kutusu",
-      "mockFeedback1": "Mobilde ödeme butonu görünmüyor",
-      "mockFeedback2": "Yeni paneli çok sevdim — bir önerim var…",
-      "mockFeedback3": "Karanlık temada form kontrastı çok düşük",
-      "mockStatusOpen": "Açık",
-      "mockStatusInProgress": "İşlemde",
-      "mockStatusResolved": "Çözüldü",
-      "mockNew": "Yeni geri bildirim geldi · az önce"
-    },
-    "bento": {
-      "annotation": "Burada bir sorun var",
-      "annotation2": "Burası bozuk",
-      "codeComment": "önce ekle",
-      "launcher": "Geri bildirim",
-      "notifTitle": "Yeni geri bildirim",
-      "liveFeed": "Canlı akış"
-    },
-    "stats": {
-      "setup": "5 dk",
-      "setupLabel": "Ortalama kurulum süresi",
-      "sites": "Sınırsız",
-      "sitesLabel": "Çalışma alanı başına site",
-      "beta": "%100 ücretsiz",
-      "betaLabel": "Beta süresince",
-      "realtime": "Gerçek zamanlı",
-      "realtimeLabel": "Bildirimler ve gelen kutusu"
+      "ctaSecondary": "Özellikleri keşfet",
+      "note": "Beta süresince ücretsiz · Kredi kartı gerekmez",
+      "previewAlt": "Rivesio geri bildirim gelen kutusu paneli"
     },
     "features": {
-      "title": "Geri bildirim döngüsünü kapatmak için gereken her şey",
-      "subtitle": "İlk hata bildiriminden kullanıcıyı geri kazanan yanıta kadar — Rivesio tüm yolculuğu kapsar.",
-      "widget": {
-        "title": "Gömülebilir widget",
-        "desc": "Tek bir script etiketi, her siteye şık bir geri bildirim widget'ı ekler. Markana uyacak şekilde tamamen özelleştirilebilir."
+      "eyebrow": "Odağını koruyan tasarım",
+      "title": "Gürültü olmadan geri bildirim döngüsü",
+      "subtitle": "Bağlamı yakala, kullanıcıyla konuş, döngüyü kapat — tek gelen kutuda.",
+      "capture": {
+        "title": "Geri bildirim topla",
+        "desc": "Her siteye hafif bir widget. Kullanıcılar ürününden ayrılmadan hata ve fikir bildirir."
       },
       "screenshots": {
         "title": "Ekran görüntüsü ve işaretleme",
-        "desc": "Kullanıcılar ekranlarını yakalayıp üzerine çizim yapar; sen de tam olarak onların gördüğünü görürsün."
+        "desc": "Ekranı yakala, bozuk alanı işaretle, görsel ekle — her bildirim kullanıcının gördüğünü net gösterir."
       },
       "inbox": {
-        "title": "Çok siteli gelen kutusu",
-        "desc": "Tüm sitelerindeki geri bildirimler durum, öncelik ve kategorilerle tek bir ortak gelen kutusunda toplanır."
+        "title": "Tek ortak gelen kutusu",
+        "desc": "Her siteden gelen geri bildirim tek yerde toplanır. Araçlar arasında gezmeden oku, filtrele, aksiyona geç."
       },
       "chat": {
-        "title": "Çift yönlü konuşmalar",
-        "desc": "Kullanıcılara doğrudan gelen kutusundan yanıt ver. Onlar da widget üzerinden cevaplasın — e-posta trafiği yok."
+        "title": "Geri bildirim üzerinde sohbet",
+        "desc": "Konu içinde yanıt ver. Kullanıcı widget'tan cevaplasın. E-posta zinciri yok — konuşma bildirimle birlikte kalır."
       },
-      "agents": {
-        "title": "Anlık bildirimler",
-        "desc": "Yeni geri bildirim geldiğinde push ve e-posta bildirimi al — hiçbir şeyi kaçırma."
+      "organize": {
+        "title": "Durum, öncelik, kategori",
+        "desc": "Hataları fikirlerden saniyeler içinde ayır. Her bildirimi açıktan çözüme taşı."
       },
-      "analytics": {
-        "title": "Trendler ve analizler",
-        "desc": "Artışları yakala, çözüm sürelerini takip et ve hangi kategorilerin öne çıktığını gör — site bazında ya da tümünde."
+      "notifications": {
+        "title": "Anlık uyarılar",
+        "desc": "Yeni geri bildirim veya kullanıcı yanıtı geldiğinde öğren — uygulama içi, e-posta veya push."
       }
     },
-    "how": {
-      "title": "Dakikalar içinde hazır",
-      "subtitle": "SDK yok, backend değişikliği yok. Bir script etiketi yapıştırabiliyorsan Rivesio'yu kullanabilirsin.",
-      "step1": {
-        "title": "Kodu ekle",
-        "desc": "Sitene tek bir script etiketi yapıştır. Widget anında, markana uygun şekilde görünür."
+    "visual": {
+      "feedback": "Geri bildirim",
+      "captured": "Yakalandı",
+      "chatUser": "Büyük raporlarda dışa aktarma butonu hata veriyor.",
+      "chatReply": "Teşekkürler — sorunu yeniden ürettik, düzeltme yolda.",
+      "open": "Açık",
+      "inProgress": "İşlemde",
+      "resolved": "Çözüldü",
+      "notifTitle": "Yeni geri bildirim",
+      "notifBody": "Bir kullanıcı ödeme adımında sorun bildirdi."
+    },
+    "faq": {
+      "eyebrow": "Sorular ve yanıtlar",
+      "title": "Bilmen gereken her şey",
+      "subtitle": "Rivesio'yu ürününe eklemek ve geri bildirimlerle çalışmak hakkında net yanıtlar.",
+      "one": {
+        "question": "Rivesio'yu siteme nasıl eklerim?",
+        "answer": "Bir widget oluştur, script etiketini kopyala ve sitene yapıştır. Asenkron yüklenir; SDK veya backend değişikliği gerektirmez."
       },
-      "step2": {
-        "title": "Geri bildirim topla",
-        "desc": "Kullanıcılar hataları, fikirleri ve övgüleri — ekran görüntüsü ve işaretlemelerle birlikte — iletir."
+      "two": {
+        "question": "Kullanıcılar ekran görüntüsü ekleyebilir mi?",
+        "answer": "Evet. Kullanıcılar mevcut ekranlarını yakalayabilir, dikkat edilmesi gereken alanı işaretleyebilir veya geri bildirimlerine görsel yükleyebilir."
       },
-      "step3": {
-        "title": "Önceliklendir ve yanıtla",
-        "desc": "Ortak gelen kutusunda ekibin ve yapay zekâ ajanlarıyla çalış, geri bildirimin olduğu yerden yanıt ver."
+      "three": {
+        "question": "Geri bildirim gönderen kullanıcıya yanıt verebilir miyim?",
+        "answer": "Evet. Rivesio gelen kutusundan yanıt ver; kullanıcı cevabı widget içinde görür. İki taraf da aynı konu üzerinden konuşmaya devam edebilir."
+      },
+      "four": {
+        "question": "Birden fazla sitenin geri bildirimini yönetebilir miyim?",
+        "answer": "Evet. Her site kendi widget ayarını kullanabilir; tüm geri bildirimler tek çalışma alanından erişilebilir kalır."
+      },
+      "five": {
+        "question": "Rivesio ücretsiz mi?",
+        "answer": "Rivesio beta süresince tüm mevcut özellikleriyle ücretsizdir ve kredi kartı gerektirmez."
       }
-    },
-    "highlight1": {
-      "badge": "Topla",
-      "title": "Kullanıcıların gerçekten tıklamak isteyeceği bir widget",
-      "desc": "Tek bir script etiketi, her siteye markana uygun, şık bir geri bildirim widget'ı ekler. Kullanıcılar hataları ve fikirleri ekran görüntüsü ve işaretlemelerle iletir — form yok, sürtünme yok.",
-      "point1": "Çizim araçlarıyla ekran görüntüsü yakalama",
-      "point2": "Markana uygun tema desteği",
-      "point3": "Asenkron yüklenir — sayfa hızına sıfır etki",
-      "mockTitle": "Geri bildirim gönder",
-      "mockPlaceholder": "Kaydet butonu şurada çalışmıyor…",
-      "mockAttach": "ekran-goruntusu.png",
-      "mockSend": "Gönder"
-    },
-    "highlight2": {
-      "badge": "Önceliklendir",
-      "title": "Her site, tek gelen kutusu, sıfır kaos",
-      "desc": "Tüm sitelerindeki geri bildirimler gerçek zamanlı olarak tek bir ortak gelen kutusuna akar. Durumlar, öncelikler ve kategoriler ekibi hizada tutar — çift yönlü sohbet kullanıcıyı süreçte tutar.",
-      "point1": "Gerçek zamanlı güncellemeler ve push bildirimleri",
-      "point2": "Durum, öncelik ve kategoriler hazır gelir",
-      "point3": "Konu içinde yanıtla — kullanıcı widget'tan cevaplar"
     },
     "cta": {
+      "badge": "Beta süresince ücretsiz",
       "title": "Beta süresince ücretsiz. Tüm özellikler dahil.",
       "subtitle": "Plan yok, limit yok, kredi kartı yok. Rivesio'yu birlikte şekillendir, lansmanla birlikte erken destekçi ayrıcalıklarını koru.",
-      "button": "Ücretsiz hesabını oluştur",
-      "secondary": "Zaten hesabın var mı? Giriş yap"
+      "button": "Ücretsiz hesabını oluştur"
     },
     "footer": {
       "tagline": "Yönettiğin her site için geri bildirim platformu.",
-      "product": "Ürün",
-      "featuresLink": "Özellikler",
-      "howLink": "Nasıl çalışır",
-      "account": "Hesap",
-      "signIn": "Giriş yap",
       "signUp": "Kayıt ol",
       "rights": "Tüm hakları saklıdır."
-    },
-    "highlight3": {
-      "badge": "Yanıtla",
-      "title": "Döngüyü geri bildirimin olduğu yerde kapat",
-      "desc": "Gelen kutusundan doğrudan yanıt ver; kullanıcı cevabını sitendeki widget üzerinden görür ve oradan yanıtlar. E-posta zincirleri yok, kayıp konuşmalar yok.",
-      "point1": "Konu bazlı çift yönlü sohbet",
-      "point2": "Kullanıcı yanıtları anında gelen kutusuna düşer",
-      "point3": "Durum güncellemeleriyle kullanıcıyı bilgilendir",
-      "mockUser": "Kullanıcı",
-      "mockUserText": "50'den fazla satır seçtiğimde dışa aktarma butonu hata veriyor.",
-      "mockYou": "Sen",
-      "mockYouText": "Detaylı bildirim için teşekkürler! Sorunu yeniden ürettik, düzeltme yolda — yayınlanır yayınlanmaz buradan haber vereceğiz.",
-      "mockTagBug": "Hata",
-      "mockTagHigh": "Yüksek öncelik"
     }
   },
   "auth": {

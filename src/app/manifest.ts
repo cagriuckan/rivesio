@@ -4,7 +4,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Rivesio Feedback",
     short_name: "Rivesio",
-    description: "Collect feedback from every site with one lightweight widget.",
+    description: "Collect product feedback with screenshots, triage every site in one inbox, and reply in-thread.",
     start_url: "/",
     display: "standalone",
     background_color: "#f6f7fb",
