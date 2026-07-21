@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import HeroBackground from "@/components/landing/HeroBackground";
 import FeatureBento from "@/components/landing/FeatureBento";
+import LanguageSwitcher from "@/components/layout/LanguageSwitcher";
 
 /**
  * Public landing page ("/" for signed-out visitors).
@@ -82,7 +83,8 @@ export default async function LandingPage() {
             <a href="#features" className="transition hover:text-white">{t("nav.features")}</a>
             <a href="#how" className="transition hover:text-white">{t("nav.howItWorks")}</a>
           </nav>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <LanguageSwitcher variant="dark" />
             <Link href="/login" className="hidden px-3 py-1.5 text-sm text-white/65 transition hover:text-white sm:block">
               {t("nav.signIn")}
             </Link>

@@ -79,7 +79,7 @@ export default function Sidebar({
               className="block rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <Image
-                src="/icon.png"
+                src="/icon-512.png"
                 alt="Rivesio"
                 width={48}
                 height={48}

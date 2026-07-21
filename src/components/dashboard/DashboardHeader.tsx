@@ -61,7 +61,7 @@ export default function DashboardHeader({
         <div className="flex min-w-0 items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-raised ring-1 ring-line">
             <Image
-              src={image || "/icon.png"}
+              src={image || "/icon-512.png"}
               alt=""
               width={40}
               height={40}

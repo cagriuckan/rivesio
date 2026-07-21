@@ -50,7 +50,19 @@ export async function middleware(req: NextRequest) {
   }
 
   // Let next-intl handle locale detection, prefixing and rewrites.
-  return intlMiddleware(req);
+  const response = intlMiddleware(req);
+
+  const isNoIndexPath =
+    isProtectedPage ||
+    rest === "/login" ||
+    rest === "/signup" ||
+    rest.startsWith("/agent-invite");
+
+  if (isNoIndexPath && response) {
+    response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  return response;
 }
 
 export const config = {

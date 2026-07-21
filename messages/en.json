@@ -564,8 +564,14 @@
     "acceptGoToInbox": "Go to inbox"
   },
   "metadata": {
-    "title": "Rivesio Feedback",
-    "description": "Rivesio feedback management panel"
+    "siteName": "Rivesio",
+    "title": "Feedback for every site",
+    "description": "Collect feedback from every site with one lightweight widget. Triage in a shared inbox and reply where you work — free during beta.",
+    "ogImageAlt": "Rivesio dashboard preview showing the feedback inbox",
+    "loginTitle": "Sign in",
+    "signupTitle": "Sign up",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "This page does not exist or was moved."
   },
   "signup": {
     "title": "Create your account",

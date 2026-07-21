@@ -6,24 +6,23 @@
 Merkezi feedback widget sunucusu + admin paneli. Next.js 15 (App Router, `[locale]` ile next-intl), React 19, Tailwind v4, Postgres + Drizzle (local port 5433, snake_case Row mapping, epoch-ms bigint), Better Auth (multi-tenant), Resend e-posta, web-push, S3. Widget ayrı build edilir (`npm run build:widget`), custom `server.js` ile servis edilir.
 
 ## Mevcut Durum
-- **Klasör:** `/Users/cagri/dev/Rivesio` (eski `revisto` taşındı)
+- **Klasör:** `/Users/cagri/dev/Rivesio`
 - **GitHub:** https://github.com/cagriuckan/rivesio
-- **Branch:** `feat/issues-1-2-3` (main'e henüz merge edilmedi)
-- Son commit: `c3cd2ba` — uygulama adı Revisto → Rivesio (package, UI, widget API, skill)
-- Landing + dashboard redesign önceki commitlerde (`9d19d71`); rebrand üstüne eklendi
+- **Branch:** `feat/issues-1-2-3`
+- Landing SEO tamam: meta/OG/Twitter, robots.txt, sitemap (`/en`+`/tr`), hreflang, Organization+WebSite JSON-LD, panel `noindex` — kararlar `seo.config.md`
 
 ## Kalanlar / Yapılacaklar
-- [ ] PR #15'i gözden geçirip main'e merge et (rebrand dahil)
-- [ ] Local Postgres DB adı / `.env` `DATABASE_URL` gerekirse `rivesio` ile hizala
-- [ ] Logo asset'lerindeki "Revisto" yazısı varsa görsel olarak Rivesio'ya güncelle
+- [ ] PR’ı gözden geçirip main’e merge et
+- [ ] Prod `PUBLIC_BASE_URL` ile sitemap/canonical doğrula
+- [ ] İdeal OG: 1200×630 `og.png` (şimdilik `dashboard-preview.png`)
+- [ ] Logo asset’lerinde eski “Revisto” yazısı varsa güncelle
 
 ## Alınan Kararlar
-- 2026-07-21: Ürün adı **Rivesio**; repo `cagriuckan/rivesio`, yerel klasör `Rivesio`. Widget host API `window.RivesioFeedback`, DOM id `rivesio-widget`
-- 2026-07: Tema duyarlı logo için tek `ThemedLogo` bileşeni (light/dark asset çifti)
-- 2026-07: Landing page kök `/` route'unda yaşıyor (ayrı route yok): girişsiz → landing, girişli → dashboard. Beta boyunca fiyatlandırma bölümü yok
-- 2026-07: Tipografi Inter + kompakt ölçek: font tokenları `globals.css @theme`'de, base metin 14px, tüm spacing utility'leri `--spacing: 0.225rem` üzerinden %10 daha sıkı
-- 2026-07: İkon tek kaynak: `public/icon.png` (512px master). `icon-192.png` `npm run icons` ile türetilir; favicon.ico/apple-icon/icon-512/svg'ler silindi, tüm referanslar icon.png'ye bağlı
-- Mimari kararlar için bkz. Claude memory: `rivesio-architecture-v2`, `db-architecture`
+- 2026-07-21: SEO tipik set (A1/B1/C1/D1/E1/F1) — title `Page | Rivesio`, index yalnız landing, AI bot serbest, schema without sameAs/SearchAction
+- 2026-07-21: Ürün adı **Rivesio**; repo `cagriuckan/rivesio`
+- 2026-07: Tema duyarlı logo `ThemedLogo`; landing kök `/`; beta’da fiyatlandırma yok
+- 2026-07: İkon tek kaynak `public/icon.png`
+- Mimari: Claude memory `rivesio-architecture-v2`, `db-architecture`
 
 ## Faydalı Komutlar
 | Komut | Ne yapar |
