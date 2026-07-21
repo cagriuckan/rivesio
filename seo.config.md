@@ -9,9 +9,9 @@ Meta basics · Indexing · robots.txt · sitemap · Open Graph · Twitter Cards 
 | Decision | Value |
 |---|---|
 | Site name | Rivesio |
-| Tagline (EN) | Feedback for every site |
+| Tagline (EN) | Feedback Widget with Screenshots & Inbox Chat |
 | Title template | `Rivesio — %s` |
-| Title / description length | ~60 / ~155 |
+| Title / description length | ~55 / ~150 (SERP limits) |
 | keywords meta | omitted (TR/EU / Google-Bing audience) |
 | Theme color | `#0B1437` (dark accent `#8da2e3`) |
 | Indexable | `/en`, `/tr` landing only |

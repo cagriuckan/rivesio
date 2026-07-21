@@ -12,13 +12,17 @@ export async function generateMetadata({
   const path = "/login";
   return {
     title: t("loginTitle"),
-    description: t("description"),
+    description: t("loginDescription"),
     robots: { index: false, follow: false },
     alternates: {
       canonical: localePath(locale, path),
       languages: languageAlternates(path),
     },
-    openGraph: { url: localePath(locale, path) },
+    openGraph: {
+      url: localePath(locale, path),
+      title: t("loginTitle"),
+      description: t("loginDescription"),
+    },
   };
 }
 
