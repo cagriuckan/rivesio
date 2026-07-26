@@ -38,8 +38,12 @@ interface ServerConfig {
     fabStyle?: "label" | "icon";
     theme?: "auto" | "dark" | "light";
     logoUrl?: string;
-    /** Localized categories, or legacy plain string[]. */
+    /**
+     * Stable category values (string[]), or legacy LocalizedCategory[] from a
+     * short-lived API shape. Display labels come from categoryLabels when set.
+     */
     categories: Array<LocalizedCategory | string>;
+    categoryLabels?: Record<WidgetLocale, Record<string, string>>;
     text?: Record<WidgetLocale, WidgetText>;
     fields?: FormField[];
   };
@@ -201,25 +205,42 @@ const LEGACY_CATEGORY_EN: Record<string, string> = {
   Diğer: "Other",
 };
 
-function normalizeWidgetCategories(raw: Array<LocalizedCategory | string> | undefined): LocalizedCategory[] {
+function normalizeWidgetCategories(
+  raw: Array<LocalizedCategory | string> | undefined,
+  categoryLabels?: Record<WidgetLocale, Record<string, string>>,
+): LocalizedCategory[] {
   if (!raw?.length) return DEFAULT_CATEGORIES;
+
+  // Preferred wire format: string values + optional per-locale label maps.
   if (typeof raw[0] === "string") {
     return (raw as string[]).map((value) => ({
       value,
-      labels: { tr: value, en: LEGACY_CATEGORY_EN[value] ?? value },
+      labels: {
+        tr: categoryLabels?.tr?.[value] ?? value,
+        en: categoryLabels?.en?.[value] ?? LEGACY_CATEGORY_EN[value] ?? value,
+      },
     }));
   }
-  return (raw as LocalizedCategory[]).map((c) => ({
-    value: c.value,
-    labels: {
-      tr: c.labels?.tr || c.value,
-      en: c.labels?.en || c.value,
-    },
-  }));
+
+  // Short-lived object[] shape (and any mixed leftovers).
+  return (raw as LocalizedCategory[])
+    .map((c) => {
+      if (!c || typeof c !== "object") return null;
+      const value = typeof c.value === "string" ? c.value : "";
+      if (!value) return null;
+      return {
+        value,
+        labels: {
+          tr: c.labels?.tr || categoryLabels?.tr?.[value] || value,
+          en: c.labels?.en || categoryLabels?.en?.[value] || value,
+        },
+      };
+    })
+    .filter((c): c is LocalizedCategory => Boolean(c));
 }
 
 function categoryDisplayLabel(cat: LocalizedCategory, locale: WidgetLocale): string {
-  return cat.labels[locale] || cat.labels.tr || cat.labels.en || cat.value;
+  return String(cat.labels[locale] || cat.labels.tr || cat.labels.en || cat.value || "");
 }
 
 interface HostConfig {
@@ -329,7 +350,11 @@ async function boot() {
     canSubmit: registration.canSubmit ?? true,
     blockedReason: registration.blockedReason ?? null,
   };
-  mount(server, host, cfg, { domain }, runtime);
+  try {
+    mount(server, host, cfg, { domain }, runtime);
+  } catch {
+    // Never throw out of boot — host pages should stay unaffected.
+  }
 }
 
 function mount(
@@ -369,7 +394,7 @@ function mount(
   const txt: WidgetText = { ...DEFAULT_TEXT[locale], ...(project.text?.[locale]) };
   const ui = UI[locale];
   const fields = project.fields ?? [];
-  const categories = normalizeWidgetCategories(project.categories);
+  const categories = normalizeWidgetCategories(project.categories, project.categoryLabels);
   const convo = runtime.conversationEnabled;
   const logoHtml = project.logoUrl
     ? `<img class="kf-logo" src="${esc(project.logoUrl)}" alt="" width="20" height="20" decoding="async">`
@@ -379,9 +404,10 @@ function mount(
     .map((c) => `<option value="${esc(c.value)}">${esc(categoryDisplayLabel(c, locale))}</option>`)
     .join("");
 
-  function labelForValue(value: string): string {
-    const found = categories.find((c) => c.value === value);
-    return found ? categoryDisplayLabel(found, locale) : value;
+  function labelForValue(value: unknown): string {
+    const key = String(value ?? "");
+    const found = categories.find((c) => c.value === key);
+    return found ? categoryDisplayLabel(found, locale) : key;
   }
 
   const customFieldsHtml = fields
@@ -761,7 +787,7 @@ function mount(
       seenTokens.add(c.token);
       rows.push(historyRow({
         title: labelForValue(c.category),
-        snippet: c.last_message,
+        snippet: c.last_message ?? "",
         date: c.last_activity_at,
         token: c.token,
         unread: isUnread(c.token),
@@ -772,7 +798,7 @@ function mount(
       if (e.token && seenTokens.has(e.token)) continue;
       rows.push(historyRow({
         title: labelForValue(e.category),
-        snippet: e.page,
+        snippet: e.page ?? "",
         date: e.date,
         token: e.token,
         id: e.id,
@@ -1375,8 +1401,8 @@ function mount(
   checkUnread().then(renderHistory);
 }
 
-function esc(s: string): string {
-  return s.replace(/[&<>"']/g, (c) =>
+function esc(s: unknown): string {
+  return String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string
   );
 }

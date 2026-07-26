@@ -65,3 +65,22 @@ export function labelForCategoryValue(
   const found = categories.find((c) => c.value === value);
   return found ? categoryLabel(found, locale) : value;
 }
+
+/**
+ * Widget wire payload. `categories` stays a string[] (stable values) so older
+ * widget bundles that call String methods on each entry keep working.
+ * Localized display text lives in `categoryLabels`.
+ */
+export function toWidgetCategoriesPayload(categories: LocalizedCategory[]): {
+  categories: string[];
+  categoryLabels: Record<WidgetLocale, Record<string, string>>;
+} {
+  const categoryLabels: Record<WidgetLocale, Record<string, string>> = { tr: {}, en: {} };
+  const values: string[] = [];
+  for (const c of categories) {
+    values.push(c.value);
+    categoryLabels.tr[c.value] = c.labels.tr || c.value;
+    categoryLabels.en[c.value] = c.labels.en || c.value;
+  }
+  return { categories: values, categoryLabels };
+}

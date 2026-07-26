@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { NextResponse } from "next/server";
 import { env } from "@/lib/env";
+import { toWidgetCategoriesPayload } from "@/lib/categories";
 import { getProjectByWidgetKey, parseSettings } from "@/lib/repo";
 
 export const runtime = "nodejs";
@@ -41,6 +42,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
   }
 
   const settings = parseSettings(project);
+  const { categories, categoryLabels } = toWidgetCategoriesPayload(settings.categories);
   const config = {
     base: env.publicBaseUrl,
     widgetKey: project.widget_key,
@@ -51,7 +53,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
       fabStyle: settings.fabStyle ?? "label",
       theme: settings.theme ?? "auto",
       logoUrl: settings.logoUrl,
-      categories: settings.categories,
+      categories,
+      categoryLabels,
       text: settings.text,
       fields: settings.fields,
     },
