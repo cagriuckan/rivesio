@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { corsJson, corsPreflight } from "@/lib/cors";
+import { toWidgetCategoriesPayload } from "@/lib/categories";
 import { checkSubmissionAllowed, guardRegister } from "@/lib/guard";
 import { parseSettings } from "@/lib/repo";
 import { rateLimit, clientIp } from "@/lib/ratelimit";
@@ -41,6 +42,7 @@ export async function POST(req: Request) {
 
   const settings = parseSettings(result.project);
   const { config } = result;
+  const { categories, categoryLabels } = toWidgetCategoriesPayload(settings.categories);
 
   // Site-level submit availability (support window + site daily cap). Per-visitor
   // caps are enforced at submit time.
@@ -56,7 +58,8 @@ export async function POST(req: Request) {
       fabStyle: settings.fabStyle ?? "label",
       theme: settings.theme ?? "auto",
       logoUrl: settings.logoUrl,
-      categories: settings.categories,
+      categories,
+      categoryLabels,
       text: settings.text,
       fields: settings.fields,
     },

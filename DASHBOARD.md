@@ -13,7 +13,8 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - Widget logo FAB + panel başlık + Projects kart / switcher
 - Mobile tab bar: expo-glass-tabs web portu (minimize-on-scroll, scrubbing, sliding highlight)
 - Dashboard: Son geri bildirimler + Kategoriler kartları zenginleştirildi
-- Widget kategorileri TR/EN etiketli (`LocalizedCategory`); görünür metin sayfa diline göre
+- Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
+- Fix: `esc()` non-string → `n.replace is not a function` (kategori objesi / null snippet)
 
 ## Kalanlar / Yapılacaklar
 - [ ] Hostinger redeploy (perf + sites/logo + glass tabs + dashboard + localized categories)
@@ -25,6 +26,7 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - [ ] Widget kategori dili smoke test (`lang=en` / `lang=tr`)
 
 ## Alınan Kararlar
+- 2026-07-26: Widget API `categories` string[] + `categoryLabels` map; object[] kısa süre eski bundle’ı kırıyordu
 - 2026-07-26: Kategori `value` sabit (feedback/agent); `labels.tr/en` widget görünür metin
 - 2026-07-26: Dashboard kategori satırları `?category=` ile Inbox filtresine deep-link
 - 2026-07-26: Mobile tab bar `expo-glass-tabs` UX’inin web portu; Expo paketi kurulmadı (Next.js)
