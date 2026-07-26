@@ -16,12 +16,16 @@ export default async function Shell({ children }: { children: React.ReactNode })
     getStats(sessionUser.id),
   ]);
 
-  const widgets: WidgetOption[] = projects.map((p) => ({
-    id: p.id,
-    name: p.name,
-    slug: p.slug,
-    accentColor: parseSettings(p).accentColor,
-  }));
+  const widgets: WidgetOption[] = projects.map((p) => {
+    const settings = parseSettings(p);
+    return {
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      accentColor: settings.accentColor,
+      logoUrl: settings.logoUrl ?? null,
+    };
+  });
 
   const navCounts = {
     feedbacks: stats.newFeedbacks,

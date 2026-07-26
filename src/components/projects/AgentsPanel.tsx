@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, type Tone } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -9,7 +9,8 @@ import { Checkbox, Input, Label } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icons";
 import { ActionMenu } from "@/components/ui/ActionMenu";
 import { SettingsSectionHeader } from "@/components/settings/SettingsLayout";
-import type { AgentMembershipRow, AgentMembershipStatus } from "@/lib/types";
+import type { AgentMembershipRow, AgentMembershipStatus, LocalizedCategory } from "@/lib/types";
+import { categoryLabel, labelForCategoryValue } from "@/lib/categories";
 
 const STATUS_TONE: Record<AgentMembershipStatus, Tone> = {
   invited: "warning",
@@ -17,9 +18,16 @@ const STATUS_TONE: Record<AgentMembershipStatus, Tone> = {
   revoked: "neutral",
 };
 
-export default function AgentsPanel({ projectId, categories }: { projectId: string; categories: string[] }) {
+export default function AgentsPanel({
+  projectId,
+  categories,
+}: {
+  projectId: string;
+  categories: LocalizedCategory[];
+}) {
   const t = useTranslations("agents");
   const tc = useTranslations("common");
+  const locale = (useLocale() === "en" ? "en" : "tr") as "tr" | "en";
   const [items, setItems] = useState<AgentMembershipRow[] | null>(null);
   const [email, setEmail] = useState("");
   const [allCategories, setAllCategories] = useState(true);
@@ -139,11 +147,15 @@ export default function AgentsPanel({ projectId, categories }: { projectId: stri
             <div className="mt-2 flex flex-wrap gap-2">
               {categories.map((c) => (
                 <label
-                  key={c}
+                  key={c.value || categoryLabel(c, locale)}
                   className="flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-raised px-2.5 py-1 text-xs font-medium text-secondary"
                 >
-                  <Checkbox checked={selectedCategories.includes(c)} onChange={() => toggleCategory(c)} />
-                  {c}
+                  <Checkbox
+                    checked={selectedCategories.includes(c.value)}
+                    onChange={() => toggleCategory(c.value)}
+                    disabled={!c.value}
+                  />
+                  {categoryLabel(c, locale)}
                 </label>
               ))}
             </div>
@@ -174,7 +186,9 @@ export default function AgentsPanel({ projectId, categories }: { projectId: stri
                       <Badge tone={STATUS_TONE[m.status]} dot>{t(`status_${m.status}`)}</Badge>
                     </div>
                     <div className="mt-0.5 truncate text-xs text-subtle">
-                      {m.categories?.length ? m.categories.join(", ") : t("inviteAllCategories")}
+                      {m.categories?.length
+                        ? m.categories.map((v) => labelForCategoryValue(categories, v, locale)).join(", ")
+                        : t("inviteAllCategories")}
                     </div>
                   </div>
                   <ActionMenu

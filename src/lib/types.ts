@@ -36,6 +36,15 @@ export type FabStyle = "label" | "icon";
 /** "auto" follows the host page's data-theme; otherwise force dark/light. */
 export type WidgetTheme = "auto" | "dark" | "light";
 
+/**
+ * Widget category: `value` is the stable id stored on feedbacks / agent routing;
+ * `labels` are the visitor-facing texts per widget locale.
+ */
+export interface LocalizedCategory {
+  value: string;
+  labels: Record<WidgetLocale, string>;
+}
+
 export interface ProjectSettings {
   accentColor: string;
   /** Absolute URL to the uploaded brand logo, shown in the widget's emails. */
@@ -45,7 +54,7 @@ export interface ProjectSettings {
   position: WidgetPosition;
   fabStyle?: FabStyle;
   theme?: WidgetTheme;
-  categories: string[];
+  categories: LocalizedCategory[];
   text?: Record<WidgetLocale, WidgetText>;
   fields?: FormField[];
 }

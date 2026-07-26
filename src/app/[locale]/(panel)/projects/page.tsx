@@ -1,17 +1,18 @@
 import { getTranslations } from "next-intl/server";
-import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import CreateProject from "@/components/CreateProject";
 import ProjectCard from "@/components/ProjectCard";
 import { Icon } from "@/components/ui/Icons";
 import { parseSettings } from "@/lib/repo";
-import { listFeedbacks, listOwnedProjects, listSites } from "@/lib/admin-repo";
+import {
+  countFeedbacksByOwnedProjects,
+  countSitesByOwnedProjects,
+  listOwnedProjects,
+} from "@/lib/admin-repo";
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { env } from "@/lib/env";
-
-export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage({ searchParams }: { searchParams: Promise<{ create?: string }> }) {
   const sp = await searchParams;
@@ -21,21 +22,13 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
   const projects = await listOwnedProjects(user.id);
   const shouldOpenCreate = sp.create === "1";
 
-  // Per-project counts for the card stats.
-  const counts = new Map<string, { feedbacks: number; sites: number }>();
-  await Promise.all(
-    projects.map(async (p) => {
-      const [feedbacks, sites] = await Promise.all([
-        listFeedbacks(user.id, { projectId: p.id }),
-        listSites(user.id, { projectId: p.id }),
-      ]);
-      counts.set(p.id, { feedbacks: feedbacks.length, sites: sites.length });
-    }),
-  );
+  const [feedbackCounts, siteCounts] = await Promise.all([
+    countFeedbacksByOwnedProjects(user.id),
+    countSitesByOwnedProjects(user.id),
+  ]);
 
   return (
-    <Shell>
-      <PageContent>
+    <PageContent>
       <PageHeader
         icon={Icon.code}
         title={t("title")}
@@ -56,7 +49,6 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
         <div className="grid gap-4 lg:grid-cols-2">
           {projects.map((p) => {
             const s = parseSettings(p);
-            const c = counts.get(p.id)!;
             return (
               <ProjectCard
                 key={p.id}
@@ -67,14 +59,17 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
                   slug: p.slug,
                   widgetKey: p.widget_key,
                   accentColor: s.accentColor,
+                  logoUrl: s.logoUrl ?? null,
                 }}
-                stats={c}
+                stats={{
+                  feedbacks: feedbackCounts.get(p.id) ?? 0,
+                  sites: siteCounts.get(p.id) ?? 0,
+                }}
               />
             );
           })}
         </div>
       )}
-      </PageContent>
-    </Shell>
+    </PageContent>
   );
 }

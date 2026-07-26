@@ -1,5 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import Image from "next/image";
+import Script from "next/script";
 import { Link } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import HeroBackground from "@/components/landing/HeroBackground";
@@ -160,6 +161,7 @@ export default async function LandingPage() {
   };
 
   return (
+    <>
     <div className="min-h-screen overflow-x-hidden text-white antialiased" style={{ background: colors.background }}>
       <header className="fixed inset-x-0 top-4 z-50 px-4">
         <div
@@ -352,5 +354,10 @@ export default async function LandingPage() {
         </div>
       </footer>
     </div>
+    <Script
+      src="https://rivesio.com/api/widget/wk_9M0Uw9noVWCAPE-s8yiYBPMk.js"
+      strategy="afterInteractive"
+    />
+    </>
   );
 }

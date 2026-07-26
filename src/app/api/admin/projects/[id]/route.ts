@@ -33,7 +33,18 @@ const schema = z.object({
   position: z.enum(["bottom-right", "bottom-left"]).optional(),
   fabStyle: z.enum(["label", "icon"]).optional(),
   theme: z.enum(["auto", "dark", "light"]).optional(),
-  categories: z.array(z.string().min(1).max(60)).optional(),
+  categories: z
+    .array(
+      z.object({
+        value: z.string().min(1).max(60),
+        labels: z.object({
+          tr: z.string().min(1).max(60),
+          en: z.string().min(1).max(60),
+        }),
+      }),
+    )
+    .max(30)
+    .optional(),
   text: z.object({ tr: widgetTextSchema, en: widgetTextSchema }).optional(),
   fields: z.array(formFieldSchema).max(20).optional(),
   rotateKey: z.boolean().optional(),

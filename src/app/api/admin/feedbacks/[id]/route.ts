@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, after } from "next/server";
 import { z } from "zod";
 import { requireAdminSession } from "@/lib/auth";
 import {
@@ -111,6 +111,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       },
     });
     // Notify the end user by email when the conversation feature is on for their site.
+    // Fire-and-forget so the admin UI isn't blocked on Resend latency.
     if (fb.email) {
       const project = await getAccessibleProject(user.id, fb.project_id);
       if (project?.allow_conversation) {
@@ -120,13 +121,27 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
           created_at: r.created_at,
         }));
         const settings = parseSettings(project);
-        await sendReplyNotification(fb.email, fb.access_token, reply, history, {
-          accent: settings.accentColor,
-          name: project.name,
-          logo: settings.logoUrl,
-        });
+        const email = fb.email;
+        const token = fb.access_token;
+        after(() =>
+          sendReplyNotification(email, token, reply, history, {
+            accent: settings.accentColor,
+            name: project.name,
+            logo: settings.logoUrl,
+          }),
+        );
       }
     }
+    return NextResponse.json({
+      ok: true,
+      reply: {
+        id: created.id,
+        author: created.author,
+        message: created.message,
+        created_at: created.created_at,
+        feedback_id: id,
+      },
+    });
   }
   return NextResponse.json({ ok: true });
 }

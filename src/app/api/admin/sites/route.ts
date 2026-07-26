@@ -33,5 +33,16 @@ export async function POST(req: Request) {
     // Manually added sites default to approved (admin intent), unless told otherwise.
     status: status ?? "approved",
   });
-  return NextResponse.json({ ok: true, id: site.id });
+  return NextResponse.json({
+    ok: true,
+    site: {
+      ...site,
+      project_name: project.name,
+      feedback_count: 0,
+      project_default_daily_limit_site: project.default_daily_limit_site,
+      project_default_daily_limit_visitor: project.default_daily_limit_visitor,
+      project_default_support_days: project.default_support_days,
+      project_allow_conversation: project.allow_conversation,
+    },
+  });
 }

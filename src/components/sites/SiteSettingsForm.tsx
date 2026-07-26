@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { Checkbox, Input } from "@/components/ui/Field";
 import {
   OptionCards,
@@ -46,7 +45,6 @@ export default function SiteSettingsForm({
   const t = useTranslations("sites");
   const tc = useTranslations("common");
   const ts = useTranslations("settings");
-  const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("general");
   const [state, setState] = useState<SiteSettingsInitial>(initial);
@@ -81,7 +79,6 @@ export default function SiteSettingsForm({
       if (res.ok) {
         setSaved(true);
         Object.assign(initial, state);
-        router.refresh();
       }
     } finally {
       setSaving(false);

@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
@@ -64,7 +63,6 @@ export default function UserSettings({ initial }: { initial: UserSettingsInitial
 function ProfileTab({ initial }: { initial: UserSettingsInitial }) {
   const t = useTranslations("settings");
   const tc = useTranslations("common");
-  const router = useRouter();
   const [name, setName] = useState(initial.name);
   const [image, setImage] = useState(initial.image);
   const [saving, setSaving] = useState(false);
@@ -82,7 +80,6 @@ function ProfileTab({ initial }: { initial: UserSettingsInitial }) {
       if (!res.error) {
         setSaved(true);
         initial.name = name.trim();
-        router.refresh();
       }
     } finally {
       setSaving(false);
@@ -108,7 +105,6 @@ function ProfileTab({ initial }: { initial: UserSettingsInitial }) {
       if (res.ok && data?.imageUrl) {
         setImage(data.imageUrl);
         initial.image = data.imageUrl;
-        router.refresh();
       } else {
         setAvatarError(t("fieldAvatarErrorUpload"));
       }
@@ -127,7 +123,6 @@ function ProfileTab({ initial }: { initial: UserSettingsInitial }) {
       if (res.ok) {
         setImage(null);
         initial.image = null;
-        router.refresh();
       } else {
         setAvatarError(t("fieldAvatarErrorUpload"));
       }

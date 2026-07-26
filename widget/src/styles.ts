@@ -90,11 +90,23 @@ export const widgetCss = `
 .kf-fab:active { transform: scale(.97); }
 .kf-fab:focus-visible { box-shadow: 0 0 0 3px var(--ring); }
 .kf-fab svg { width: 15px; height: 15px; flex-shrink: 0; }
+.kf-fab .kf-logo,
+.kf-title-icon .kf-logo {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  object-fit: cover;
+  flex-shrink: 0;
+  display: block;
+  background: rgba(255,255,255,.18);
+}
 
 /* Icon-only FAB: compact circular button, no text label. */
 .kf-root[data-fab="icon"] .kf-fab { padding: 13px; border-radius: 50%; position: relative; }
-.kf-root[data-fab="icon"] .kf-fab span { display: none; }
+.kf-root[data-fab="icon"] .kf-fab > span:not(.kf-fab-badge) { display: none; }
 .kf-root[data-fab="icon"] .kf-fab svg { width: 18px; height: 18px; }
+.kf-root[data-fab="icon"] .kf-fab .kf-logo { width: 22px; height: 22px; border-radius: 7px; }
+.kf-root[data-has-logo="1"][data-fab="icon"] .kf-fab { padding: 8px; }
 
 /* Tooltip on the icon-only FAB (label shown on hover / focus). */
 .kf-root[data-fab="icon"] .kf-fab::after {
@@ -186,8 +198,16 @@ export const widgetCss = `
   background: var(--kf-accent, #0B1437);
   display: flex; align-items: center; justify-content: center;
   color: #fff;
+  overflow: hidden;
 }
 .kf-title-icon svg { width: 13px; height: 13px; }
+.kf-title-icon .kf-logo {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  object-fit: cover;
+  background: transparent;
+}
 .kf-title {
   font-size: 13px;
   font-weight: 600;
@@ -805,8 +825,10 @@ export const widgetCss = `
   .kf-root[data-pos="bottom-right"] { right: 16px; }
   .kf-root[data-pos="bottom-left"]  { left: 16px; }
   .kf-panel { width: calc(100vw - 24px); max-width: none; border-radius: var(--radius-lg); }
-  .kf-fab span { display: none; }
+  .kf-fab > span:not(.kf-fab-badge) { display: none; }
   .kf-fab { padding: 12px; border-radius: 50%; }
   .kf-fab svg { width: 18px; height: 18px; }
+  .kf-fab .kf-logo { width: 22px; height: 22px; border-radius: 7px; }
+  .kf-root[data-has-logo="1"] .kf-fab { padding: 8px; }
 }
 `;

@@ -1,5 +1,4 @@
 import { getTranslations } from "next-intl/server";
-import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import SitesPanel from "@/components/sites/SitesPanel";
@@ -9,8 +8,6 @@ import { getOwnedProject, listOwnedProjects, listSites } from "@/lib/admin-repo"
 import { getSessionUser } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import type { SiteStatus } from "@/lib/types";
-
-export const dynamic = "force-dynamic";
 
 const STATUSES: SiteStatus[] = ["pending", "approved", "blocked"];
 
@@ -28,24 +25,19 @@ export default async function SitesPage({ searchParams }: { searchParams: Promis
   const initialSelectedId = sp.s && sites.some((s) => s.id === sp.s) ? sp.s : null;
 
   return (
-    <Shell>
-      <PageContent>
-        <div className="mb-6 shrink-0 border-b border-line pb-4">
-          <PageHeader
-            icon={Icon.globe}
-            title={t("title")}
-            subtitle={t("subtitle", { count: sites.length })}
-            actions={<AddSiteButton projects={projects.map((p) => ({ id: p.id, name: p.name }))} />}
-          />
-        </div>
+    <PageContent>
+      <PageHeader
+        icon={Icon.globe}
+        title={t("title")}
+        subtitle={t("subtitle", { count: sites.length })}
+        actions={<AddSiteButton projects={projects.map((p) => ({ id: p.id, name: p.name }))} />}
+      />
 
-          <SitesPanel
-            sites={sites}
-            projects={projects.map((p) => ({ id: p.id, name: p.name }))}
-            initialStatus={status ?? "all"}
-            initialSelectedId={initialSelectedId}
-          />
-      </PageContent>
-    </Shell>
+      <SitesPanel
+        sites={sites}
+        initialStatus={status ?? "all"}
+        initialSelectedId={initialSelectedId}
+      />
+    </PageContent>
   );
 }

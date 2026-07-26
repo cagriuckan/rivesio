@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { and, count, desc, eq, gte, inArray, lt, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { attachments, feedbackReplies, feedbacks, projects, sites, user } from "@/db/schema";
@@ -53,14 +54,14 @@ export async function projectSlugExists(slug: string): Promise<boolean> {
   return Boolean(r);
 }
 
-export async function listOwnedProjects(userId: string): Promise<ProjectRow[]> {
+export const listOwnedProjects = cache(async (userId: string): Promise<ProjectRow[]> => {
   const rows = await db
     .select()
     .from(projects)
     .where(eq(projects.userId, userId))
     .orderBy(desc(projects.createdAt));
   return rows.map(toProjectRow);
-}
+});
 
 export async function getOwnedProject(userId: string, id: string): Promise<ProjectRow | undefined> {
   const [r] = await db
@@ -321,6 +322,7 @@ export async function listFeedbacks(
     status?: FeedbackStatus;
     priority?: Priority;
     q?: string;
+    limit?: number;
   },
 ): Promise<FeedbackWithMeta[]> {
   const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
@@ -341,9 +343,47 @@ export async function listFeedbacks(
     .innerJoin(sites, eq(sites.id, feedbacks.siteId))
     .where(and(...where))
     .orderBy(desc(feedbacks.lastActivityAt))
-    .limit(500);
+    .limit(filter.limit ?? 500);
 
   return rows.map(toFeedbackWithMeta);
+}
+
+/** Per-owned-project feedback counts (for project cards — avoids N× full listFeedbacks). */
+export async function countFeedbacksByOwnedProjects(
+  userId: string,
+): Promise<Map<string, number>> {
+  const rows = await db
+    .select({ projectId: feedbacks.projectId, c: count() })
+    .from(feedbacks)
+    .innerJoin(projects, eq(projects.id, feedbacks.projectId))
+    .where(eq(projects.userId, userId))
+    .groupBy(feedbacks.projectId);
+  return new Map(rows.map((r) => [r.projectId, r.c]));
+}
+
+/** Per-owned-project site counts. */
+export async function countSitesByOwnedProjects(userId: string): Promise<Map<string, number>> {
+  const rows = await db
+    .select({ projectId: sites.projectId, c: count() })
+    .from(sites)
+    .innerJoin(projects, eq(projects.id, sites.projectId))
+    .where(eq(projects.userId, userId))
+    .groupBy(sites.projectId);
+  return new Map(rows.map((r) => [r.projectId, r.c]));
+}
+
+/** Count feedbacks whose last user activity is newer than last admin read. */
+export async function countUnreadFeedbacks(userId: string, projectId?: string): Promise<number> {
+  const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
+  if (projectId) where.push(eq(feedbacks.projectId, projectId));
+  where.push(
+    sql`coalesce(${feedbacks.lastAdminReadAt}, 0) < coalesce(
+      (select max(created_at) from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} and author = 'user'),
+      ${feedbacks.createdAt}
+    )`,
+  );
+  const [r] = await db.select({ c: count() }).from(feedbacks).where(and(...where));
+  return r?.c ?? 0;
 }
 
 export async function markFeedbackRead(userId: string, id: string): Promise<void> {
@@ -468,7 +508,7 @@ async function countSites(
   return r?.c ?? 0;
 }
 
-export async function getStats(userId: string, projectId?: string): Promise<Stats> {
+export const getStats = cache(async (userId: string, projectId?: string): Promise<Stats> => {
   const [
     totalFeedbacks,
     newFeedbacks,
@@ -503,7 +543,7 @@ export async function getStats(userId: string, projectId?: string): Promise<Stat
     totalSites,
     projects: projectCount,
   };
-}
+});
 
 function scopedFeedbackWhere(userId: string, projectId?: string) {
   const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
