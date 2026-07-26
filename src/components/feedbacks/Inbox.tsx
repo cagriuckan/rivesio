@@ -23,11 +23,13 @@ export default function Inbox({
   initialSelectedId,
   projectId,
   initialQuery,
+  initialCategory,
 }: {
   initialItems: FeedbackWithMeta[];
   initialSelectedId: string | null;
   projectId?: string;
   initialQuery?: string;
+  initialCategory?: string;
 }) {
   const t = useTranslations("feedbacks.inbox");
   const [items, setItems] = useState<FeedbackWithMeta[]>(initialItems);
@@ -37,7 +39,7 @@ export default function Inbox({
   const [tab, setTab] = useState<InboxTab>("all");
   const [sort, setSort] = useState<InboxSort>("recent");
   const [statusFilter, setStatusFilter] = useState<FeedbackStatus | "all">("all");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>(initialCategory ?? "all");
   const [query, setQuery] = useState(initialQuery ?? "");
   const [mobilePane, setMobilePane] = useState<MobilePane>(initialSelectedId ? "thread" : "list");
   // Details start open only on wide screens; on smaller ones it's a slide-over.
@@ -48,6 +50,8 @@ export default function Inbox({
   }, []);
   const selectedRef = useRef<string | null>(initialSelectedId);
   selectedRef.current = selectedId;
+  // Skip the next SSE-driven refetch for a feedback we just patched ourselves.
+  const skipSseRefetchFor = useRef<string | null>(null);
 
   // Server re-renders (e.g. the widget switcher changing ?w=) deliver a new
   // initialItems prop; sync it into state and drop a selection that no longer
@@ -56,6 +60,14 @@ export default function Inbox({
     setItems(initialItems);
     setSelectedId((cur) => (cur && initialItems.some((f) => f.id === cur) ? cur : null));
   }, [initialItems]);
+
+  useEffect(() => {
+    setCategoryFilter(initialCategory ?? "all");
+  }, [initialCategory]);
+
+  useEffect(() => {
+    setQuery(initialQuery ?? "");
+  }, [initialQuery]);
 
   const refetchList = useCallback(async () => {
     const params = new URLSearchParams();
@@ -91,6 +103,13 @@ export default function Inbox({
   }, [selectedId, refetchDetail]);
 
   useLiveEvents((type, payload) => {
+    const skipId = skipSseRefetchFor.current;
+    if (skipId && payload.feedback_id === skipId) {
+      skipSseRefetchFor.current = null;
+      if (type === "reply.created" || type === "feedback.updated" || type === "feedback.assigned") {
+        return;
+      }
+    }
     if (type === "reconnected" || type === "feedback.created" || type === "feedback.updated") {
       refetchList();
       if (type !== "feedback.created" && selectedRef.current) refetchDetail(selectedRef.current);
@@ -127,14 +146,84 @@ export default function Inbox({
   async function patchDetail(fields: Record<string, unknown>) {
     if (!detail) return;
     const id = detail.id;
+    const replyText = typeof fields.reply === "string" ? fields.reply : null;
+
+    // Optimistic reply: append locally and update list preview immediately.
+    let optimisticId: string | null = null;
+    if (replyText) {
+      optimisticId = `optimistic-${Date.now()}`;
+      const now = Date.now();
+      const optimisticReply: FeedbackReplyRow = {
+        id: optimisticId,
+        feedback_id: id,
+        author: "admin",
+        message: replyText,
+        created_at: now,
+        page_url: null,
+        user_agent: null,
+      };
+      setDetail((prev) =>
+        prev && prev.id === id ? { ...prev, replies: [...prev.replies, optimisticReply] } : prev,
+      );
+      setItems((prev) =>
+        prev.map((f) =>
+          f.id === id
+            ? {
+                ...f,
+                last_message: replyText,
+                last_message_author: "admin" as const,
+                last_message_at: now,
+                last_activity_at: now,
+                reply_count: f.reply_count + 1,
+                last_replier: "admin" as const,
+                last_reply_at: now,
+                unread: false,
+              }
+            : f,
+        ),
+      );
+    } else {
+      // Optimistic field patches (status, priority, note, …).
+      setDetail((prev) => (prev && prev.id === id ? { ...prev, ...fields } : prev));
+      setItems((prev) => prev.map((f) => (f.id === id ? { ...f, ...fields } : f)));
+    }
+
+    skipSseRefetchFor.current = id;
     const res = await fetch(`/api/admin/feedbacks/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(fields),
     }).catch(() => null);
-    if (res?.ok) {
+
+    if (!res?.ok) {
+      skipSseRefetchFor.current = null;
       await Promise.all([refetchDetail(id), refetchList()]);
+      return;
     }
+
+    if (replyText) {
+      const data = (await res.json().catch(() => null)) as {
+        reply?: FeedbackReplyRow;
+      } | null;
+      if (data?.reply && optimisticId) {
+        setDetail((prev) =>
+          prev && prev.id === id
+            ? {
+                ...prev,
+                replies: prev.replies.map((r) => (r.id === optimisticId ? { ...data.reply!, page_url: null, user_agent: null } : r)),
+              }
+            : prev,
+        );
+      }
+      // Drop the SSE skip shortly if the echo never arrives.
+      window.setTimeout(() => {
+        if (skipSseRefetchFor.current === id) skipSseRefetchFor.current = null;
+      }, 1500);
+      return;
+    }
+
+    // Non-reply patches: one list refresh is enough; detail already patched locally.
+    await refetchList();
   }
 
   async function deleteFeedback() {

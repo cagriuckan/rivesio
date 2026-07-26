@@ -28,8 +28,15 @@ import {
   type SiteRow,
   type SiteStatus,
 } from "./types";
+import { DEFAULT_PROJECT_CATEGORIES, normalizeCategories } from "./categories";
 
-export const DEFAULT_PROJECT_CATEGORIES = ["Öneri", "Hata", "Tasarım", "Diğer"];
+export {
+  DEFAULT_PROJECT_CATEGORIES,
+  normalizeCategories,
+  categoryLabel,
+  categoryValues,
+  labelForCategoryValue,
+} from "./categories";
 
 const FALLBACK_SETTINGS: ProjectSettings = {
   accentColor: "#0B1437",
@@ -43,10 +50,13 @@ const FALLBACK_SETTINGS: ProjectSettings = {
 
 export function parseSettings(project: ProjectRow): ProjectSettings {
   try {
-    const stored = JSON.parse(project.settings_json) as Partial<ProjectSettings>;
+    const stored = JSON.parse(project.settings_json) as Partial<ProjectSettings> & {
+      categories?: unknown;
+    };
     return {
       ...FALLBACK_SETTINGS,
       ...stored,
+      categories: normalizeCategories(stored.categories),
       // Deep-merge text so partially-customized projects keep defaults per key.
       text: {
         tr: { ...DEFAULT_WIDGET_TEXT.tr, ...stored.text?.tr },

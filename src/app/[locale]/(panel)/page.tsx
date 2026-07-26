@@ -1,7 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import LandingPage from "@/components/landing/LandingPage";
 import { Link } from "@/i18n/navigation";
-import Shell from "@/components/layout/Shell";
 import PageContent from "@/components/layout/PageContent";
 import PageHeader from "@/components/layout/PageHeader";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
@@ -24,14 +23,13 @@ import {
   getOwnedProject,
   listFeedbacks,
   listOwnedProjects,
+  countUnreadFeedbacks,
 } from "@/lib/admin-repo";
 import { getSessionUser } from "@/lib/auth";
 import { FEEDBACK_STATUSES, PRIORITIES } from "@/lib/types";
 import { FEEDBACK_TONE, PRIORITY_TONE } from "@/components/ui/Badge";
 import { buildOrganizationWebsiteJsonLd } from "@/lib/seo";
 import type { Locale } from "@/i18n/routing";
-
-export const dynamic = "force-dynamic";
 
 type SearchParams = Promise<{ w?: string; period?: string }>;
 
@@ -59,15 +57,17 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const projectId = project?.id;
   const projects = await listOwnedProjects(user.id);
 
-  const [stats, trend, dailyTrend, statusBd, priorityBd, categories, allFeedbacks] = await Promise.all([
-    getStats(user.id, projectId),
-    getStatsWithTrend(user.id, projectId, days),
-    getDailyTrend(user.id, projectId, days),
-    getStatusBreakdown(user.id, projectId),
-    getPriorityBreakdown(user.id, projectId),
-    getCategoryBreakdown(user.id, projectId),
-    listFeedbacks(user.id, { projectId }),
-  ]);
+  const [stats, trend, dailyTrend, statusBd, priorityBd, categories, recentFeedbacks, unread] =
+    await Promise.all([
+      projectId ? getStats(user.id, projectId) : getStats(user.id),
+      getStatsWithTrend(user.id, projectId, days),
+      getDailyTrend(user.id, projectId, days),
+      getStatusBreakdown(user.id, projectId),
+      getPriorityBreakdown(user.id, projectId),
+      getCategoryBreakdown(user.id, projectId, 20),
+      listFeedbacks(user.id, { projectId, limit: 8 }),
+      countUnreadFeedbacks(user.id, projectId),
+    ]);
 
   const t = await getTranslations("dashboard");
   const tStatus = await getTranslations("status");
@@ -79,9 +79,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const sitesHref = `/sites${wq}`;
   const projectsHref = "/projects";
 
-  const unread = allFeedbacks.filter((f) => f.unread).length;
   const openFeedbacks = Math.max(0, stats.totalFeedbacks - stats.resolvedFeedbacks);
-  const recent = allFeedbacks.slice(0, 6);
+  const recent = recentFeedbacks;
 
   const hour = new Date().getHours();
   const greetKey = hour < 6 ? "night" : hour < 12 ? "morning" : hour < 18 ? "afternoon" : "evening";
@@ -89,31 +88,28 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
 
   if (projects.length === 0) {
     return (
-      <Shell>
-        <PageContent>
-          <PageHeader icon={Icon.dashboard} title={t("title")} subtitle={t("subtitle")} />
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface py-20 text-center">
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
-              <Icon.code className="h-6 w-6 text-subtle" />
-            </div>
-            <h3 className="mb-1.5 text-base font-semibold text-strong">{t("emptyTitle")}</h3>
-            <p className="mb-5 max-w-xs text-sm text-subtle">{t("emptyBody")}</p>
-            <Link
-              href="/projects?create=1"
-              className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
-            >
-              <Icon.plus className="h-4 w-4" />
-              {t("createWidget")}
-            </Link>
+      <PageContent>
+        <PageHeader icon={Icon.dashboard} title={t("title")} subtitle={t("subtitle")} />
+        <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-line bg-surface py-20 text-center">
+          <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-raised">
+            <Icon.code className="h-6 w-6 text-subtle" />
           </div>
-        </PageContent>
-      </Shell>
+          <h3 className="mb-1.5 text-base font-semibold text-strong">{t("emptyTitle")}</h3>
+          <p className="mb-5 max-w-xs text-sm text-subtle">{t("emptyBody")}</p>
+          <Link
+            href="/projects?create=1"
+            className="inline-flex h-9 items-center gap-2 rounded-lg bg-accent px-4 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
+          >
+            <Icon.plus className="h-4 w-4" />
+            {t("createWidget")}
+          </Link>
+        </div>
+      </PageContent>
     );
   }
 
   return (
-    <Shell>
-      <PageContent>
+    <PageContent>
         <DashboardHeader
           title={t(`greeting_${greetKey}`, { name: firstName })}
           subtitle={project ? project.name : t("snapshot", { open: openFeedbacks, unread })}
@@ -201,7 +197,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
         {/* Category + sites */}
         <div className="mt-4 grid gap-4 xl:grid-cols-3">
           <div className="xl:col-span-2">
-            <CategoryCard categories={categories} />
+            <CategoryCard categories={categories} baseHref={feedbacksHref} />
           </div>
           <SiteSummaryCard
             approved={stats.approvedSites}
@@ -217,8 +213,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
             {t("coverage")}: {stats.approvedSites}/{stats.totalSites} · {stats.projects} {t("widgetCount").toLowerCase()}
           </Link>
         </div>
-      </PageContent>
-    </Shell>
+    </PageContent>
   );
 }
 

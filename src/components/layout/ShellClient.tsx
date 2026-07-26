@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import Sidebar from "./Sidebar";
 import Header from "./Header";
 import BottomTabBar from "./BottomTabBar";
@@ -26,6 +26,7 @@ export default function ShellClient({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const contentScrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (localStorage.getItem("sidebar_collapsed") === "1") {
@@ -91,15 +92,22 @@ export default function ShellClient({
         )}
 
         <main className="min-w-0 flex-1 overflow-hidden bg-canvas md:p-3 md:pb-3">
-          <div className="h-full overflow-y-auto bg-surface pb-24 md:rounded-xl md:border md:border-line md:pb-0">
+          <div
+            ref={contentScrollRef}
+            className="h-full overflow-y-auto bg-surface pb-28 md:rounded-xl md:border md:border-line md:pb-0"
+          >
             {children}
           </div>
         </main>
       </div>
 
-      {/* Mobile bottom tab bar */}
+      {/* Mobile bottom tab bar — glass tabs (web port of expo-glass-tabs) */}
       <Suspense>
-        <BottomTabBar widgets={widgets} hasOwnedProjects={hasOwnedProjects} />
+        <BottomTabBar
+          widgets={widgets}
+          hasOwnedProjects={hasOwnedProjects}
+          scrollParentRef={contentScrollRef}
+        />
       </Suspense>
     </div>
     </UserProvider>

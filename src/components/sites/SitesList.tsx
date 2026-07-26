@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Avatar } from "@/components/ui/Avatar";
 import { Badge, SITE_TONE } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icons";
@@ -37,8 +38,48 @@ function FeedbackRing({ count, max }: { count: number; max: number }) {
   );
 }
 
+function RowAction({
+  label,
+  onClick,
+  danger,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  danger?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick();
+      }}
+      aria-label={label}
+      title={label}
+      className={cn(
+        "inline-flex h-8 w-8 items-center justify-center rounded-lg border shadow-xs transition-colors",
+        danger
+          ? "border-danger-soft bg-danger-soft text-danger-text hover:bg-danger-soft/80"
+          : "border-line bg-surface text-secondary hover:border-line-strong hover:bg-raised hover:text-primary",
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
 export default function SitesList({
   items,
+  pageItems,
+  page,
+  pageCount,
+  totalFiltered,
+  totalAll,
+  pageStart,
+  pageEnd,
+  onPage,
   selectedId,
   statusFilter,
   onStatusFilter,
@@ -50,10 +91,20 @@ export default function SitesList({
   sortOptions,
   selected,
   onToggleSelect,
+  onToggleSelectPage,
   onSelect,
   onToggleFavorite,
+  onChangeStatus,
 }: {
   items: SiteWithCounts[];
+  pageItems: SiteWithCounts[];
+  page: number;
+  pageCount: number;
+  totalFiltered: number;
+  totalAll: number;
+  pageStart: number;
+  pageEnd: number;
+  onPage: (page: number) => void;
   selectedId: string | null;
   statusFilter: SiteStatus | "all";
   onStatusFilter: (s: SiteStatus | "all") => void;
@@ -65,14 +116,20 @@ export default function SitesList({
   sortOptions: ReadonlyArray<SortOption<SiteSort>>;
   selected: Set<string>;
   onToggleSelect: (id: string) => void;
+  onToggleSelectPage: () => void;
   onSelect: (id: string) => void;
   onToggleFavorite: (id: string, next: boolean) => void;
+  onChangeStatus: (id: string, status: SiteStatus) => void;
 }) {
   const t = useTranslations("sites");
   const tc = useTranslations("common");
   const ts = useTranslations("siteStatus");
   const locale = useLocale();
   const maxFeedback = Math.max(1, ...items.map((s) => s.feedback_count));
+
+  const pageIds = pageItems.map((s) => s.id);
+  const allPageSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const somePageSelected = pageIds.some((id) => selected.has(id));
 
   return (
     <section>
@@ -124,20 +181,39 @@ export default function SitesList({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[44rem] text-left">
+          <table className="w-full min-w-[48rem] text-left">
             <thead>
               <tr className="border-b border-line">
-                <th className="w-10 px-4 py-3" />
+                <th className="w-12 px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={onToggleSelectPage}
+                    aria-label={allPageSelected ? t("selectedVisible") : t("selectVisible")}
+                    aria-pressed={allPageSelected}
+                    className={cn(
+                      "flex h-5 w-5 items-center justify-center rounded-md border transition-colors",
+                      allPageSelected
+                        ? "border-accent bg-accent text-white"
+                        : somePageSelected
+                          ? "border-accent bg-accent-soft text-accent-text"
+                          : "border-line-strong bg-base text-transparent hover:border-accent hover:bg-accent-soft",
+                    )}
+                  >
+                    {(allPageSelected || somePageSelected) && <Icon.check className="h-3.5 w-3.5" />}
+                  </button>
+                </th>
                 <th className="px-2 py-3 font-mono text-[11px] font-medium uppercase tracking-widest text-subtle">{t("colDomain")}</th>
                 <th className="px-2 py-3 font-mono text-[11px] font-medium uppercase tracking-widest text-subtle">{t("colFeedback")}</th>
                 <th className="hidden px-2 py-3 font-mono text-[11px] font-medium uppercase tracking-widest text-subtle md:table-cell">{t("colWidget")}</th>
                 <th className="hidden px-2 py-3 font-mono text-[11px] font-medium uppercase tracking-widest text-subtle sm:table-cell">{t("colLastSeen")}</th>
                 <th className="px-2 py-3 font-mono text-[11px] font-medium uppercase tracking-widest text-subtle">{t("colStatus")}</th>
-                <th className="w-12 px-4 py-3" />
+                <th className="w-40 px-4 py-3 text-right font-mono text-[11px] font-medium uppercase tracking-widest text-subtle">
+                  {t("actions")}
+                </th>
               </tr>
             </thead>
             <tbody>
-              {items.length === 0 ? (
+              {pageItems.length === 0 ? (
                 <tr>
                   <td colSpan={7}>
                     <div className="flex flex-col items-center justify-center gap-3 px-4 py-16 text-center">
@@ -149,16 +225,22 @@ export default function SitesList({
                   </td>
                 </tr>
               ) : (
-                items.map((site) => {
+                pageItems.map((site) => {
                   const active = site.id === selectedId;
                   const isSelected = selected.has(site.id);
+                  const statusAction =
+                    site.status === "approved"
+                      ? { label: t("block"), status: "blocked" as const, IconComp: Icon.alertTriangle }
+                      : { label: t("approve"), status: "approved" as const, IconComp: Icon.checkCircle };
+                  const StatusIcon = statusAction.IconComp;
+
                   return (
                     <tr
                       key={site.id}
                       onClick={() => onSelect(site.id)}
                       className={cn(
                         "group cursor-pointer border-b border-line/60 transition-colors last:border-b-0",
-                        active ? "bg-accent-soft/50" : isSelected ? "bg-accent-soft/20" : "hover:bg-raised/60",
+                        active ? "bg-accent-soft/50" : isSelected ? "bg-accent-soft/25" : "hover:bg-raised/60",
                       )}
                     >
                       <td className="px-4 py-3.5">
@@ -170,13 +252,13 @@ export default function SitesList({
                           }}
                           aria-label={isSelected ? t("actionUnselect") : t("actionSelect")}
                           className={cn(
-                            "flex h-4 w-4 items-center justify-center rounded border transition-opacity",
+                            "flex h-5 w-5 items-center justify-center rounded-md border transition-colors",
                             isSelected
-                              ? "border-accent bg-accent text-white opacity-100"
-                              : "border-line-strong text-transparent opacity-0 group-hover:opacity-100",
+                              ? "border-accent bg-accent text-white"
+                              : "border-line-strong bg-base text-transparent hover:border-accent hover:bg-accent-soft",
                           )}
                         >
-                          <Icon.check className="h-3 w-3" />
+                          {isSelected && <Icon.check className="h-3.5 w-3.5" />}
                         </button>
                       </td>
                       <td className="px-2 py-3.5">
@@ -214,21 +296,28 @@ export default function SitesList({
                         <Badge tone={SITE_TONE[site.status]} dot>{ts(site.status)}</Badge>
                       </td>
                       <td className="px-4 py-3.5">
-                        <span className="flex items-center justify-end gap-1">
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onToggleFavorite(site.id, !site.is_favorite);
-                            }}
-                            aria-label={site.is_favorite ? t("actionRemoveFavorite") : t("actionAddFavorite")}
-                            className={cn(
-                              "rounded p-1 transition-opacity",
-                              site.is_favorite ? "text-warning-text" : "text-faint opacity-0 group-hover:opacity-100 hover:text-primary",
-                            )}
+                        <span className="flex items-center justify-end gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+                          <RowAction
+                            label={statusAction.label}
+                            onClick={() => onChangeStatus(site.id, statusAction.status)}
                           >
-                            <Icon.star className={cn("h-3.5 w-3.5", site.is_favorite ? "fill-current" : null)} />
-                          </button>
-                          <Icon.chevronRight className="h-4 w-4 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
+                            <StatusIcon className="h-3.5 w-3.5" />
+                          </RowAction>
+                          <RowAction
+                            label={site.is_favorite ? t("actionRemoveFavorite") : t("actionAddFavorite")}
+                            onClick={() => onToggleFavorite(site.id, !site.is_favorite)}
+                          >
+                            <Icon.star className={cn("h-3.5 w-3.5", site.is_favorite ? "fill-warning text-warning" : null)} />
+                          </RowAction>
+                          <Link
+                            href={`/sites/${site.id}/settings`}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={t("actionSettings")}
+                            title={t("actionSettings")}
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface text-secondary shadow-xs transition-colors hover:border-line-strong hover:bg-raised hover:text-primary"
+                          >
+                            <Icon.settings className="h-3.5 w-3.5" />
+                          </Link>
                         </span>
                       </td>
                     </tr>
@@ -238,6 +327,44 @@ export default function SitesList({
             </tbody>
           </table>
         </div>
+
+        {totalFiltered > 0 && (
+          <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line px-4 py-3">
+            <p className="text-xs text-subtle tnum">
+              {totalFiltered === totalAll
+                ? t("paginationSummary", { start: pageStart, end: pageEnd, total: totalFiltered })
+                : t("filteredPaginationSummary", {
+                    start: pageStart,
+                    end: pageEnd,
+                    filtered: totalFiltered,
+                    total: totalAll,
+                  })}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => onPage(page - 1)}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-base px-3 text-xs font-semibold text-secondary transition-colors hover:bg-raised hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+              >
+                <Icon.chevronLeft className="h-3.5 w-3.5" />
+                {t("previousPage")}
+              </button>
+              <span className="text-xs font-medium text-subtle tnum">
+                {t("pageIndicator", { page, pages: pageCount })}
+              </span>
+              <button
+                type="button"
+                disabled={page >= pageCount}
+                onClick={() => onPage(page + 1)}
+                className="inline-flex h-8 items-center gap-1.5 rounded-lg border border-line bg-base px-3 text-xs font-semibold text-secondary transition-colors hover:bg-raised hover:text-primary disabled:pointer-events-none disabled:opacity-40"
+              >
+                {t("nextPage")}
+                <Icon.chevronRight className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );

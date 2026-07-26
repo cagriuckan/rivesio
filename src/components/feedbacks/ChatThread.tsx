@@ -248,7 +248,7 @@ function Composer({
 
   return (
     <div className="shrink-0 border-t border-line bg-base p-3">
-      <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-line bg-surface p-2 shadow-xs focus-within:border-accent-line focus-within:ring-2 focus-within:ring-accent-soft">
+      <div className="mx-auto flex max-w-3xl items-end gap-2 rounded-2xl border border-line bg-surface p-2 shadow-xs">
         <input
           ref={fileRef}
           type="file"
@@ -269,14 +269,14 @@ function Composer({
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+            if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();
               send();
             }
           }}
           rows={Math.min(6, Math.max(1, text.split("\n").length))}
           placeholder={t("composerPlaceholder")}
-          className="max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-sm text-primary placeholder:text-faint outline-none focus-visible:outline-none"
+          className="max-h-40 min-h-9 flex-1 resize-none bg-transparent py-2 text-sm text-primary placeholder:text-faint !outline-none focus-visible:!outline-none"
         />
         <button
           onClick={send}

@@ -13,6 +13,7 @@ export interface ProjectView {
   slug: string;
   widgetKey: string;
   accentColor: string;
+  logoUrl?: string | null;
 }
 
 export default function ProjectCard({
@@ -70,12 +71,21 @@ export default function ProjectCard({
     <Card className="overflow-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-line px-5 py-4">
-        <span
-          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
-          style={{ background: project.accentColor }}
-        >
-          {project.name.slice(0, 1).toUpperCase()}
-        </span>
+        {project.logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={project.logoUrl}
+            alt=""
+            className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-line"
+          />
+        ) : (
+          <span
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white"
+            style={{ background: project.accentColor }}
+          >
+            {project.name.slice(0, 1).toUpperCase()}
+          </span>
+        )}
         <div className="min-w-0 flex-1">
           <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
           <span className="text-xs text-subtle">{project.slug}</span>

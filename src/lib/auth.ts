@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { betterAuth } from "better-auth";
@@ -46,13 +47,13 @@ export interface SessionUser {
   image: string | null;
 }
 
-/** Returns the signed-in user, or null. Server-side (route handlers, RSC). */
-export async function getSessionUser(): Promise<SessionUser | null> {
+/** Returns the signed-in user, or null. Server-side (route handlers, RSC). Deduped per request. */
+export const getSessionUser = cache(async (): Promise<SessionUser | null> => {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return null;
   const u = session.user as SessionUser & { image?: string | null };
   return { id: u.id, name: u.name, email: u.email, role: u.role, image: u.image ?? null };
-}
+});
 
 /** Route-handler guard: returns the user or a ready-made 401 response. */
 export async function requireAdminSession(): Promise<SessionUser | NextResponse> {

@@ -102,13 +102,16 @@
   --shadow-pop: 0 16px 40px rgba(17,20,40,.14), 0 4px 10px rgba(17,20,40,.06);
   --shadow-accent: 0 8px 20px color-mix(in srgb, #0B1437 35%, transparent);
 
-  /* ── Liquid-glass tab bar (mobile) ── */
-  --tabbar-glass-bg:     rgba(255,255,255,0.28);
-  --tabbar-glass-border: rgba(255,255,255,0.5);
-  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.12) 22%, rgba(255,255,255,0) 55%, rgba(255,255,255,0.08) 100%);
-  --tabbar-glass-shadow: 0 20px 50px rgba(17,20,40,0.16), 0 6px 16px rgba(17,20,40,0.08), inset 0 1px 1px rgba(255,255,255,0.9), inset 0 -1px 1px rgba(17,20,40,0.06);
-  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.65) 100%);
-  --tabbar-bubble-shadow: 0 8px 20px rgba(17,20,40,0.14), 0 2px 6px rgba(17,20,40,0.08), inset 0 1px 0 rgba(255,255,255,0.95), inset 0 -1px 0 rgba(17,20,40,0.04);
+  /* ── Liquid-glass tab bar (mobile) — expo-glass-tabs inspired ── */
+  --tabbar-glass-bg:     rgba(255,255,255,0.42);
+  --tabbar-glass-border: rgba(255,255,255,0.55);
+  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.62) 0%, rgba(255,255,255,0.14) 28%, rgba(255,255,255,0) 58%, rgba(255,255,255,0.1) 100%);
+  --tabbar-glass-shadow: 0 18px 48px rgba(17,20,40,0.18), 0 4px 14px rgba(17,20,40,0.1), inset 0 1px 1px rgba(255,255,255,0.95), inset 0 -1px 1px rgba(17,20,40,0.05);
+  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.98) 0%, rgba(255,255,255,0.72) 100%);
+  --tabbar-bubble-shadow: 0 6px 18px rgba(17,20,40,0.12), 0 1px 4px rgba(17,20,40,0.06), inset 0 1px 0 rgba(255,255,255,1), inset 0 -1px 0 rgba(17,20,40,0.04);
+  --tabbar-active-tint:   var(--color-accent);
+  --tabbar-inactive-tint: color-mix(in srgb, var(--color-secondary) 75%, transparent);
+  --tabbar-edge-blur:     linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-canvas) 35%, transparent) 45%, color-mix(in srgb, var(--color-canvas) 72%, transparent) 100%);
 }
 
 /* ═══ Dark theme override ════════════════════════════════════════════════ */
@@ -153,12 +156,15 @@
   --shadow-accent: 0 8px 20px color-mix(in srgb, #8da2e3 30%, transparent);
 
 
-  --tabbar-glass-bg:     rgba(28,28,32,0.38);
-  --tabbar-glass-border: rgba(255,255,255,0.1);
-  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.16) 0%, rgba(255,255,255,0.04) 22%, rgba(255,255,255,0) 55%, rgba(255,255,255,0.02) 100%);
-  --tabbar-glass-shadow: 0 20px 50px rgba(0,0,0,0.55), 0 6px 16px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.14), inset 0 -1px 1px rgba(0,0,0,0.3);
-  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.24) 0%, rgba(255,255,255,0.1) 100%);
-  --tabbar-bubble-shadow: 0 8px 20px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.22), inset 0 -1px 0 rgba(0,0,0,0.2);
+  --tabbar-glass-bg:     rgba(22,22,26,0.55);
+  --tabbar-glass-border: rgba(255,255,255,0.12);
+  --tabbar-glass-shine:  linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.05) 28%, rgba(255,255,255,0) 58%, rgba(255,255,255,0.03) 100%);
+  --tabbar-glass-shadow: 0 18px 48px rgba(0,0,0,0.55), 0 4px 14px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.16), inset 0 -1px 1px rgba(0,0,0,0.35);
+  --tabbar-bubble-bg:     linear-gradient(180deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.1) 100%);
+  --tabbar-bubble-shadow: 0 6px 18px rgba(0,0,0,0.4), 0 1px 4px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -1px 0 rgba(0,0,0,0.25);
+  --tabbar-active-tint:   #ffffff;
+  --tabbar-inactive-tint: rgba(255,255,255,0.48);
+  --tabbar-edge-blur:     linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--color-canvas) 45%, transparent) 45%, color-mix(in srgb, var(--color-canvas) 82%, transparent) 100%);
 }
 
 /* ═══ Base ══════════════════════════════════════════════════════════════ */
@@ -243,7 +249,7 @@ button:not(:disabled), [role="button"]:not([aria-disabled="true"]) {
   background: linear-gradient(90deg,
     var(--color-raised) 25%, var(--color-inset) 50%, var(--color-raised) 75%);
   background-size: 200% 100%;
-  animation: ds-shimmer 1.4s infinite;
+  animation: ds-shimmer 0.9s linear infinite;
 }
 .ds-fade-in     { animation: ds-fade-in  .22s ease both; }
 .ds-slide-in    { animation: ds-slide-in  .2s ease both; }

@@ -1,11 +1,17 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import { Badge, FEEDBACK_TONE } from "@/components/ui/Badge";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import { SortMenu } from "@/components/ui/SortMenu";
 import type { FeedbackWithMeta } from "@/lib/admin-repo";
 import { FEEDBACK_STATUSES, type FeedbackStatus } from "@/lib/types";
+import {
+  CONVERSATION_LABEL_KEY,
+  CONVERSATION_TONE,
+  getConversationState,
+} from "./conversationState";
 
 const STATUS_BORDER: Record<FeedbackStatus, string> = {
   new: "border-l-info",
@@ -111,7 +117,6 @@ export default function ConversationList({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      {/* Search */}
       <div className="shrink-0 border-b border-line p-3">
         <div className="relative">
           <Icon.search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-faint" />
@@ -122,7 +127,6 @@ export default function ConversationList({
             className="h-9 w-full rounded-lg border border-line bg-surface pl-9 pr-3 text-sm text-primary placeholder:text-faint outline-none transition-colors focus:border-accent-line focus:ring-2 focus:ring-accent-soft"
           />
         </div>
-        {/* Tabs */}
         <div className="mt-2.5 flex items-center gap-1">
           <div className="flex min-w-0 flex-1 items-center gap-1">
             {tabs.map(({ key, label, count }) => (
@@ -145,7 +149,6 @@ export default function ConversationList({
           </div>
           <SortMenu options={sortOptions} value={sort} onChange={onSort} label={t("sortLabel")} />
         </div>
-        {/* Filters */}
         <div className="mt-2 flex items-center gap-1.5">
           <SortMenu
             options={statusOptions}
@@ -170,7 +173,6 @@ export default function ConversationList({
         </div>
       </div>
 
-      {/* Rows */}
       <div className="min-h-0 flex-1 overflow-y-auto">
         {items.length === 0 ? (
           <div className="px-4 py-10 text-center text-sm text-subtle">{t("emptyList")}</div>
@@ -178,11 +180,12 @@ export default function ConversationList({
           items.map((f) => {
             const name = senderName(f);
             const active = f.id === selectedId;
+            const conv = getConversationState(f);
             return (
               <div
                 key={f.id}
                 className={cn(
-                  "group flex w-full cursor-pointer items-start gap-3 border-b border-l-4 border-line/60 px-3 py-3 transition-colors",
+                  "group flex w-full cursor-pointer items-start gap-3 border-b border-l-2 border-line/60 px-3 py-3 transition-colors",
                   STATUS_BORDER[f.status],
                   f.status === "resolved" && "opacity-60",
                   active ? "bg-accent-soft/50" : "hover:bg-raised",
@@ -236,6 +239,14 @@ export default function ConversationList({
                         <Icon.star className={cn("h-3.5 w-3.5", f.pinned_at ? "fill-current" : null)} />
                       </button>
                     </span>
+                  </span>
+                  <span className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                    <Badge tone={CONVERSATION_TONE[conv]} dot className="!px-1.5 !py-0 !text-[10px] !leading-4">
+                      {t(CONVERSATION_LABEL_KEY[conv] as "convUnanswered")}
+                    </Badge>
+                    <Badge tone={FEEDBACK_TONE[f.status]} className="!px-1.5 !py-0 !text-[10px] !leading-4">
+                      {tStatus(f.status)}
+                    </Badge>
                   </span>
                 </span>
               </div>

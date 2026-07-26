@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import {
   DndContext,
   closestCenter,
@@ -36,6 +35,7 @@ import {
   FORM_FIELD_TYPES,
   type FormField,
   type FormFieldType,
+  type LocalizedCategory,
   type WidgetLocale,
   type WidgetText,
 } from "@/lib/types";
@@ -57,7 +57,7 @@ interface DesignSettings {
 }
 
 interface InitialSettings {
-  categories: string[];
+  categories: LocalizedCategory[];
   text: Record<WidgetLocale, WidgetText>;
   fields: FormField[];
   design: DesignSettings;
@@ -90,6 +90,31 @@ function newId(): string {
     : Math.random().toString(36).slice(2);
 }
 
+function emptyCategory(): LocalizedCategory {
+  return { value: "", labels: { tr: "", en: "" } };
+}
+
+function cleanCategories(list: LocalizedCategory[]): LocalizedCategory[] {
+  const out: LocalizedCategory[] = [];
+  const seen = new Set<string>();
+  for (const c of list) {
+    const tr = c.labels.tr.trim();
+    const en = c.labels.en.trim();
+    if (!tr && !en) continue;
+    const value = (c.value.trim() || tr || en).slice(0, 60);
+    if (seen.has(value)) continue;
+    seen.add(value);
+    out.push({
+      value,
+      labels: {
+        tr: (tr || en).slice(0, 60),
+        en: (en || tr).slice(0, 60),
+      },
+    });
+  }
+  return out;
+}
+
 export default function ProjectSettingsForm({
   projectId,
   initial,
@@ -100,10 +125,9 @@ export default function ProjectSettingsForm({
   const t = useTranslations("projectSettings");
   const tc = useTranslations("common");
   const ts = useTranslations("settings");
-  const router = useRouter();
 
   const [tab, setTab] = useState<Tab>("appearance");
-  const [categories, setCategories] = useState<string[]>(initial.categories);
+  const [categories, setCategories] = useState<LocalizedCategory[]>(initial.categories);
   const [text, setText] = useState<Record<WidgetLocale, WidgetText>>(initial.text);
   const [fields, setFields] = useState<FormField[]>(initial.fields);
   const [limits, setLimits] = useState<LimitSettings>(initial.limits);
@@ -186,15 +210,21 @@ export default function ProjectSettingsForm({
     setSaved(false);
   }
 
-  function updateCategory(i: number, value: string) {
-    setCategories((prev) => prev.map((c, idx) => (idx === i ? value : c)));
+  function updateCategoryLabel(i: number, value: string) {
+    setCategories((prev) =>
+      prev.map((c, idx) =>
+        idx === i ? { ...c, labels: { ...c.labels, [locale]: value } } : c,
+      ),
+    );
     setSaved(false);
   }
   function removeCategory(i: number) {
     setCategories((prev) => prev.filter((_, idx) => idx !== i));
+    setSaved(false);
   }
   function addCategory() {
-    setCategories((prev) => [...prev, ""]);
+    setCategories((prev) => [...prev, emptyCategory()]);
+    setSaved(false);
   }
 
   function addField() {
@@ -230,7 +260,7 @@ export default function ProjectSettingsForm({
     setSaving(true);
     setSaved(false);
     try {
-      const cleanCategories = categories.map((c) => c.trim()).filter(Boolean);
+      const cleanCats = cleanCategories(categories);
       const cleanFields = fields
         .filter((f) => f.label.trim())
         .map((f) => ({
@@ -244,7 +274,7 @@ export default function ProjectSettingsForm({
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          categories: cleanCategories,
+          categories: cleanCats,
           text,
           fields: cleanFields,
           position: design.position,
@@ -261,14 +291,14 @@ export default function ProjectSettingsForm({
       });
       if (res.ok) {
         setSaved(true);
+        setCategories(cleanCats);
         Object.assign(initial, {
-          categories: cleanCategories,
+          categories: cleanCats,
           text,
           fields: cleanFields,
           limits,
           design,
         });
-        router.refresh();
       }
     } finally {
       setSaving(false);
@@ -457,8 +487,13 @@ export default function ProjectSettingsForm({
             <SettingsSectionHeader title={t("categoriesSection")} description={t("categoriesHint")} />
             <div className="flex flex-col gap-2 border-t border-line pt-5">
               {categories.map((c, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <Input value={c} onChange={(e) => updateCategory(i, e.target.value)} className="max-w-sm" />
+                <div key={c.value || `new-${i}`} className="flex items-center gap-2">
+                  <Input
+                    value={c.labels[locale]}
+                    onChange={(e) => updateCategoryLabel(i, e.target.value)}
+                    className="max-w-sm"
+                    placeholder={t("categoryLabelPlaceholder", { locale: locale.toUpperCase() })}
+                  />
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeCategory(i)} aria-label={tc("delete")}>
                     <Icon.trash className="h-4 w-4" />
                   </Button>
@@ -500,7 +535,12 @@ export default function ProjectSettingsForm({
         </div>
       )}
 
-      {tab === "agents" && <AgentsPanel projectId={projectId} categories={categories.filter(Boolean)} />}
+      {tab === "agents" && (
+        <AgentsPanel
+          projectId={projectId}
+          categories={categories.filter((c) => Boolean(c.value.trim()))}
+        />
+      )}
 
       <SettingsFooter
         dirty={dirty}

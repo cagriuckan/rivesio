@@ -55,6 +55,7 @@ export async function POST(req: Request) {
       position: settings.position,
       fabStyle: settings.fabStyle ?? "label",
       theme: settings.theme ?? "auto",
+      logoUrl: settings.logoUrl,
       categories: settings.categories,
       text: settings.text,
       fields: settings.fields,

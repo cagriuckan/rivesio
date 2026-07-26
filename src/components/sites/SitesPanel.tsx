@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { Icon } from "@/components/ui/Icons";
@@ -14,6 +13,7 @@ import SitesList from "./SitesList";
 import SiteDetailsPanel from "./SiteDetailsPanel";
 
 const SITE_STATUSES: SiteStatus[] = ["pending", "approved", "blocked"];
+const PAGE_SIZE = 20;
 
 export type SiteSort = "recent" | "oldest" | "domainAsc" | "domainDesc" | "feedbackDesc" | "feedbackAsc";
 
@@ -63,128 +63,71 @@ function StatCard({
   );
 }
 
-function QuickAddBanner({ projects }: { projects: { id: string; name: string }[] }) {
-  const t = useTranslations("sites");
-  const router = useRouter();
-  const [domain, setDomain] = useState("");
-  const [projectId, setProjectId] = useState(projects[0]?.id ?? "");
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function add() {
-    if (!projectId || !domain.trim() || busy) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/admin/sites", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ projectId, domain: domain.trim() }),
-      });
-      if (res.ok) {
-        setDomain("");
-        router.refresh();
-      } else {
-        const d = await res.json().catch(() => ({}));
-        setError(d?.error === "site_exists" ? t("addExists") : t("addError"));
-      }
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  if (projects.length === 0) return null;
-
-  return (
-    <div className="rounded-2xl border border-line bg-raised/60 p-4 sm:p-5">
-      <p className="flex items-center gap-2 text-sm font-medium text-secondary">
-        <Icon.sparkles className="h-4 w-4 text-accent" />
-        {t("quickAddTitle")}
-      </p>
-      <div className="mt-3 flex flex-col gap-2 sm:flex-row">
-        <input
-          value={domain}
-          onChange={(e) => setDomain(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter") add(); }}
-          placeholder={t("quickAddPlaceholder")}
-          aria-label={t("addSite")}
-          className="h-10 min-w-0 flex-1 rounded-xl border border-line bg-surface px-4 text-sm text-primary placeholder:text-faint outline-none transition-colors focus:border-accent-line focus:ring-2 focus:ring-accent-soft"
-        />
-        {projects.length > 1 && (
-          <select
-            value={projectId}
-            onChange={(e) => setProjectId(e.target.value)}
-            aria-label={t("colWidget")}
-            className="h-10 rounded-xl border border-line bg-surface px-3 text-sm text-primary outline-none"
-          >
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
-        )}
-        <Button type="button" variant="primary" onClick={add} disabled={busy || !domain.trim()} className="h-10 rounded-xl">
-          <Icon.plus className="h-4 w-4" />
-          {t("addSite")}
-        </Button>
-      </div>
-      {error && <p className="mt-2 text-xs text-danger-text">{error}</p>}
-    </div>
-  );
-}
-
-type MobilePane = "list" | "detail";
-
 export default function SitesPanel({
   sites,
-  projects = [],
   initialStatus = "all",
   initialSelectedId,
 }: {
   sites: SiteWithCounts[];
-  projects?: { id: string; name: string }[];
   initialStatus?: SiteStatus | "all";
   initialSelectedId?: string | null;
 }) {
   const t = useTranslations("sites");
   const ts = useTranslations("siteStatus");
-  const router = useRouter();
+  const [items, setItems] = useState(sites);
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<SiteStatus | "all">(initialStatus);
   const [sort, setSort] = useState<SiteSort>("recent");
+  const [page, setPage] = useState(1);
   const [selectedId, setSelectedId] = useState<string | null>(initialSelectedId ?? null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    setSelectedId((cur) => (cur && sites.some((s) => s.id === cur) ? cur : null));
+    setItems(sites);
   }, [sites]);
 
+  useEffect(() => {
+    setSelectedId((cur) => (cur && items.some((s) => s.id === cur) ? cur : null));
+  }, [items]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [query, statusFilter, sort]);
+
   const statusCounts = useMemo(() => {
-    const counts = new Map<SiteStatus | "all", number>([["all", sites.length]]);
+    const counts = new Map<SiteStatus | "all", number>([["all", items.length]]);
     for (const status of SITE_STATUSES) counts.set(status, 0);
-    for (const site of sites) counts.set(site.status, (counts.get(site.status) ?? 0) + 1);
+    for (const site of items) counts.set(site.status, (counts.get(site.status) ?? 0) + 1);
     return counts;
-  }, [sites]);
+  }, [items]);
 
   const filteredSites = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return sites.filter((site) =>
+    return items.filter((site) =>
       (statusFilter === "all" || site.status === statusFilter) &&
       (!q || [site.domain, site.label, site.project_name, site.status, site.id]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(q))),
     );
-  }, [query, sites, statusFilter]);
+  }, [query, items, statusFilter]);
   const sortedSites = useMemo(() => [...filteredSites].sort(SITE_SORTERS[sort]), [filteredSites, sort]);
 
-  const totalFeedback = sites.reduce((sum, s) => sum + s.feedback_count, 0);
+  const pageCount = Math.max(1, Math.ceil(sortedSites.length / PAGE_SIZE));
+  const safePage = Math.min(page, pageCount);
+  const pageStartIndex = (safePage - 1) * PAGE_SIZE;
+  const pageItems = sortedSites.slice(pageStartIndex, pageStartIndex + PAGE_SIZE);
+  const pageStart = sortedSites.length === 0 ? 0 : pageStartIndex + 1;
+  const pageEnd = Math.min(pageStartIndex + PAGE_SIZE, sortedSites.length);
+
+  const totalFeedback = items.reduce((sum, s) => sum + s.feedback_count, 0);
   const feedbackBars = useMemo(
-    () => [...sites].sort((a, b) => a.feedback_count - b.feedback_count).slice(-7).map((s) => s.feedback_count),
-    [sites],
+    () => [...items].sort((a, b) => a.feedback_count - b.feedback_count).slice(-7).map((s) => s.feedback_count),
+    [items],
   );
   const activityBars = useMemo(
-    () => [...sites].sort((a, b) => a.last_seen - b.last_seen).slice(-7).map((s) => s.feedback_count + 1),
-    [sites],
+    () => [...items].sort((a, b) => a.last_seen - b.last_seen).slice(-7).map((s) => s.feedback_count + 1),
+    [items],
   );
 
   const sortOptions: ReadonlyArray<SortOption<SiteSort>> = [
@@ -197,11 +140,11 @@ export default function SitesPanel({
   ];
 
   const selectedIds = Array.from(selected);
-  const selectedSites = sites.filter((site) => selected.has(site.id));
+  const selectedSites = items.filter((site) => selected.has(site.id));
   const availableBulkStatuses = SITE_STATUSES.filter(
     (status) => selectedSites.length > 0 && !selectedSites.every((site) => site.status === status),
   );
-  const selectedSite = sites.find((s) => s.id === selectedId) ?? null;
+  const selectedSite = items.find((s) => s.id === selectedId) ?? null;
 
   function selectStatus(next: SiteStatus | "all") {
     setStatusFilter(next);
@@ -236,6 +179,17 @@ export default function SitesPanel({
     });
   }
 
+  function toggleSelectPage() {
+    const pageIds = pageItems.map((s) => s.id);
+    const allSelected = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+    setSelected((current) => {
+      const next = new Set(current);
+      if (allSelected) pageIds.forEach((id) => next.delete(id));
+      else pageIds.forEach((id) => next.add(id));
+      return next;
+    });
+  }
+
   function clearSelection() {
     setSelected(new Set());
   }
@@ -243,6 +197,7 @@ export default function SitesPanel({
   async function updateSites(ids: string[], status: SiteStatus) {
     if (ids.length === 0) return;
     setBusyIds((current) => new Set([...current, ...ids]));
+    setItems((prev) => prev.map((s) => (ids.includes(s.id) ? { ...s, status } : s)));
     try {
       await Promise.all(ids.map((id) =>
         fetch(`/api/admin/sites/${id}`, {
@@ -256,7 +211,6 @@ export default function SitesPanel({
         ids.forEach((id) => next.delete(id));
         return next;
       });
-      router.refresh();
     } finally {
       setBusyIds((current) => {
         const next = new Set(current);
@@ -268,18 +222,18 @@ export default function SitesPanel({
 
   async function toggleFavorite(id: string, next: boolean) {
     setBusyIds((current) => new Set(current).add(id));
+    setItems((prev) => prev.map((s) => (s.id === id ? { ...s, is_favorite: next ? 1 : 0 } : s)));
     try {
       await fetch(`/api/admin/sites/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ is_favorite: next }),
       });
-      router.refresh();
     } finally {
       setBusyIds((current) => {
-        const next = new Set(current);
-        next.delete(id);
-        return next;
+        const nextBusy = new Set(current);
+        nextBusy.delete(id);
+        return nextBusy;
       });
     }
   }
@@ -289,13 +243,13 @@ export default function SitesPanel({
     setBusyIds((current) => new Set(current).add(id));
     try {
       await fetch(`/api/admin/sites/${id}`, { method: "DELETE" });
+      setItems((prev) => prev.filter((s) => s.id !== id));
       setSelected((current) => {
         const next = new Set(current);
         next.delete(id);
         return next;
       });
       if (selectedId === id) closeDetails();
-      router.refresh();
     } finally {
       setBusyIds((current) => {
         const next = new Set(current);
@@ -313,13 +267,13 @@ export default function SitesPanel({
         selectedIds.map((id) => fetch(`/api/admin/sites/${id}`, { method: "DELETE" })),
       );
       const deletedIds = selectedIds.filter((_, index) => results[index]?.ok);
+      setItems((prev) => prev.filter((s) => !deletedIds.includes(s.id)));
       setSelected((current) => {
         const next = new Set(current);
         deletedIds.forEach((id) => next.delete(id));
         return next;
       });
       if (selectedId && deletedIds.includes(selectedId)) closeDetails();
-      router.refresh();
     } finally {
       setBusyIds((current) => {
         const next = new Set(current);
@@ -330,13 +284,12 @@ export default function SitesPanel({
   }
 
   return (
-    <div className="relative h-full min-h-0 overflow-y-aut">
+    <div className="relative h-full min-h-0 overflow-y-auto">
       <div className="mx-auto flex max-w-6xl flex-col gap-5">
-        {/* Stat cards */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard
             label={t("statsMonitored")}
-            value={sites.length}
+            value={items.length}
             meta={t("statsMonitoredMeta", { count: statusCounts.get("approved") ?? 0 })}
             bars={activityBars.length > 0 ? activityBars : [1]}
             lastBarTone="bg-accent"
@@ -357,12 +310,16 @@ export default function SitesPanel({
           />
         </div>
 
-        {/* Quick add */}
-        <QuickAddBanner projects={projects} />
-
-        {/* Table */}
         <SitesList
           items={sortedSites}
+          pageItems={pageItems}
+          page={safePage}
+          pageCount={pageCount}
+          totalFiltered={sortedSites.length}
+          totalAll={items.length}
+          pageStart={pageStart}
+          pageEnd={pageEnd}
+          onPage={setPage}
           selectedId={selectedId}
           statusFilter={statusFilter}
           onStatusFilter={selectStatus}
@@ -374,12 +331,13 @@ export default function SitesPanel({
           sortOptions={sortOptions}
           selected={selected}
           onToggleSelect={toggleSelect}
+          onToggleSelectPage={toggleSelectPage}
           onSelect={select}
           onToggleFavorite={toggleFavorite}
+          onChangeStatus={(id, status) => updateSites([id], status)}
         />
       </div>
 
-      {/* Details drawer */}
       {selectedSite && (
         <>
           <div className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[2px]" onClick={closeDetails} />
@@ -438,7 +396,7 @@ export default function SitesPanel({
                   )}
                 >
                   <Icon.checkCircle className="h-3.5 w-3.5 text-subtle" />
-                  {t("colStatus")}
+                  {t("bulkActions")}
                   <Icon.chevronDown className={cn("h-3.5 w-3.5 text-subtle transition-transform", open && "rotate-180")} />
                 </button>
               )}

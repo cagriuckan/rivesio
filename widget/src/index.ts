@@ -23,6 +23,11 @@ interface FormField {
   options?: string[];
 }
 
+interface LocalizedCategory {
+  value: string;
+  labels: Record<WidgetLocale, string>;
+}
+
 interface ServerConfig {
   base: string;
   widgetKey: string;
@@ -32,7 +37,9 @@ interface ServerConfig {
     position: "bottom-right" | "bottom-left";
     fabStyle?: "label" | "icon";
     theme?: "auto" | "dark" | "light";
-    categories: string[];
+    logoUrl?: string;
+    /** Localized categories, or legacy plain string[]. */
+    categories: Array<LocalizedCategory | string>;
     text?: Record<WidgetLocale, WidgetText>;
     fields?: FormField[];
   };
@@ -180,6 +187,41 @@ function detectLocale(): WidgetLocale {
   return lang.startsWith("en") ? "en" : "tr";
 }
 
+const DEFAULT_CATEGORIES: LocalizedCategory[] = [
+  { value: "Öneri", labels: { tr: "Öneri", en: "Suggestion" } },
+  { value: "Hata", labels: { tr: "Hata", en: "Bug" } },
+  { value: "Tasarım", labels: { tr: "Tasarım", en: "Design" } },
+  { value: "Diğer", labels: { tr: "Diğer", en: "Other" } },
+];
+
+const LEGACY_CATEGORY_EN: Record<string, string> = {
+  Öneri: "Suggestion",
+  Hata: "Bug",
+  Tasarım: "Design",
+  Diğer: "Other",
+};
+
+function normalizeWidgetCategories(raw: Array<LocalizedCategory | string> | undefined): LocalizedCategory[] {
+  if (!raw?.length) return DEFAULT_CATEGORIES;
+  if (typeof raw[0] === "string") {
+    return (raw as string[]).map((value) => ({
+      value,
+      labels: { tr: value, en: LEGACY_CATEGORY_EN[value] ?? value },
+    }));
+  }
+  return (raw as LocalizedCategory[]).map((c) => ({
+    value: c.value,
+    labels: {
+      tr: c.labels?.tr || c.value,
+      en: c.labels?.en || c.value,
+    },
+  }));
+}
+
+function categoryDisplayLabel(cat: LocalizedCategory, locale: WidgetLocale): string {
+  return cat.labels[locale] || cat.labels.tr || cat.labels.en || cat.value;
+}
+
 interface HostConfig {
   domain?: string;
   user?: string;
@@ -310,6 +352,7 @@ function mount(
   root.className = "kf-root";
   root.dataset.pos = project.position || "bottom-right";
   root.dataset.fab = project.fabStyle || "label";
+  if (project.logoUrl) root.dataset.hasLogo = "1";
   root.style.setProperty("--kf-accent", project.accentColor || "#0B1437");
 
   // Theme: "auto" mirrors the host page's data-theme; otherwise force dark/light.
@@ -326,11 +369,20 @@ function mount(
   const txt: WidgetText = { ...DEFAULT_TEXT[locale], ...(project.text?.[locale]) };
   const ui = UI[locale];
   const fields = project.fields ?? [];
+  const categories = normalizeWidgetCategories(project.categories);
   const convo = runtime.conversationEnabled;
+  const logoHtml = project.logoUrl
+    ? `<img class="kf-logo" src="${esc(project.logoUrl)}" alt="" width="20" height="20" decoding="async">`
+    : ICONS.chat;
 
-  const categoryOptions = (project.categories ?? ["Öneri"])
-    .map((c) => `<option value="${esc(c)}">${esc(c)}</option>`)
+  const categoryOptions = categories
+    .map((c) => `<option value="${esc(c.value)}">${esc(categoryDisplayLabel(c, locale))}</option>`)
     .join("");
+
+  function labelForValue(value: string): string {
+    const found = categories.find((c) => c.value === value);
+    return found ? categoryDisplayLabel(found, locale) : value;
+  }
 
   const customFieldsHtml = fields
     .map((f) => {
@@ -365,14 +417,14 @@ function mount(
 
   root.innerHTML = `
     <button class="kf-fab" type="button" aria-label="${esc(txt.fabLabel)}" data-tip="${esc(txt.fabLabel)}">
-      ${ICONS.chat}<span>${esc(txt.fabLabel)}</span><span class="kf-fab-badge" hidden></span>
+      ${logoHtml}<span>${esc(txt.fabLabel)}</span><span class="kf-fab-badge" hidden></span>
     </button>
 
     <div class="kf-panel" role="dialog" aria-label="${esc(txt.title)}">
 
       <div class="kf-head">
         <div class="kf-title-wrap">
-          <div class="kf-title-icon">${ICONS.chat}</div>
+          <div class="kf-title-icon">${logoHtml}</div>
           <span class="kf-title">${esc(txt.title)}</span>
         </div>
         <div class="kf-head-actions">
@@ -708,7 +760,7 @@ function mount(
     for (const c of session?.conversations ?? []) {
       seenTokens.add(c.token);
       rows.push(historyRow({
-        title: c.category,
+        title: labelForValue(c.category),
         snippet: c.last_message,
         date: c.last_activity_at,
         token: c.token,
@@ -719,7 +771,7 @@ function mount(
     for (const e of loadHistory()) {
       if (e.token && seenTokens.has(e.token)) continue;
       rows.push(historyRow({
-        title: e.category,
+        title: labelForValue(e.category),
         snippet: e.page,
         date: e.date,
         token: e.token,
@@ -1152,7 +1204,7 @@ function mount(
   }
 
   function renderThread(c: ConvoData, _token: string) {
-    convoCat.textContent = c.category;
+    convoCat.textContent = labelForValue(c.category);
     const originImgs = c.attachments.filter((a) => !a.reply_id).map((a) => ({ url: a.url }));
     const messages = [
       { author: "user" as const, message: c.message, created_at: c.created_at, imgs: originImgs },

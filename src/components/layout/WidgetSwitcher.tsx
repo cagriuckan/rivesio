@@ -12,6 +12,42 @@ export interface WidgetOption {
   name: string;
   slug: string;
   accentColor: string;
+  logoUrl?: string | null;
+}
+
+function WidgetMark({
+  widget,
+  className,
+  size = "md",
+}: {
+  widget: Pick<WidgetOption, "name" | "accentColor" | "logoUrl">;
+  className?: string;
+  size?: "sm" | "md";
+}) {
+  const dim = size === "sm" ? "h-5 w-5" : "h-9 w-9";
+  if (widget.logoUrl) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={widget.logoUrl}
+        alt=""
+        className={cn(dim, "shrink-0 rounded-lg object-cover ring-1 ring-line", className)}
+      />
+    );
+  }
+  return (
+    <span
+      className={cn(
+        dim,
+        "flex shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm",
+        size === "sm" && "rounded-full text-[10px] shadow-none",
+        className,
+      )}
+      style={{ background: widget.accentColor }}
+    >
+      {widget.name.slice(0, 1).toUpperCase()}
+    </span>
+  );
 }
 
 export default function WidgetSwitcher({ widgets, collapsed }: { widgets: WidgetOption[]; collapsed?: boolean }) {
@@ -46,12 +82,22 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
           <button
             {...triggerProps}
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-80 outline-none focus-visible:ring-2 focus-visible:ring-accent",
-              open && "opacity-80"
+              "flex h-10 w-10 items-center justify-center rounded-xl text-sm font-bold text-white shadow-sm transition-opacity hover:opacity-80 outline-none focus-visible:ring-2 focus-visible:ring-accent overflow-hidden",
+              open && "opacity-80",
+              !active && "bg-subtle",
             )}
-            style={{ background: active ? active.accentColor : "var(--color-subtle)" }}
+            style={active && !active.logoUrl ? { background: active.accentColor } : undefined}
           >
-            {active ? active.name.slice(0, 1).toUpperCase() : <Icon.layers className="h-4 w-4" />}
+            {active ? (
+              active.logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={active.logoUrl} alt="" className="h-full w-full object-cover" />
+              ) : (
+                active.name.slice(0, 1).toUpperCase()
+              )
+            ) : (
+              <Icon.layers className="h-4 w-4" />
+            )}
           </button>
         ) : (
           /* Expanded: full trigger */
@@ -62,12 +108,13 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
               open && "bg-raised ring-accent-line"
             )}
           >
-            <span
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm"
-              style={{ background: active ? active.accentColor : "var(--color-accent)" }}
-            >
-              {active ? active.name.slice(0, 1).toUpperCase() : <Icon.layers className="h-4 w-4" />}
-            </span>
+            {active ? (
+              <WidgetMark widget={active} />
+            ) : (
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold text-white shadow-sm bg-accent">
+                <Icon.layers className="h-4 w-4" />
+              </span>
+            )}
             <span className="min-w-0 flex-1">
               <span className="block truncate text-sm font-semibold text-strong">
                 {active ? active.name : t("all")}
@@ -119,8 +166,15 @@ function DropdownList({ widgets, active, t, onSelect }: {
           sub={w.slug}
           selected={active?.id === w.id}
           onClick={() => onSelect(w.id)}
-          icon={<span className="text-[10px] font-bold text-white">{w.name.slice(0, 1).toUpperCase()}</span>}
-          iconBg={w.accentColor}
+          icon={
+            w.logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={w.logoUrl} alt="" className="h-full w-full rounded-full object-cover" />
+            ) : (
+              <span className="text-[10px] font-bold text-white">{w.name.slice(0, 1).toUpperCase()}</span>
+            )
+          }
+          iconBg={w.logoUrl ? "transparent" : w.accentColor}
         />
       ))}
     </>
