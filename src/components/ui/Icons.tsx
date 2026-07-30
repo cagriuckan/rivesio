@@ -271,6 +271,12 @@ export const Icon = {
       <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
     </Svg>
   ),
+  power: (p: IconProps) => (
+    <Svg {...p}>
+      <path d="M12 2v10" />
+      <path d="M18.4 6.6a7 7 0 1 1-12.8 0" />
+    </Svg>
+  ),
   panelLeft: ({ className, style, width, height, ...p }: IconProps) => (
     <svg viewBox="0 0 24 24" fill="currentColor" className={className} style={style} width={width} height={height} xmlns="http://www.w3.org/2000/svg" {...p}>
       <path d="M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM8 5H4V19H8V5ZM10 5V19H20V5H10Z" />

@@ -108,6 +108,8 @@ export const projects = pgTable("projects", {
   widgetKey: text("widget_key").notNull(),
   // Presentational config (accent, position, categories, text, fields).
   settings: jsonb("settings").$type<ProjectSettings>().notNull(),
+  // When false the embed stays hidden and public APIs reject the widget.
+  isActive: boolean("is_active").notNull().default(true),
   // Operational, widget-global defaults. null == unlimited.
   siteLimit: integer("site_limit"),
   autoApproveSites: boolean("auto_approve_sites").notNull().default(false),

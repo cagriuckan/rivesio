@@ -15,6 +15,7 @@ import type { FeedbackRow, ProjectRow, SiteRow } from "./types";
 
 export type GuardError =
   | "invalid_widget"
+  | "inactive"
   | "not_registered"
   | "pending"
   | "blocked"
@@ -102,6 +103,7 @@ export async function checkSubmissionAllowed(
 export async function guardRegister(input: Input): Promise<GuardFail | GuardOk> {
   const project = await getProjectByWidgetKey(input.widgetKey);
   if (!project) return { ok: false, error: "invalid_widget" };
+  if (!project.is_active) return { ok: false, error: "inactive" };
 
   const domain = normalizeDomain(input.domain);
   const existing = await findSite(project.id, domain);
@@ -138,7 +140,7 @@ export interface ConversationContext {
  */
 export async function getConversationContext(
   token: string,
-): Promise<ConversationContext | { ok: false; error: "not_found" }> {
+): Promise<ConversationContext | { ok: false; error: "not_found" | "inactive" }> {
   const feedback = await getFeedbackByToken(token);
   if (!feedback) return { ok: false, error: "not_found" };
   const [project, site] = await Promise.all([
@@ -146,6 +148,7 @@ export async function getConversationContext(
     getSiteById(feedback.site_id),
   ]);
   if (!project || !site) return { ok: false, error: "not_found" };
+  if (!project.is_active) return { ok: false, error: "inactive" };
   return { ok: true, feedback, project, site, config: resolveSiteConfig(project, site) };
 }
 
@@ -156,6 +159,7 @@ export async function getConversationContext(
 export async function guardSubmission(input: Input): Promise<GuardFail | GuardOk> {
   const project = await getProjectByWidgetKey(input.widgetKey);
   if (!project) return { ok: false, error: "invalid_widget" };
+  if (!project.is_active) return { ok: false, error: "inactive" };
 
   const domain = normalizeDomain(input.domain);
   const site = await findSite(project.id, domain);

@@ -31,6 +31,11 @@ const schema = z.object({
   name: z.string().min(1).max(120).optional(),
   accentColor: z.string().max(20).optional(),
   position: z.enum(["bottom-right", "bottom-left"]).optional(),
+  offsetX: z.number().int().min(0).max(200).optional(),
+  offsetY: z.number().int().min(0).max(200).optional(),
+  offsetXMobile: z.number().int().min(0).max(200).optional(),
+  offsetYMobile: z.number().int().min(0).max(200).optional(),
+  zIndex: z.number().int().min(1).max(2147483647).optional(),
   fabStyle: z.enum(["label", "icon"]).optional(),
   theme: z.enum(["auto", "dark", "light"]).optional(),
   categories: z
@@ -55,6 +60,7 @@ const schema = z.object({
   defaultDailyLimitSite: nullableCount.optional(),
   defaultDailyLimitVisitor: nullableCount.optional(),
   defaultSupportDays: nullableCount.optional(),
+  isActive: z.boolean().optional(),
 });
 
 export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }> }) {
@@ -78,6 +84,11 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
       logoUrl: current.logoUrl,
       logoPath: current.logoPath,
       position: d.position ?? current.position,
+      offsetX: d.offsetX ?? current.offsetX ?? 20,
+      offsetY: d.offsetY ?? current.offsetY ?? 20,
+      offsetXMobile: d.offsetXMobile ?? current.offsetXMobile ?? 16,
+      offsetYMobile: d.offsetYMobile ?? current.offsetYMobile ?? 16,
+      zIndex: d.zIndex ?? current.zIndex ?? 99999,
       fabStyle: d.fabStyle ?? current.fabStyle ?? "label",
       theme: d.theme ?? current.theme ?? "auto",
       categories: d.categories ?? current.categories,
@@ -90,6 +101,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     defaultDailyLimitSite: d.defaultDailyLimitSite,
     defaultDailyLimitVisitor: d.defaultDailyLimitVisitor,
     defaultSupportDays: d.defaultSupportDays,
+    isActive: d.isActive,
   });
 
   let widget_key = project.widget_key;

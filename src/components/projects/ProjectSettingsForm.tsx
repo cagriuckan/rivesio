@@ -38,6 +38,7 @@ import {
   type LocalizedCategory,
   type WidgetLocale,
   type WidgetText,
+  type WidgetPosition,
 } from "@/lib/types";
 
 interface LimitSettings {
@@ -47,10 +48,16 @@ interface LimitSettings {
   defaultDailyLimitSite: number | null;
   defaultDailyLimitVisitor: number | null;
   defaultSupportDays: number | null;
+  isActive: boolean;
 }
 
 interface DesignSettings {
-  position: "bottom-right" | "bottom-left";
+  position: WidgetPosition;
+  offsetX: number;
+  offsetY: number;
+  offsetXMobile: number;
+  offsetYMobile: number;
+  zIndex: number;
   fabStyle: "label" | "icon";
   theme: "auto" | "dark" | "light";
   accentColor: string;
@@ -68,6 +75,14 @@ interface InitialSettings {
 type Tab = "appearance" | "behavior" | "content" | "fields" | "agents";
 
 const ACCENT_SWATCHES = ["#0B1437", "#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#ec4899", "#8b5cf6"];
+const Z_INDEX_PRESETS = [
+  { value: 9999, key: "zIndexLow" as const },
+  { value: 99999, key: "zIndexNormal" as const },
+  { value: 2147483000, key: "zIndexMax" as const },
+];
+const DEFAULT_OFFSET = 20;
+const DEFAULT_OFFSET_MOBILE = 16;
+const DEFAULT_Z_INDEX = 99999;
 
 // Keep in sync with logoLimits in src/lib/env.ts.
 const MAX_LOGO_BYTES = 512 * 1024;
@@ -278,6 +293,11 @@ export default function ProjectSettingsForm({
           text,
           fields: cleanFields,
           position: design.position,
+          offsetX: design.offsetX,
+          offsetY: design.offsetY,
+          offsetXMobile: design.offsetXMobile,
+          offsetYMobile: design.offsetYMobile,
+          zIndex: design.zIndex,
           fabStyle: design.fabStyle,
           theme: design.theme,
           accentColor: design.accentColor,
@@ -287,6 +307,7 @@ export default function ProjectSettingsForm({
           defaultDailyLimitSite: limits.defaultDailyLimitSite,
           defaultDailyLimitVisitor: limits.defaultDailyLimitVisitor,
           defaultSupportDays: limits.defaultSupportDays,
+          isActive: limits.isActive,
         }),
       });
       if (res.ok) {
@@ -326,10 +347,72 @@ export default function ProjectSettingsForm({
               value={design.position}
               onChange={(v) => patchDesign({ position: v })}
               options={[
-                { value: "bottom-left", title: t("positionLeft"), preview: <FabPreview side="left" accent={design.accentColor} /> },
-                { value: "bottom-right", title: t("positionRight"), preview: <FabPreview side="right" accent={design.accentColor} /> },
+                { value: "bottom-left", title: t("positionBottomLeft"), preview: <FabPreview side="left" accent={design.accentColor} /> },
+                { value: "bottom-right", title: t("positionBottomRight"), preview: <FabPreview side="right" accent={design.accentColor} /> },
               ]}
             />
+          </SettingsRow>
+          <SettingsRow label={t("offsetDesktop")} description={t("offsetDesktopHint")}>
+            <OffsetInputs
+              offsetX={design.offsetX}
+              offsetY={design.offsetY}
+              sideLabel={t("offsetSide")}
+              bottomLabel={t("offsetBottom")}
+              onChangeX={(n) => patchDesign({ offsetX: n })}
+              onChangeY={(n) => patchDesign({ offsetY: n })}
+              fallback={DEFAULT_OFFSET}
+            />
+          </SettingsRow>
+          <SettingsRow label={t("offsetMobile")} description={t("offsetMobileHint")}>
+            <OffsetInputs
+              offsetX={design.offsetXMobile}
+              offsetY={design.offsetYMobile}
+              sideLabel={t("offsetSide")}
+              bottomLabel={t("offsetBottom")}
+              onChangeX={(n) => patchDesign({ offsetXMobile: n })}
+              onChangeY={(n) => patchDesign({ offsetYMobile: n })}
+              fallback={DEFAULT_OFFSET_MOBILE}
+            />
+          </SettingsRow>
+          <SettingsRow label={t("zIndex")} description={t("zIndexHint")}>
+            <div className="flex flex-col gap-2">
+              <OptionCards
+                value={String(
+                  Z_INDEX_PRESETS.some((p) => p.value === design.zIndex)
+                    ? design.zIndex
+                    : "custom",
+                )}
+                onChange={(v) => {
+                  if (v === "custom") return;
+                  patchDesign({ zIndex: Number(v) });
+                }}
+                options={[
+                  ...Z_INDEX_PRESETS.map((p) => ({
+                    value: String(p.value),
+                    title: t(p.key),
+                  })),
+                  ...(Z_INDEX_PRESETS.some((p) => p.value === design.zIndex)
+                    ? []
+                    : [{ value: "custom", title: t("zIndexCustom") }]),
+                ]}
+              />
+              <label className="flex items-center gap-1.5 text-xs font-medium text-secondary">
+                <span className="text-subtle">{t("zIndexCustom")}</span>
+                <Input
+                  type="number"
+                  min={1}
+                  max={2147483647}
+                  value={String(design.zIndex)}
+                  onChange={(e) => {
+                    const n = parseInt(e.target.value, 10);
+                    patchDesign({
+                      zIndex: Number.isFinite(n) ? Math.min(2147483647, Math.max(1, n)) : DEFAULT_Z_INDEX,
+                    });
+                  }}
+                  className="h-9 w-32"
+                />
+              </label>
+            </div>
           </SettingsRow>
           <SettingsRow label={t("fabStyle")} description={t("fabStyleHint")}>
             <OptionCards
@@ -437,6 +520,9 @@ export default function ProjectSettingsForm({
       {tab === "behavior" && (
         <div>
           <SettingsSectionHeader title={t("limitsSection")} description={t("limitsHint")} />
+          <SettingsRow label={t("isActive")} description={t("isActiveHint")}>
+            <Toggle checked={limits.isActive} onChange={(v) => patchLimits({ isActive: v })} />
+          </SettingsRow>
           <SettingsRow label={t("autoApprove")} description={t("autoApproveHint")}>
             <Toggle checked={limits.autoApproveSites} onChange={(v) => patchLimits({ autoApproveSites: v })} />
           </SettingsRow>
@@ -565,6 +651,57 @@ function FabPreview({ side, accent }: { side: "left" | "right"; accent: string }
         className="absolute bottom-2.5 h-5 w-5 rounded-full shadow"
         style={{ background: accent, [side === "left" ? "left" : "right"]: "10px" }}
       />
+    </div>
+  );
+}
+
+function OffsetInputs({
+  offsetX,
+  offsetY,
+  sideLabel,
+  bottomLabel,
+  onChangeX,
+  onChangeY,
+  fallback,
+}: {
+  offsetX: number;
+  offsetY: number;
+  sideLabel: string;
+  bottomLabel: string;
+  onChangeX: (n: number) => void;
+  onChangeY: (n: number) => void;
+  fallback: number;
+}) {
+  function parse(raw: string): number {
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) ? Math.min(200, Math.max(0, n)) : fallback;
+  }
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <label className="flex items-center gap-1.5 text-xs font-medium text-secondary">
+        <span className="w-10 text-subtle">{sideLabel}</span>
+        <Input
+          type="number"
+          min={0}
+          max={200}
+          value={String(offsetX)}
+          onChange={(e) => onChangeX(parse(e.target.value))}
+          className="h-9 w-20"
+        />
+        <span className="text-faint">px</span>
+      </label>
+      <label className="flex items-center gap-1.5 text-xs font-medium text-secondary">
+        <span className="w-10 text-subtle">{bottomLabel}</span>
+        <Input
+          type="number"
+          min={0}
+          max={200}
+          value={String(offsetY)}
+          onChange={(e) => onChangeY(parse(e.target.value))}
+          className="h-9 w-20"
+        />
+        <span className="text-faint">px</span>
+      </label>
     </div>
   );
 }
