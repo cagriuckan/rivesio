@@ -50,6 +50,13 @@
       "when": 1783181001750,
       "tag": "0006_nasty_purifiers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1785445167771,
+      "tag": "0007_widget_is_active",
+      "breakpoints": true
     }
   ]
 }

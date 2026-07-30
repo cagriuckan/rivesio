@@ -79,6 +79,7 @@ export interface ProjectOperationalFields {
   defaultDailyLimitSite?: number | null;
   defaultDailyLimitVisitor?: number | null;
   defaultSupportDays?: number | null;
+  isActive?: boolean;
 }
 
 export async function updateProject(
@@ -98,6 +99,7 @@ export async function updateProject(
   if (fields.defaultDailyLimitSite !== undefined) set.defaultDailyLimitSite = fields.defaultDailyLimitSite;
   if (fields.defaultDailyLimitVisitor !== undefined) set.defaultDailyLimitVisitor = fields.defaultDailyLimitVisitor;
   if (fields.defaultSupportDays !== undefined) set.defaultSupportDays = fields.defaultSupportDays;
+  if (fields.isActive !== undefined) set.isActive = fields.isActive;
   await db.update(projects).set(set).where(and(eq(projects.id, id), eq(projects.userId, userId)));
 }
 

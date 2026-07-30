@@ -52,6 +52,16 @@ export interface ProjectSettings {
   /** Internal storage key for the uploaded logo (backs the public serving route). */
   logoPath?: string;
   position: WidgetPosition;
+  /** Desktop horizontal inset from the chosen side, in px (0–200). */
+  offsetX?: number;
+  /** Desktop vertical inset from the bottom, in px (0–200). */
+  offsetY?: number;
+  /** Mobile horizontal inset from the chosen side, in px (0–200). */
+  offsetXMobile?: number;
+  /** Mobile vertical inset from the bottom, in px (0–200). */
+  offsetYMobile?: number;
+  /** Stacking order on the host page. Default stays below cookie/chat overlays. */
+  zIndex?: number;
   fabStyle?: FabStyle;
   theme?: WidgetTheme;
   categories: LocalizedCategory[];
@@ -73,6 +83,8 @@ export interface ProjectRow {
   name: string;
   widget_key: string;
   settings_json: string;
+  /** When false the embed stays hidden and public APIs reject the widget. */
+  is_active: boolean;
   // Operational, widget-global defaults. null == unlimited.
   site_limit: number | null;
   auto_approve_sites: boolean;

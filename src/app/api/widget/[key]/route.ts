@@ -40,6 +40,9 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
     // Unknown key: serve a no-op so a stale embed never throws on the host page.
     return js("/* rivesio: unknown widget key */", 404);
   }
+  if (!project.is_active) {
+    return js("/* rivesio: widget inactive */", 200);
+  }
 
   const settings = parseSettings(project);
   const { categories, categoryLabels } = toWidgetCategoriesPayload(settings.categories);
@@ -50,6 +53,11 @@ export async function GET(_req: Request, ctx: { params: Promise<{ key: string }>
       name: project.name,
       accentColor: settings.accentColor,
       position: settings.position,
+      offsetX: settings.offsetX ?? 20,
+      offsetY: settings.offsetY ?? 20,
+      offsetXMobile: settings.offsetXMobile ?? 16,
+      offsetYMobile: settings.offsetYMobile ?? 16,
+      zIndex: settings.zIndex ?? 99999,
       fabStyle: settings.fabStyle ?? "label",
       theme: settings.theme ?? "auto",
       logoUrl: settings.logoUrl,

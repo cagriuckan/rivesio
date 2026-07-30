@@ -14,6 +14,7 @@ export interface ProjectView {
   widgetKey: string;
   accentColor: string;
   logoUrl?: string | null;
+  isActive: boolean;
 }
 
 export default function ProjectCard({
@@ -29,6 +30,7 @@ export default function ProjectCard({
   const tc = useTranslations("common");
   const router = useRouter();
   const [widgetKey, setWidgetKey] = useState(project.widgetKey);
+  const [isActive, setIsActive] = useState(project.isActive);
   const [copied, setCopied] = useState<"key" | "snippet" | null>(null);
   const [actionOpen, setActionOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -57,6 +59,24 @@ export default function ProjectCard({
     } finally { setBusy(false); }
   }
 
+  async function toggleActive() {
+    setActionOpen(false);
+    const next = !isActive;
+    if (!next && !confirm(t("confirmDeactivate", { name: project.name }))) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/admin/projects/${project.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: next }),
+      });
+      if (res.ok) {
+        setIsActive(next);
+        router.refresh();
+      }
+    } finally { setBusy(false); }
+  }
+
   async function remove() {
     setActionOpen(false);
     if (!confirm(t("confirmDelete", { name: project.name }))) return;
@@ -68,7 +88,7 @@ export default function ProjectCard({
   }
 
   return (
-    <Card className="overflow-hidden">
+    <Card className={cn("overflow-hidden", !isActive && "opacity-75")}>
       {/* Header */}
       <div className="flex items-center gap-3 border-b border-line px-5 py-4">
         {project.logoUrl ? (
@@ -87,7 +107,14 @@ export default function ProjectCard({
           </span>
         )}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="truncate text-sm font-semibold text-strong">{project.name}</h3>
+            {!isActive && (
+              <span className="shrink-0 rounded-md bg-raised px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-subtle">
+                {t("inactive")}
+              </span>
+            )}
+          </div>
           <span className="text-xs text-subtle">{project.slug}</span>
         </div>
         <div className="relative">
@@ -102,7 +129,7 @@ export default function ProjectCard({
           </button>
 
           {actionOpen && (
-            <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-40 rounded-xl border border-line bg-surface p-1.5 shadow-lg">
+            <div className="absolute right-0 top-[calc(100%+6px)] z-20 w-44 rounded-xl border border-line bg-surface p-1.5 shadow-lg">
               <Link
                 href={`/projects/${project.id}/settings`}
                 onClick={() => setActionOpen(false)}
@@ -119,6 +146,15 @@ export default function ProjectCard({
                 <Icon.dashboard className="h-3.5 w-3.5" />
                 {t("panel")}
               </Link>
+              <button
+                type="button"
+                onClick={toggleActive}
+                disabled={busy}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-left text-xs font-medium text-secondary transition-colors hover:bg-raised hover:text-primary disabled:opacity-50"
+              >
+                <Icon.power className="h-3.5 w-3.5" />
+                {isActive ? t("deactivate") : t("activate")}
+              </button>
               <button
                 type="button"
                 onClick={rotate}

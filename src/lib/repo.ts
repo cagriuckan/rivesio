@@ -41,6 +41,11 @@ export {
 const FALLBACK_SETTINGS: ProjectSettings = {
   accentColor: "#0B1437",
   position: "bottom-right",
+  offsetX: 20,
+  offsetY: 20,
+  offsetXMobile: 16,
+  offsetYMobile: 16,
+  zIndex: 99999,
   fabStyle: "label",
   theme: "auto",
   categories: DEFAULT_PROJECT_CATEGORIES,
@@ -53,9 +58,14 @@ export function parseSettings(project: ProjectRow): ProjectSettings {
     const stored = JSON.parse(project.settings_json) as Partial<ProjectSettings> & {
       categories?: unknown;
     };
+    // Legacy top-* corners are folded back to bottom-* (top FAB is unsupported).
+    const rawPos = String((stored as { position?: string }).position ?? "");
+    const position: ProjectSettings["position"] =
+      rawPos === "bottom-left" || rawPos === "top-left" ? "bottom-left" : "bottom-right";
     return {
       ...FALLBACK_SETTINGS,
       ...stored,
+      position,
       categories: normalizeCategories(stored.categories),
       // Deep-merge text so partially-customized projects keep defaults per key.
       text: {

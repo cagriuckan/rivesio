@@ -26,6 +26,7 @@ export function toProjectRow(r: ProjectRecord): ProjectRow {
     name: r.name,
     widget_key: r.widgetKey,
     settings_json: JSON.stringify(r.settings),
+    is_active: r.isActive,
     site_limit: r.siteLimit,
     auto_approve_sites: r.autoApproveSites,
     allow_conversation: r.allowConversation,

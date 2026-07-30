@@ -1,6 +1,6 @@
 # Rivesio — Proje Panosu
 
-> Her oturum sonunda güncellenir. Son güncelleme: **2026-07-26**
+> Her oturum sonunda güncellenir. Son güncelleme: **2026-07-31**
 
 ## Proje Özeti
 Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19, Tailwind v4, Postgres + Drizzle, Better Auth, Resend, web-push, R2.
@@ -8,24 +8,31 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 ## Mevcut Durum
 - **Repo:** https://github.com/cagriuckan/rivesio · `main`
 - **Prod:** rivesio.com · DB: Neon
+- Widget **pasife alma**: `projects.is_active` (migration `0007`); kart menüsü + ayarlar toggle; pasifte script no-op, register/submit/conversation reddedilir
+- `allowConversation` kapalıysa widget’ta Geçmiş sekmesi (ve tabs bar) render edilmiyor
+- Widget konum: sol/sağ alt + masaüstü/mobil ayrı offset + zIndex (varsayılan 99999)
 - Admin perf: `(panel)/layout` Shell; reply `after()`; sites local state
 - Sites: pagination (20), görünür toplu seçim, belirgin hover aksiyonlar; quick-add banner kaldırıldı
 - Widget logo FAB + panel başlık + Projects kart / switcher
 - Mobile tab bar: expo-glass-tabs web portu (minimize-on-scroll, scrubbing, sliding highlight)
 - Dashboard: Son geri bildirimler + Kategoriler kartları zenginleştirildi
 - Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
-- Fix: `esc()` non-string → `n.replace is not a function` (kategori objesi / null snippet)
 
 ## Kalanlar / Yapılacaklar
-- [ ] Hostinger redeploy (perf + sites/logo + glass tabs + dashboard + localized categories)
+- [ ] Hostinger redeploy (perf + sites/logo + glass tabs + dashboard + localized categories + widget is_active)
+- [ ] Prod'da `0007_widget_is_active` migrate
 - [ ] Soft nav + reply + sites pagination smoke test
 - [ ] Prod signup smoke test
 - [ ] İdeal OG 1200×630
 - [ ] Web push UX iyileştirme
 - [ ] Mobile glass tab bar smoke test (scroll minimize + finger scrub)
 - [ ] Widget kategori dili smoke test (`lang=en` / `lang=tr`)
+- [ ] Widget pasife alma smoke test (kart / ayarlar / embed gizlenme)
 
 ## Alınan Kararlar
+- 2026-07-31: Widget konum yalnız bottom-left/right; offset masaüstü (`offsetX/Y`) ve mobil (`offsetXMobile/YMobile`) ayrı; z-index ayarlanabilir
+- 2026-07-31: `allowConversation=false` → widget Geçmiş sekmesi + tabs bar yok; yalnız form
+- 2026-07-30: Widget pasif = `is_active=false`; silmeden gizler; admin panel + inbox çalışmaya devam eder
 - 2026-07-26: Widget API `categories` string[] + `categoryLabels` map; object[] kısa süre eski bundle’ı kırıyordu
 - 2026-07-26: Kategori `value` sabit (feedback/agent); `labels.tr/en` widget görünür metin
 - 2026-07-26: Dashboard kategori satırları `?category=` ile Inbox filtresine deep-link

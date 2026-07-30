@@ -60,6 +60,7 @@ export default async function ProjectsPage({ searchParams }: { searchParams: Pro
                   widgetKey: p.widget_key,
                   accentColor: s.accentColor,
                   logoUrl: s.logoUrl ?? null,
+                  isActive: p.is_active,
                 }}
                 stats={{
                   feedbacks: feedbackCounts.get(p.id) ?? 0,

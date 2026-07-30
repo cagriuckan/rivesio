@@ -50,6 +50,11 @@ export default async function ProjectSettingsPage({
           fields: settings.fields ?? [],
           design: {
             position: settings.position,
+            offsetX: settings.offsetX ?? 20,
+            offsetY: settings.offsetY ?? 20,
+            offsetXMobile: settings.offsetXMobile ?? 16,
+            offsetYMobile: settings.offsetYMobile ?? 16,
+            zIndex: settings.zIndex ?? 99999,
             fabStyle: settings.fabStyle ?? "label",
             theme: settings.theme ?? "auto",
             accentColor: settings.accentColor,
@@ -62,6 +67,7 @@ export default async function ProjectSettingsPage({
             defaultDailyLimitSite: project.default_daily_limit_site,
             defaultDailyLimitVisitor: project.default_daily_limit_visitor,
             defaultSupportDays: project.default_support_days,
+            isActive: project.is_active,
           },
         }}
       />

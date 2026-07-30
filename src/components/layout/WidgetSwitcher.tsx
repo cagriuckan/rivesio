@@ -1,11 +1,13 @@
 "use client";
 
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { Icon } from "@/components/ui/Icons";
 import { cn } from "@/components/ui/cn";
 import { Dropdown } from "@/components/ui/Dropdown";
+import { WIDGET_SCOPE_COOKIE } from "@/lib/widget-scope";
 
 export interface WidgetOption {
   id: string;
@@ -13,6 +15,17 @@ export interface WidgetOption {
   slug: string;
   accentColor: string;
   logoUrl?: string | null;
+  isActive?: boolean;
+}
+
+function readScopeCookie(): string | null {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${WIDGET_SCOPE_COOKIE}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
+
+function writeScopeCookie(id: string | null) {
+  if (id) document.cookie = `${WIDGET_SCOPE_COOKIE}=${encodeURIComponent(id)};path=/;SameSite=Lax`;
+  else document.cookie = `${WIDGET_SCOPE_COOKIE}=;path=/;Max-Age=0`;
 }
 
 function WidgetMark({
@@ -59,8 +72,20 @@ export default function WidgetSwitcher({ widgets, collapsed }: { widgets: Widget
 
   const active = widgets.find((w) => w.id === current) ?? null;
 
+  // Keep the scope cookie aligned with `?w=` so Shell (layout) can filter
+  // nav badges on the same navigation — including cold loads with a widget URL.
+  useEffect(() => {
+    const cookie = readScopeCookie();
+    if ((current || null) === (cookie || null)) return;
+    writeScopeCookie(current);
+    router.refresh();
+  }, [current, router]);
+
   function select(id: string | null, close: () => void) {
     close();
+    // Set cookie before refresh so Shell re-renders with scoped nav counts
+    // even if the navigation middleware hasn't landed yet.
+    writeScopeCookie(id);
     const sp = new URLSearchParams(params.toString());
     if (id) sp.set("w", id);
     else sp.delete("w");
@@ -163,9 +188,10 @@ function DropdownList({ widgets, active, t, onSelect }: {
         <OptionRow
           key={w.id}
           label={w.name}
-          sub={w.slug}
+          sub={w.isActive === false ? t("inactive") : ""}
           selected={active?.id === w.id}
           onClick={() => onSelect(w.id)}
+          muted={w.isActive === false}
           icon={
             w.logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -181,13 +207,14 @@ function DropdownList({ widgets, active, t, onSelect }: {
   );
 }
 
-function OptionRow({ label, sub, selected, onClick, icon, iconBg }: {
+function OptionRow({ label, sub, selected, onClick, icon, iconBg, muted }: {
   label: string;
   sub: string;
   selected: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   iconBg: string;
+  muted?: boolean;
 }) {
   return (
     <button
@@ -196,7 +223,8 @@ function OptionRow({ label, sub, selected, onClick, icon, iconBg }: {
       aria-selected={selected}
       className={cn(
         "flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left transition-colors",
-        selected ? "bg-accent-soft" : "hover:bg-raised"
+        selected ? "bg-accent-soft" : "hover:bg-raised",
+        muted && "opacity-60",
       )}
     >
       <span
@@ -209,6 +237,9 @@ function OptionRow({ label, sub, selected, onClick, icon, iconBg }: {
         <span className={cn("block truncate text-sm font-medium", selected ? "text-accent-text" : "text-primary")}>
           {label}
         </span>
+        {sub ? (
+          <span className="block truncate text-[11px] text-subtle">{sub}</span>
+        ) : null}
       </span>
       {selected && <Icon.check className="h-4 w-4 shrink-0 text-accent-text" />}
     </button>

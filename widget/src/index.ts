@@ -35,6 +35,11 @@ interface ServerConfig {
     name: string;
     accentColor: string;
     position: "bottom-right" | "bottom-left";
+    offsetX?: number;
+    offsetY?: number;
+    offsetXMobile?: number;
+    offsetYMobile?: number;
+    zIndex?: number;
     fabStyle?: "label" | "icon";
     theme?: "auto" | "dark" | "light";
     logoUrl?: string;
@@ -379,6 +384,15 @@ function mount(
   root.dataset.fab = project.fabStyle || "label";
   if (project.logoUrl) root.dataset.hasLogo = "1";
   root.style.setProperty("--kf-accent", project.accentColor || "#0B1437");
+  const offsetX = clampOffset(project.offsetX, 20);
+  const offsetY = clampOffset(project.offsetY, 20);
+  const offsetXMobile = clampOffset(project.offsetXMobile, 16);
+  const offsetYMobile = clampOffset(project.offsetYMobile, 16);
+  root.style.setProperty("--kf-offset-x", `${offsetX}px`);
+  root.style.setProperty("--kf-offset-y", `${offsetY}px`);
+  root.style.setProperty("--kf-offset-x-mobile", `${offsetXMobile}px`);
+  root.style.setProperty("--kf-offset-y-mobile", `${offsetYMobile}px`);
+  root.style.setProperty("--kf-z", String(clampZIndex(project.zIndex, 99999)));
 
   // Theme: "auto" mirrors the host page's data-theme; otherwise force dark/light.
   const theme = project.theme || "auto";
@@ -458,10 +472,10 @@ function mount(
         </div>
       </div>
 
-      <div class="kf-tabs">
+      ${convo ? `<div class="kf-tabs">
         <button class="kf-tab kf-tab-form" type="button" data-active="1">${ICONS.chat}<span>${esc(ui.tabForm)}</span></button>
         <button class="kf-tab kf-tab-history" type="button" data-active="0">${ICONS.history}<span>${esc(ui.tabHistory)}</span><span class="kf-tab-badge" hidden></span></button>
-      </div>
+      </div>` : ""}
 
       <div class="kf-support" hidden></div>
       <div class="kf-msg" hidden></div>
@@ -503,7 +517,7 @@ function mount(
         </div>
       </div>
 
-      <!-- ── HISTORY TAB ── -->
+      ${convo ? `<!-- ── HISTORY TAB ── -->
       <div class="kf-view-history" hidden>
         <div class="kf-history-main">
           <div class="kf-session-bar" hidden>
@@ -512,7 +526,6 @@ function mount(
           </div>
           <ul class="kf-history-list"></ul>
           <p class="kf-history-empty" hidden>${esc(ui.historyEmpty)}</p>
-          ${convo ? `
           <div class="kf-otp">
             <div class="kf-recover-title">${esc(ui.otpTitle)}</div>
             <div class="kf-otp-hint">${esc(ui.otpHint)}</div>
@@ -524,7 +537,7 @@ function mount(
               <input type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" class="kf-input kf-otp-code" placeholder="${esc(ui.codePlaceholder)}">
               <button class="kf-btn kf-btn-primary kf-otp-verify" type="button">${esc(ui.verify)}</button>
             </div>
-          </div>` : ""}
+          </div>
         </div>
 
         <div class="kf-convo" hidden>
@@ -544,7 +557,7 @@ function mount(
           </div>
           <div class="kf-convo-closed" hidden>${esc(ui.closedNotice)}</div>
         </div>
-      </div>
+      </div>` : ""}
 
       <a class="kf-powered" href="${esc(server.base)}" target="_blank" rel="noopener noreferrer">
         <span>${esc(ui.poweredBy)}</span>
@@ -558,8 +571,8 @@ function mount(
   const $ = <T extends Element>(sel: string) => root.querySelector<T>(sel)!;
   const fab            = $<HTMLButtonElement>(".kf-fab");
   const closeBtn       = $<HTMLButtonElement>(".kf-close-btn");
-  const tabForm        = $<HTMLButtonElement>(".kf-tab-form");
-  const tabHistory     = $<HTMLButtonElement>(".kf-tab-history");
+  const tabForm        = root.querySelector<HTMLButtonElement>(".kf-tab-form");
+  const tabHistory     = root.querySelector<HTMLButtonElement>(".kf-tab-history");
   const cancelBtn      = $<HTMLButtonElement>(".kf-cancel");
   const submitBtn      = $<HTMLButtonElement>(".kf-submit");
   const capFullBtn     = $<HTMLButtonElement>(".kf-capture-full");
@@ -578,26 +591,26 @@ function mount(
   const viewForm       = $<HTMLDivElement>(".kf-view-form");
   const formBody       = $<HTMLDivElement>(".kf-view-form .kf-body");
   const formFoot       = $<HTMLDivElement>(".kf-view-form .kf-foot");
-  const viewHistory    = $<HTMLDivElement>(".kf-view-history");
-  const historyMain    = $<HTMLDivElement>(".kf-history-main");
-  const historyList    = $<HTMLUListElement>(".kf-history-list");
-  const historyEmpty   = $<HTMLParagraphElement>(".kf-history-empty");
-  const convoEl        = $<HTMLDivElement>(".kf-convo");
-  const convoCat       = $<HTMLSpanElement>(".kf-convo-cat");
-  const threadEl       = $<HTMLDivElement>(".kf-thread");
-  const replyBox       = $<HTMLDivElement>(".kf-reply-box");
-  const replyInput     = $<HTMLTextAreaElement>(".kf-reply-input");
-  const replyFile      = $<HTMLInputElement>(".kf-reply-file");
-  const replyUpload    = $<HTMLButtonElement>(".kf-reply-upload");
-  const replySend      = $<HTMLButtonElement>(".kf-reply-send");
-  const replyCounter   = $<HTMLSpanElement>(".kf-reply-counter");
-  const convoClosed    = $<HTMLDivElement>(".kf-convo-closed");
-  const backBtn        = $<HTMLButtonElement>(".kf-back");
+  const viewHistory    = root.querySelector<HTMLDivElement>(".kf-view-history");
+  const historyMain    = root.querySelector<HTMLDivElement>(".kf-history-main");
+  const historyList    = root.querySelector<HTMLUListElement>(".kf-history-list");
+  const historyEmpty   = root.querySelector<HTMLParagraphElement>(".kf-history-empty");
+  const convoEl        = root.querySelector<HTMLDivElement>(".kf-convo");
+  const convoCat       = root.querySelector<HTMLSpanElement>(".kf-convo-cat");
+  const threadEl       = root.querySelector<HTMLDivElement>(".kf-thread");
+  const replyBox       = root.querySelector<HTMLDivElement>(".kf-reply-box");
+  const replyInput     = root.querySelector<HTMLTextAreaElement>(".kf-reply-input");
+  const replyFile      = root.querySelector<HTMLInputElement>(".kf-reply-file");
+  const replyUpload    = root.querySelector<HTMLButtonElement>(".kf-reply-upload");
+  const replySend      = root.querySelector<HTMLButtonElement>(".kf-reply-send");
+  const replyCounter   = root.querySelector<HTMLSpanElement>(".kf-reply-counter");
+  const convoClosed    = root.querySelector<HTMLDivElement>(".kf-convo-closed");
+  const backBtn        = root.querySelector<HTMLButtonElement>(".kf-back");
   const fabBadge       = $<HTMLSpanElement>(".kf-fab-badge");
-  const tabBadge       = $<HTMLSpanElement>(".kf-tab-badge");
-  const sessionBar     = $<HTMLDivElement>(".kf-session-bar");
-  const sessionEmail   = $<HTMLSpanElement>(".kf-session-email");
-  const sessionChange  = $<HTMLButtonElement>(".kf-session-change");
+  const tabBadge       = root.querySelector<HTMLSpanElement>(".kf-tab-badge");
+  const sessionBar     = root.querySelector<HTMLDivElement>(".kf-session-bar");
+  const sessionEmail   = root.querySelector<HTMLSpanElement>(".kf-session-email");
+  const sessionChange  = root.querySelector<HTMLButtonElement>(".kf-session-change");
   const otpBox         = root.querySelector<HTMLDivElement>(".kf-otp");
   const otpEmail       = root.querySelector<HTMLInputElement>(".kf-otp-email");
   const otpSendBtn     = root.querySelector<HTMLButtonElement>(".kf-otp-send");
@@ -716,11 +729,14 @@ function mount(
   }
 
   function updateBadges() {
+    if (!convo) return;
     const n = unreadCount();
     fabBadge.hidden = n === 0;
     fabBadge.textContent = n > 9 ? "9+" : String(n);
-    tabBadge.hidden = n === 0;
-    tabBadge.textContent = n > 9 ? "9+" : String(n);
+    if (tabBadge) {
+      tabBadge.hidden = n === 0;
+      tabBadge.textContent = n > 9 ? "9+" : String(n);
+    }
   }
 
   async function checkUnread() {
@@ -772,12 +788,13 @@ function mount(
   }
 
   function renderHistory() {
+    if (!historyList || !historyEmpty || !sessionBar) return;
     const session = loadSession();
     historyList.innerHTML = "";
 
     // Verified session bar + OTP box visibility.
     sessionBar.hidden = !session;
-    if (session) sessionEmail.textContent = session.email;
+    if (session && sessionEmail) sessionEmail.textContent = session.email;
     if (otpBox) otpBox.hidden = !!session;
 
     const rows: HTMLLIElement[] = [];
@@ -819,16 +836,17 @@ function mount(
   }
 
   function showForm() {
-    tabForm.dataset.active = "1";
-    tabHistory.dataset.active = "0";
+    if (tabForm) tabForm.dataset.active = "1";
+    if (tabHistory) tabHistory.dataset.active = "0";
     viewForm.hidden = false;
-    viewHistory.hidden = true;
+    if (viewHistory) viewHistory.hidden = true;
     restoreForm();
     supportEl.hidden = !runtime.support;
     renderSupport();
     setMessage("", null);
   }
   function showHistory() {
+    if (!convo || !tabForm || !tabHistory || !viewHistory) return;
     tabForm.dataset.active = "0";
     tabHistory.dataset.active = "1";
     viewForm.hidden = true;
@@ -838,8 +856,8 @@ function mount(
     closeConversation();
     renderHistory();
   }
-  tabForm.addEventListener("click", showForm);
-  tabHistory.addEventListener("click", showHistory);
+  tabForm?.addEventListener("click", showForm);
+  tabHistory?.addEventListener("click", showHistory);
 
   // ── Copy helper ────────────────────────────────────────────────────
   function copyText(text: string, btn?: Element) {
@@ -1172,15 +1190,17 @@ function mount(
   let currentToken: string | null = null;
 
   function closeConversation() {
+    if (!convo || !convoEl || !historyMain) return;
     currentToken = null;
     convoEl.hidden = true;
     historyMain.hidden = false;
     replyAttachments.splice(0);
   }
 
-  backBtn.addEventListener("click", () => { closeConversation(); renderHistory(); });
+  backBtn?.addEventListener("click", () => { closeConversation(); renderHistory(); });
 
   async function openConversation(token: string) {
+    if (!convoEl || !historyMain || !threadEl || !convoClosed || !replyBox) return;
     currentToken = token;
     historyMain.hidden = true;
     convoEl.hidden = false;
@@ -1230,6 +1250,7 @@ function mount(
   }
 
   function renderThread(c: ConvoData, _token: string) {
+    if (!convoCat || !threadEl) return;
     convoCat.textContent = labelForValue(c.category);
     const originImgs = c.attachments.filter((a) => !a.reply_id).map((a) => ({ url: a.url }));
     const messages = [
@@ -1264,12 +1285,14 @@ function mount(
   }
 
   function renderReplyCounter() {
+    if (!replyCounter || !replyUpload) return;
     replyCounter.textContent = `${replyAttachments.length} / ${MAX_ATTACHMENTS}`;
     replyUpload.toggleAttribute("disabled", replyAttachments.length >= MAX_ATTACHMENTS);
   }
 
-  replyUpload.addEventListener("click", () => replyFile.click());
-  replyFile.addEventListener("change", () => {
+  replyUpload?.addEventListener("click", () => replyFile?.click());
+  replyFile?.addEventListener("change", () => {
+    if (!replyFile) return;
     Array.from(replyFile.files ?? [])
       .filter((f) => f.type.startsWith("image/"))
       .slice(0, MAX_ATTACHMENTS - replyAttachments.length)
@@ -1279,7 +1302,7 @@ function mount(
   });
 
   async function sendReply() {
-    if (!currentToken) return;
+    if (!currentToken || !replyInput || !replySend) return;
     const message = replyInput.value.trim();
     if (!message && replyAttachments.length === 0) { replyInput.focus(); return; }
     replySend.disabled = true;
@@ -1321,10 +1344,10 @@ function mount(
       replySend.textContent = ui.send;
     }
   }
-  replySend.addEventListener("click", sendReply);
+  replySend?.addEventListener("click", sendReply);
 
   // Enter = send, Shift+Enter = newline in reply textarea
-  replyInput.addEventListener("keydown", (e: KeyboardEvent) => {
+  replyInput?.addEventListener("keydown", (e: KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendReply();
@@ -1383,7 +1406,7 @@ function mount(
     if (e.key === "Enter") { e.preventDefault(); verifyOtpCode(); }
   });
 
-  sessionChange.addEventListener("click", () => {
+  sessionChange?.addEventListener("click", () => {
     saveSession(null);
     renderHistory();
   });
@@ -1398,13 +1421,23 @@ function mount(
   renderAnnotations();
   applySubmitGate();
   // One-shot unread check on load: badge on the FAB + history tab.
-  checkUnread().then(renderHistory);
+  if (convo) checkUnread().then(renderHistory);
 }
 
 function esc(s: unknown): string {
   return String(s ?? "").replace(/[&<>"']/g, (c) =>
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string
   );
+}
+
+function clampOffset(value: number | undefined, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(200, Math.max(0, Math.round(value)));
+}
+
+function clampZIndex(value: number | undefined, fallback: number): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) return fallback;
+  return Math.min(2147483647, Math.max(1, Math.round(value)));
 }
 
 function elementSelector(el: Element): string {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSessionCookie } from "better-auth/cookies";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./i18n/routing";
+import { WIDGET_SCOPE_COOKIE } from "./lib/widget-scope";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -60,6 +61,17 @@ export async function middleware(req: NextRequest) {
 
   if (isNoIndexPath && response) {
     response.headers.set("X-Robots-Tag", "noindex, nofollow");
+  }
+
+  // Mirror `?w=` into a cookie so the panel Shell layout can scope nav badges.
+  // Layouts don't receive searchParams; URL remains the source of truth.
+  if (response) {
+    const w = req.nextUrl.searchParams.get("w");
+    if (w) {
+      response.cookies.set(WIDGET_SCOPE_COOKIE, w, { path: "/", sameSite: "lax" });
+    } else {
+      response.cookies.delete(WIDGET_SCOPE_COOKIE);
+    }
   }
 
   return response;

@@ -1,8 +1,10 @@
 import { Suspense } from "react";
+import { cookies } from "next/headers";
 import { parseSettings } from "@/lib/repo";
 import { getStats, listOwnedProjects } from "@/lib/admin-repo";
 import { listAccessibleProjects } from "@/lib/agent-repo";
 import { getSessionUser } from "@/lib/auth";
+import { WIDGET_SCOPE_COOKIE } from "@/lib/widget-scope";
 import { redirect } from "next/navigation";
 import ShellClient from "./ShellClient";
 import type { WidgetOption } from "./WidgetSwitcher";
@@ -10,10 +12,12 @@ import type { WidgetOption } from "./WidgetSwitcher";
 export default async function Shell({ children }: { children: React.ReactNode }) {
   const sessionUser = await getSessionUser();
   if (!sessionUser) redirect("/login");
-  const [projects, ownedProjects, stats] = await Promise.all([
+  // Layouts can't read searchParams; middleware mirrors `?w=` into this cookie
+  // so sidebar badges stay scoped to the active widget.
+  const cookieWidgetId = (await cookies()).get(WIDGET_SCOPE_COOKIE)?.value || undefined;
+  const [projects, ownedProjects] = await Promise.all([
     listAccessibleProjects(sessionUser.id),
     listOwnedProjects(sessionUser.id),
-    getStats(sessionUser.id),
   ]);
 
   const widgets: WidgetOption[] = projects.map((p) => {
@@ -24,8 +28,13 @@ export default async function Shell({ children }: { children: React.ReactNode })
       slug: p.slug,
       accentColor: settings.accentColor,
       logoUrl: settings.logoUrl ?? null,
+      isActive: p.is_active,
     };
   });
+
+  const widgetId =
+    cookieWidgetId && widgets.some((w) => w.id === cookieWidgetId) ? cookieWidgetId : undefined;
+  const stats = await getStats(sessionUser.id, widgetId);
 
   const navCounts = {
     feedbacks: stats.newFeedbacks,
