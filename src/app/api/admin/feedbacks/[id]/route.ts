@@ -19,7 +19,7 @@ import { deleteAttachmentDir } from "@/lib/storage";
 import { publish } from "@/lib/events";
 
 const schema = z.object({
-  status: z.enum(["new", "planned", "in_progress", "resolved", "wontfix"]).optional(),
+  status: z.enum(["open", "pending", "in_progress", "resolved", "closed"]).optional(),
   priority: z.enum(["low", "normal", "high"]).optional(),
   admin_note: z.string().max(5000).optional(),
   reply: z.string().trim().max(5000).optional(),
@@ -99,6 +99,17 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     // Fetch existing replies BEFORE adding the new one, so history is accurate for the email.
     const existingReplies = await listFeedbackReplies(id);
     const created = await addFeedbackReply(id, reply);
+    // First team reply on an open ticket → mark as in progress.
+    let status = fields.status ?? fb.status;
+    if (fb.status === "open" && fields.status === undefined) {
+      await updateFeedback(user.id, id, { status: "in_progress" });
+      status = "in_progress";
+      publish({
+        type: "feedback.updated",
+        userId: user.id,
+        payload: { feedback_id: id, status, priority: fb.priority },
+      });
+    }
     publish({
       type: "reply.created",
       userId: user.id,
@@ -134,6 +145,7 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
     }
     return NextResponse.json({
       ok: true,
+      status,
       reply: {
         id: created.id,
         author: created.author,

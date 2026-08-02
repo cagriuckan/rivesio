@@ -79,7 +79,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
   const sitesHref = `/sites${wq}`;
   const projectsHref = "/projects";
 
-  const openFeedbacks = Math.max(0, stats.totalFeedbacks - stats.resolvedFeedbacks);
+  const openFeedbacks = Math.max(0, stats.totalFeedbacks - stats.resolvedFeedbacks - stats.closedFeedbacks);
   const recent = recentFeedbacks;
 
   const hour = new Date().getHours();
@@ -168,7 +168,7 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
               <CardTitle icon={Icon.alertTriangle}>{t("needsAttention")}</CardTitle>
             </CardHeader>
             <CardBody className="space-y-2.5">
-              <AttentionRow label={t("new")} value={stats.newFeedbacks} href={`${feedbacksHref}${wq ? "&" : "?"}status=new`} icon={Icon.feedback} tone="info" />
+              <AttentionRow label={t("new")} value={stats.newFeedbacks} href={`${feedbacksHref}${wq ? "&" : "?"}status=open`} icon={Icon.feedback} tone="info" />
               <AttentionRow label={t("unread")} value={unread} href={feedbacksHref} icon={Icon.bell} tone="info" />
               <AttentionRow label={t("pendingSites")} value={stats.pendingSites} href={`${sitesHref}${wq ? "&" : "?"}status=pending`} icon={Icon.globe} tone="warning" />
             </CardBody>

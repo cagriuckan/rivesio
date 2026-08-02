@@ -14,11 +14,11 @@ import {
 } from "./conversationState";
 
 const STATUS_BORDER: Record<FeedbackStatus, string> = {
-  new: "border-l-info",
-  planned: "border-l-violet",
+  open: "border-l-info",
+  pending: "border-l-violet",
   in_progress: "border-l-warning",
   resolved: "border-l-success",
-  wontfix: "border-l-subtle",
+  closed: "border-l-subtle",
 };
 
 export type InboxTab = "all" | "unread" | "pinned";
@@ -187,7 +187,7 @@ export default function ConversationList({
                 className={cn(
                   "group flex w-full cursor-pointer items-start gap-3 border-b border-l-2 border-line/60 px-3 py-3 transition-colors",
                   STATUS_BORDER[f.status],
-                  f.status === "resolved" && "opacity-60",
+                  f.status === "resolved" || f.status === "closed" ? "opacity-60" : undefined,
                   active ? "bg-accent-soft/50" : "hover:bg-raised",
                 )}
                 onClick={() => onSelect(f.id)}

@@ -342,7 +342,7 @@ export default function Sidebar({
                 </a>
               </div>
               <div className="text-[10px] font-semibold text-faint tracking-wider">
-                Beta v0.0.2
+                Beta v0.1.0
               </div>
             </div>
           </div>

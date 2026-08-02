@@ -1,6 +1,6 @@
 # Rivesio — Proje Panosu
 
-> Her oturum sonunda güncellenir. Son güncelleme: **2026-07-31**
+> Her oturum sonunda güncellenir. Son güncelleme: **2026-08-02**
 
 ## Proje Özeti
 Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19, Tailwind v4, Postgres + Drizzle, Better Auth, Resend, web-push, R2.
@@ -8,6 +8,8 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 ## Mevcut Durum
 - **Repo:** https://github.com/cagriuckan/rivesio · `main`
 - **Prod:** rivesio.com · DB: Neon
+- **Sürüm:** Beta v0.1.0 / package `0.1.0`
+- Inbox triage durumları: `open` / `pending` / `in_progress` / `resolved` / `closed` (migration `0008`)
 - Widget **pasife alma**: `projects.is_active` (migration `0007`); kart menüsü + ayarlar toggle; pasifte script no-op, register/submit/conversation reddedilir
 - `allowConversation` kapalıysa widget’ta Geçmiş sekmesi (ve tabs bar) render edilmiyor
 - Widget konum: sol/sağ alt + masaüstü/mobil ayrı offset + zIndex (varsayılan 99999)
@@ -19,8 +21,7 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
 
 ## Kalanlar / Yapılacaklar
-- [ ] Hostinger redeploy (perf + sites/logo + glass tabs + dashboard + localized categories + widget is_active)
-- [ ] Prod'da `0007_widget_is_active` migrate
+- [ ] Hostinger redeploy tetikle / smoke (v0.1.0)
 - [ ] Soft nav + reply + sites pagination smoke test
 - [ ] Prod signup smoke test
 - [ ] İdeal OG 1200×630
@@ -28,8 +29,12 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - [ ] Mobile glass tab bar smoke test (scroll minimize + finger scrub)
 - [ ] Widget kategori dili smoke test (`lang=en` / `lang=tr`)
 - [ ] Widget pasife alma smoke test (kart / ayarlar / embed gizlenme)
+- [ ] Inbox durum seti smoke test (open→in_progress on reply, pending/closed filtre)
 
 ## Alınan Kararlar
+- 2026-08-02: Sürüm Beta v0.1.0 / package `0.1.0`
+- 2026-08-02: Inbox triage `open/pending/in_progress/resolved/closed`; ilk ajan yanıtı `open`→`in_progress`; `planned/wontfix` kaldırıldı
+- 2026-08-02: Sidebar gelen kutusu badge'i `status=open` + ziyaretçi son konuşan; ajan/owner son mesajlı thread'ler sayıya dahil değil
 - 2026-07-31: Widget konum yalnız bottom-left/right; offset masaüstü (`offsetX/Y`) ve mobil (`offsetXMobile/YMobile`) ayrı; z-index ayarlanabilir
 - 2026-07-31: `allowConversation=false` → widget Geçmiş sekmesi + tabs bar yok; yalnız form
 - 2026-07-30: Widget pasif = `is_active=false`; silmeden gizler; admin panel + inbox çalışmaya devam eder

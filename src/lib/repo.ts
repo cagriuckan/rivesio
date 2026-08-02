@@ -211,7 +211,7 @@ export async function createFeedback(args: {
     email: args.email,
     accessToken: token,
     visitorHash: args.visitorHash,
-    status: "new",
+    status: "open",
     priority: "normal",
     customFields: args.customFields?.length ? args.customFields : null,
     createdAt: now,

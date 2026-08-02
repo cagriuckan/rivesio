@@ -10,7 +10,7 @@ export type ConversationState =
   | "closed";
 
 export function getConversationState(f: FeedbackWithMeta): ConversationState {
-  if (f.status === "resolved" || f.status === "wontfix") return "closed";
+  if (f.status === "resolved" || f.status === "closed") return "closed";
   // Initial visitor message only — nobody from the team has replied yet.
   if (f.reply_count === 0) return "unanswered";
   // Visitor spoke last (or has unreplied user messages after the last admin reply).
