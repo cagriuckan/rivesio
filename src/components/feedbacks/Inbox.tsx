@@ -163,7 +163,13 @@ export default function Inbox({
         user_agent: null,
       };
       setDetail((prev) =>
-        prev && prev.id === id ? { ...prev, replies: [...prev.replies, optimisticReply] } : prev,
+        prev && prev.id === id
+          ? {
+              ...prev,
+              replies: [...prev.replies, optimisticReply],
+              ...(prev.status === "open" ? { status: "in_progress" as const } : {}),
+            }
+          : prev,
       );
       setItems((prev) =>
         prev.map((f) =>
@@ -178,16 +184,27 @@ export default function Inbox({
                 last_replier: "admin" as const,
                 last_reply_at: now,
                 unread: false,
+                ...(f.status === "open" ? { status: "in_progress" as const } : {}),
               }
             : f,
         ),
       );
-    } else {
-      // Optimistic field patches (status, priority, note, …).
-      setDetail((prev) => (prev && prev.id === id ? { ...prev, ...fields } : prev));
-      setItems((prev) => prev.map((f) => (f.id === id ? { ...f, ...fields } : f)));
+      // Unblock the composer in the same turn as the bubble paint; persist in background.
+      void persistPatch(id, fields, { replyText, optimisticId });
+      return;
     }
 
+    // Optimistic field patches (status, priority, note, …).
+    setDetail((prev) => (prev && prev.id === id ? { ...prev, ...fields } : prev));
+    setItems((prev) => prev.map((f) => (f.id === id ? { ...f, ...fields } : f)));
+    await persistPatch(id, fields, { replyText: null, optimisticId: null });
+  }
+
+  async function persistPatch(
+    id: string,
+    fields: Record<string, unknown>,
+    opts: { replyText: string | null; optimisticId: string | null },
+  ) {
     skipSseRefetchFor.current = id;
     const res = await fetch(`/api/admin/feedbacks/${id}`, {
       method: "PATCH",
@@ -201,19 +218,26 @@ export default function Inbox({
       return;
     }
 
-    if (replyText) {
+    if (opts.replyText) {
       const data = (await res.json().catch(() => null)) as {
         reply?: FeedbackReplyRow;
+        status?: FeedbackDetail["status"];
       } | null;
-      if (data?.reply && optimisticId) {
+      if (data?.reply && opts.optimisticId) {
         setDetail((prev) =>
           prev && prev.id === id
             ? {
                 ...prev,
-                replies: prev.replies.map((r) => (r.id === optimisticId ? { ...data.reply!, page_url: null, user_agent: null } : r)),
+                ...(data.status ? { status: data.status } : {}),
+                replies: prev.replies.map((r) =>
+                  r.id === opts.optimisticId ? { ...data.reply!, page_url: null, user_agent: null } : r,
+                ),
               }
             : prev,
         );
+        if (data.status) {
+          setItems((prev) => prev.map((f) => (f.id === id ? { ...f, status: data.status! } : f)));
+        }
       }
       // Drop the SSE skip shortly if the echo never arrives.
       window.setTimeout(() => {

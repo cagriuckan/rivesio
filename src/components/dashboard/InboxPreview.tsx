@@ -23,11 +23,11 @@ function avatarStyle(seed: string): React.CSSProperties {
 }
 
 const STATUS_BORDER: Record<FeedbackStatus, string> = {
-  new: "border-l-info",
-  planned: "border-l-violet",
+  open: "border-l-info",
+  pending: "border-l-violet",
   in_progress: "border-l-warning",
   resolved: "border-l-success",
-  wontfix: "border-l-subtle",
+  closed: "border-l-subtle",
 };
 
 /** Recent conversations rendered inbox-style, linking straight into the Inbox. */
@@ -88,7 +88,7 @@ export default async function InboxPreview({
                   className={cn(
                     "group flex items-start gap-3 border-l-2 px-4 py-3 transition-colors hover:bg-raised",
                     STATUS_BORDER[f.status],
-                    f.status === "resolved" && "opacity-70",
+                    f.status === "resolved" || f.status === "closed" ? "opacity-70" : undefined,
                   )}
                 >
                   <span

@@ -42,11 +42,11 @@ export function Badge({
 /* ── Domain → tone mappings ── */
 
 export const FEEDBACK_TONE: Record<FeedbackStatus, Tone> = {
-  new:         "info",
-  planned:     "violet",
+  open:        "info",
+  pending:     "violet",
   in_progress: "warning",
   resolved:    "success",
-  wontfix:     "neutral",
+  closed:      "neutral",
 };
 
 export const PRIORITY_TONE: Record<Priority, Tone> = {

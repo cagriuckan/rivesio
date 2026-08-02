@@ -92,11 +92,11 @@
     "inactive": "Inactive"
   },
   "status": {
-    "new": "New",
-    "planned": "Planned",
+    "open": "Open",
+    "pending": "Waiting on customer",
     "in_progress": "In progress",
     "resolved": "Resolved",
-    "wontfix": "Won't fix"
+    "closed": "Closed"
   },
   "priority": {
     "low": "Low",
@@ -130,7 +130,7 @@
     "openFeedback": "Open feedback",
     "pendingSites": "Pending sites",
     "coverage": "Coverage",
-    "new": "New",
+    "new": "Open",
     "resolved": "Resolved",
     "highPriority": "High priority",
     "previousPeriod": "Previous {period}: {value}",

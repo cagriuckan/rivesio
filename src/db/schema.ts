@@ -20,11 +20,11 @@ const epoch = (name: string) => bigint(name, { mode: "number" });
 export const siteStatusEnum = pgEnum("site_status", ["pending", "approved", "blocked"]);
 export const siteSourceEnum = pgEnum("site_source", ["auto", "manual"]);
 export const feedbackStatusEnum = pgEnum("feedback_status", [
-  "new",
-  "planned",
+  "open",
+  "pending",
   "in_progress",
   "resolved",
-  "wontfix",
+  "closed",
 ]);
 export const priorityEnum = pgEnum("priority", ["low", "normal", "high"]);
 export const replyAuthorEnum = pgEnum("reply_author", ["admin", "user"]);
@@ -198,7 +198,7 @@ export const feedbacks = pgTable("feedbacks", {
   accessToken: text("access_token").notNull(),
   // sha256(ip|userAgent) — backs per-visitor daily limits.
   visitorHash: text("visitor_hash"),
-  status: feedbackStatusEnum("status").notNull().default("new"),
+  status: feedbackStatusEnum("status").notNull().default("open"),
   priority: priorityEnum("priority").notNull().default("normal"),
   adminNote: text("admin_note"),
   customFields: jsonb("custom_fields").$type<CustomFieldValue[]>(),

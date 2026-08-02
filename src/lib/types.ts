@@ -1,6 +1,6 @@
 export type SiteStatus = "pending" | "approved" | "blocked";
 export type SiteSource = "auto" | "manual";
-export type FeedbackStatus = "new" | "planned" | "in_progress" | "resolved" | "wontfix";
+export type FeedbackStatus = "open" | "pending" | "in_progress" | "resolved" | "closed";
 export type Priority = "low" | "normal" | "high";
 export type ReplyAuthor = "admin" | "user";
 export type AgentMembershipStatus = "invited" | "active" | "revoked";
@@ -198,11 +198,11 @@ export interface AttachmentRow {
 }
 
 export const FEEDBACK_STATUSES: FeedbackStatus[] = [
-  "new",
-  "planned",
+  "open",
+  "pending",
   "in_progress",
   "resolved",
-  "wontfix",
+  "closed",
 ];
 export const PRIORITIES: Priority[] = ["low", "normal", "high"];
 

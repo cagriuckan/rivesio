@@ -20,7 +20,7 @@ export async function GET(req: Request) {
 
 const schema = z.object({
   ids: z.array(z.string().min(1)).min(1).max(500),
-  status: z.enum(["new", "planned", "in_progress", "resolved", "wontfix"]),
+  status: z.enum(["open", "pending", "in_progress", "resolved", "closed"]),
 });
 
 export async function PATCH(req: Request) {

@@ -223,11 +223,12 @@ function Composer({
   async function send() {
     const message = text.trim();
     if (!message || sending) return;
+    // Clear + release in the same turn as the optimistic bubble (onSend returns after paint).
+    setText("");
+    textRef.current?.focus();
     setSending(true);
     try {
       await onSend(message);
-      setText("");
-      textRef.current?.focus();
     } finally {
       setSending(false);
     }

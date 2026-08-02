@@ -92,11 +92,11 @@
     "inactive": "Pasif"
   },
   "status": {
-    "new": "Yeni",
-    "planned": "Planlandı",
-    "in_progress": "Üzerinde",
+    "open": "Açık",
+    "pending": "Müşteri bekleniyor",
+    "in_progress": "İşlemde",
     "resolved": "Çözüldü",
-    "wontfix": "Yapılmayacak"
+    "closed": "Kapatıldı"
   },
   "priority": {
     "low": "Düşük",
@@ -130,7 +130,7 @@
     "openFeedback": "Açık geri bildirim",
     "pendingSites": "Bekleyen siteler",
     "coverage": "Kapsama",
-    "new": "Yeni",
+    "new": "Açık",
     "resolved": "Çözüldü",
     "highPriority": "Yüksek öncelik",
     "previousPeriod": "Önceki {period}: {value}",

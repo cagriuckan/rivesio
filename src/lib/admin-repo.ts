@@ -479,6 +479,7 @@ export interface Stats {
   newFeedbacks: number;
   totalFeedbacks: number;
   resolvedFeedbacks: number;
+  closedFeedbacks: number;
   pendingSites: number;
   approvedSites: number;
   blockedSites: number;
@@ -489,13 +490,24 @@ export interface Stats {
 async function countFeedbacks(
   userId: string,
   projectId: string | undefined,
-  extra?: ReturnType<typeof eq>,
+  extra?: ReturnType<typeof eq> | ReturnType<typeof and> | ReturnType<typeof sql>,
 ): Promise<number> {
   const where = [inArray(feedbacks.projectId, accessibleProjectIds(userId))];
   if (projectId) where.push(eq(feedbacks.projectId, projectId));
   if (extra) where.push(extra);
   const [r] = await db.select({ c: count() }).from(feedbacks).where(and(...where));
   return r?.c ?? 0;
+}
+
+/** status=open and the visitor still spoke last (no team/agent reply pending a user follow-up). */
+function awaitingTeamReply(): ReturnType<typeof and> {
+  return and(
+    eq(feedbacks.status, "open"),
+    sql`coalesce(
+      (select author from ${feedbackReplies} where ${feedbackReplies.feedbackId} = ${feedbacks.id} order by created_at desc limit 1),
+      'user'
+    ) = 'user'`,
+  );
 }
 
 async function countSites(
@@ -515,6 +527,7 @@ export const getStats = cache(async (userId: string, projectId?: string): Promis
     totalFeedbacks,
     newFeedbacks,
     resolvedFeedbacks,
+    closedFeedbacks,
     pendingSites,
     approvedSites,
     blockedSites,
@@ -522,8 +535,10 @@ export const getStats = cache(async (userId: string, projectId?: string): Promis
     projectCount,
   ] = await Promise.all([
     countFeedbacks(userId, projectId),
-    countFeedbacks(userId, projectId, eq(feedbacks.status, "new")),
+    // Sidebar inbox badge: skip threads where an agent/owner already replied last.
+    countFeedbacks(userId, projectId, awaitingTeamReply()),
     countFeedbacks(userId, projectId, eq(feedbacks.status, "resolved")),
+    countFeedbacks(userId, projectId, eq(feedbacks.status, "closed")),
     countSites(userId, projectId, eq(sites.status, "pending")),
     countSites(userId, projectId, eq(sites.status, "approved")),
     countSites(userId, projectId, eq(sites.status, "blocked")),
@@ -539,6 +554,7 @@ export const getStats = cache(async (userId: string, projectId?: string): Promis
     totalFeedbacks,
     newFeedbacks,
     resolvedFeedbacks,
+    closedFeedbacks,
     pendingSites,
     approvedSites,
     blockedSites,
@@ -559,7 +575,7 @@ export async function getStatusBreakdown(userId: string, projectId?: string): Pr
     .from(feedbacks)
     .where(and(...scopedFeedbackWhere(userId, projectId)))
     .groupBy(feedbacks.status);
-  const out: Record<FeedbackStatus, number> = { new: 0, planned: 0, in_progress: 0, resolved: 0, wontfix: 0 };
+  const out: Record<FeedbackStatus, number> = { open: 0, pending: 0, in_progress: 0, resolved: 0, closed: 0 };
   for (const r of rows) out[r.status] = r.c;
   return out;
 }
@@ -616,7 +632,7 @@ async function getPeriodStats(
   };
   const [total, newCount, resolved, highPriority] = await Promise.all([
     countWith(),
-    countWith(eq(feedbacks.status, "new")),
+    countWith(eq(feedbacks.status, "open")),
     countWith(eq(feedbacks.status, "resolved")),
     countWith(eq(feedbacks.priority, "high")),
   ]);
