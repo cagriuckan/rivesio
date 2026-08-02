@@ -45,34 +45,42 @@ export async function POST(req: Request, ctx: { params: Promise<{ token: string 
     userAgent: req.headers.get("user-agent"),
   });
 
-  // Notify the project owner that the user replied — fire & forget, never block the response.
+  // Notify the project owner (+ assignee) that the user replied — fire & forget.
   const owner = await getProjectOwner(feedback.project_id);
   if (owner) {
-    publish({
-      type: "reply.created",
-      userId: owner.id,
-      payload: {
-        feedback_id: feedback.id,
-        author: "user",
-        message: reply.message.slice(0, 200),
-        reply_id: reply.id,
-        created_at: reply.created_at,
-      },
-    });
-    const ownerId = owner.id;
+    const recipientIds = Array.from(
+      new Set([owner.id, ...(feedback.assigned_to ? [feedback.assigned_to] : [])]),
+    );
+    for (const userId of recipientIds) {
+      publish({
+        type: "reply.created",
+        userId,
+        payload: {
+          feedback_id: feedback.id,
+          author: "user",
+          message: reply.message.slice(0, 200),
+          reply_id: reply.id,
+          created_at: reply.created_at,
+        },
+      });
+    }
     const settings = parseSettings(result.project);
     const accentColor = settings.accentColor;
     const brandName = result.project.name;
     after(() =>
-      notify(ownerId, {
-        type: "reply_user",
-        title: `Yeni kullanıcı yanıtı: ${feedback.category}`,
-        body: parsed.data.message.slice(0, 200),
-        link: `/feedbacks?f=${feedback.id}`,
-        accentColor,
-        brandName,
-        logoUrl: settings.logoUrl,
-      }),
+      Promise.all(
+        recipientIds.map((userId) =>
+          notify(userId, {
+            type: "reply_user",
+            title: `Yeni kullanıcı yanıtı: ${feedback.category}`,
+            body: parsed.data.message.slice(0, 200),
+            link: `/feedbacks?f=${feedback.id}`,
+            accentColor,
+            brandName,
+            logoUrl: settings.logoUrl,
+          }),
+        ),
+      ),
     );
   }
   return corsJson({

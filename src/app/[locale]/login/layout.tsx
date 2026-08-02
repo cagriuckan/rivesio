@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { languageAlternates, localePath } from "@/lib/seo";
@@ -27,5 +28,5 @@ export async function generateMetadata({
 }
 
 export default function LoginLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return <Suspense fallback={null}>{children}</Suspense>;
 }

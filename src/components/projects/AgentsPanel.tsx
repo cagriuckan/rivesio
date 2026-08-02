@@ -64,11 +64,17 @@ export default function AgentsPanel({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: trimmed, categories: allCategories ? null : selectedCategories }),
       });
+      const data = await res.json().catch(() => null);
       if (res.ok) {
         setEmail("");
         setAllCategories(true);
         setSelectedCategories([]);
         await load();
+        if (data?.email && data.email.ok === false) {
+          setError(t("inviteEmailFailed"));
+        } else if (data?.email?.mode === "dev") {
+          setError(t("inviteEmailDev"));
+        }
       } else {
         setError(t("inviteError"));
       }

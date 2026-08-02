@@ -1,10 +1,11 @@
-import { and, desc, eq, inArray, isNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNull, or } from "drizzle-orm";
 import { db } from "@/db/client";
 import { agentMemberships, feedbacks, projects, user } from "@/db/schema";
 import { toAgentMembershipRow, toProjectRow } from "@/db/map";
 import { generateId } from "./ids";
 import { createInviteToken, consumeInviteToken } from "./otp";
 import { sendAgentInviteEmail } from "./email";
+import { notify } from "./notify";
 import { parseSettings } from "./repo";
 import type { AgentMembershipRow, AgentMembershipStatus, ProjectRow } from "./types";
 
@@ -69,16 +70,19 @@ export async function inviteAgent(
   projectId: string,
   email: string,
   categories: string[] | null,
-): Promise<AgentMembershipRow | null> {
+): Promise<{ membership: AgentMembershipRow; email: { ok: boolean; mode?: "sent" | "dev"; error?: string } } | null> {
   const project = await getOwnedProjectForAgents(ownerId, projectId);
   if (!project) return null;
   const normalizedEmail = email.trim().toLowerCase();
 
-  const [existing] = await db
-    .select()
-    .from(agentMemberships)
-    .where(and(eq(agentMemberships.projectId, projectId), eq(agentMemberships.email, normalizedEmail)))
-    .limit(1);
+  const [[existing], [invitee]] = await Promise.all([
+    db
+      .select()
+      .from(agentMemberships)
+      .where(and(eq(agentMemberships.projectId, projectId), eq(agentMemberships.email, normalizedEmail)))
+      .limit(1),
+    db.select({ id: user.id }).from(user).where(eq(user.email, normalizedEmail)).limit(1),
+  ]);
 
   const now = Date.now();
   let membershipId: string;
@@ -86,7 +90,15 @@ export async function inviteAgent(
     membershipId = existing.id;
     await db
       .update(agentMemberships)
-      .set({ status: "invited", categories, invitedBy: ownerId, invitedAt: now, updatedAt: now, acceptedAt: null })
+      .set({
+        status: "invited",
+        categories,
+        invitedBy: ownerId,
+        invitedAt: now,
+        updatedAt: now,
+        acceptedAt: null,
+        userId: invitee?.id ?? existing.userId,
+      })
       .where(eq(agentMemberships.id, membershipId));
   } else {
     membershipId = generateId();
@@ -94,6 +106,7 @@ export async function inviteAgent(
       id: membershipId,
       projectId,
       email: normalizedEmail,
+      userId: invitee?.id ?? null,
       status: "invited",
       categories,
       invitedBy: ownerId,
@@ -103,10 +116,33 @@ export async function inviteAgent(
     });
   }
 
-  await sendInviteEmail(ownerId, project, membershipId, normalizedEmail, categories);
+  const { email: emailResult, token } = await sendInviteEmail(
+    ownerId,
+    project,
+    membershipId,
+    normalizedEmail,
+    categories,
+  );
+
+  // Existing Rivesio accounts also get in-app + push (dedicated invite email already covers email).
+  if (invitee) {
+    const settings = parseSettings(project);
+    const [owner] = await db.select({ name: user.name }).from(user).where(eq(user.id, ownerId)).limit(1);
+    await notify(invitee.id, {
+      type: "agent_invite",
+      title: `${project.name} — ajan daveti`,
+      body: `${owner?.name ?? "Bir yönetici"} seni ekibe davet etti`,
+      link: `/agent-invite/${token}`,
+      accentColor: settings.accentColor,
+      brandName: project.name,
+      logoUrl: settings.logoUrl,
+      channels: { email: false },
+    });
+  }
 
   const [row] = await db.select().from(agentMemberships).where(eq(agentMemberships.id, membershipId)).limit(1);
-  return row ? toAgentMembershipRow(row) : null;
+  if (!row) return null;
+  return { membership: toAgentMembershipRow(row), email: emailResult };
 }
 
 async function sendInviteEmail(
@@ -115,14 +151,15 @@ async function sendInviteEmail(
   membershipId: string,
   email: string,
   categories: string[] | null,
-): Promise<void> {
+): Promise<{ email: { ok: boolean; mode?: "sent" | "dev"; error?: string }; token: string }> {
   const [owner] = await db.select({ name: user.name }).from(user).where(eq(user.id, ownerId)).limit(1);
   const token = await createInviteToken(membershipId);
   const settings = parseSettings(project);
-  await sendAgentInviteEmail(email, token, project.name, owner?.name ?? project.name, categories, {
+  const emailResult = await sendAgentInviteEmail(email, token, project.name, owner?.name ?? project.name, categories, {
     accent: settings.accentColor,
     logo: settings.logoUrl,
   });
+  return { email: emailResult, token };
 }
 
 export async function resendAgentInvite(ownerId: string, projectId: string, membershipId: string): Promise<boolean> {
@@ -135,8 +172,28 @@ export async function resendAgentInvite(ownerId: string, projectId: string, memb
     .limit(1);
   if (!membership || membership.status === "revoked") return false;
 
-  await sendInviteEmail(ownerId, project, membershipId, membership.email, membership.categories ?? null);
-  return true;
+  const { email: emailResult, token } = await sendInviteEmail(
+    ownerId,
+    project,
+    membershipId,
+    membership.email,
+    membership.categories ?? null,
+  );
+  if (membership.userId) {
+    const settings = parseSettings(project);
+    const [owner] = await db.select({ name: user.name }).from(user).where(eq(user.id, ownerId)).limit(1);
+    await notify(membership.userId, {
+      type: "agent_invite",
+      title: `${project.name} — ajan daveti`,
+      body: `${owner?.name ?? "Bir yönetici"} seni ekibe davet etti`,
+      link: `/agent-invite/${token}`,
+      accentColor: settings.accentColor,
+      brandName: project.name,
+      logoUrl: settings.logoUrl,
+      channels: { email: false },
+    });
+  }
+  return emailResult.ok;
 }
 
 export async function updateAgentCategories(
@@ -225,6 +282,95 @@ export async function acceptAgentInvite(
   // Only burn the token once the invite has actually been consumed successfully.
   await consumeInviteToken(token);
   return { ok: true, projectId: membership.projectId };
+}
+
+export interface PendingInvite {
+  id: string;
+  project_id: string;
+  project_name: string;
+  inviter_name: string;
+  categories: string[] | null;
+  invited_at: number;
+}
+
+/** Pending invites for the signed-in user's email (panel accept/reject surface). */
+export async function listPendingInvitesForUser(sessionUser: {
+  id: string;
+  email: string;
+}): Promise<PendingInvite[]> {
+  const email = sessionUser.email.trim().toLowerCase();
+  const rows = await db
+    .select({
+      id: agentMemberships.id,
+      projectId: agentMemberships.projectId,
+      projectName: projects.name,
+      inviterName: user.name,
+      categories: agentMemberships.categories,
+      invitedAt: agentMemberships.invitedAt,
+    })
+    .from(agentMemberships)
+    .innerJoin(projects, eq(projects.id, agentMemberships.projectId))
+    .innerJoin(user, eq(user.id, agentMemberships.invitedBy))
+    .where(
+      and(
+        eq(agentMemberships.status, "invited"),
+        or(eq(agentMemberships.email, email), eq(agentMemberships.userId, sessionUser.id)),
+      ),
+    )
+    .orderBy(desc(agentMemberships.invitedAt));
+  return rows.map((r) => ({
+    id: r.id,
+    project_id: r.projectId,
+    project_name: r.projectName,
+    inviter_name: r.inviterName,
+    categories: r.categories ?? null,
+    invited_at: r.invitedAt,
+  }));
+}
+
+/** Accept a pending invite by membership id (email must match — no token required). */
+export async function acceptPendingInvite(
+  sessionUser: { id: string; email: string },
+  membershipId: string,
+): Promise<{ ok: true; projectId: string } | { ok: false; error: "invalid" | "email_mismatch" }> {
+  const [membership] = await db.select().from(agentMemberships).where(eq(agentMemberships.id, membershipId)).limit(1);
+  if (!membership || membership.status !== "invited") return { ok: false, error: "invalid" };
+  if (membership.email.toLowerCase() !== sessionUser.email.toLowerCase()) {
+    return { ok: false, error: "email_mismatch" };
+  }
+  const now = Date.now();
+  await db
+    .update(agentMemberships)
+    .set({ status: "active", userId: sessionUser.id, acceptedAt: now, updatedAt: now })
+    .where(eq(agentMemberships.id, membershipId));
+  return { ok: true, projectId: membership.projectId };
+}
+
+/** Decline a pending invite (invitee-side revoke). */
+export async function rejectPendingInvite(
+  sessionUser: { id: string; email: string },
+  membershipId: string,
+): Promise<boolean> {
+  const [membership] = await db.select().from(agentMemberships).where(eq(agentMemberships.id, membershipId)).limit(1);
+  if (!membership || membership.status !== "invited") return false;
+  if (membership.email.toLowerCase() !== sessionUser.email.toLowerCase()) return false;
+  await db
+    .update(agentMemberships)
+    .set({ status: "revoked", updatedAt: Date.now() })
+    .where(eq(agentMemberships.id, membershipId));
+  return true;
+}
+
+/** Decline a pending invite via the emailed token. */
+export async function rejectAgentInviteByToken(
+  sessionUser: { id: string; email: string },
+  token: string,
+): Promise<boolean> {
+  const membershipId = await consumeInviteToken(token, { peek: true });
+  if (!membershipId) return false;
+  const ok = await rejectPendingInvite(sessionUser, membershipId);
+  if (ok) await consumeInviteToken(token);
+  return ok;
 }
 
 // --- Assignment ---

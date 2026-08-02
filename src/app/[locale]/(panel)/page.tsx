@@ -10,6 +10,7 @@ import SiteSummaryCard from "@/components/dashboard/SiteSummaryCard";
 import TrendChart from "@/components/dashboard/TrendChart";
 import QuickOverview from "@/components/dashboard/QuickOverview";
 import InboxPreview from "@/components/dashboard/InboxPreview";
+import PendingInvites from "@/components/agents/PendingInvites";
 import { Card, CardBody, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icons";
 import JsonLd from "@/components/seo/JsonLd";
@@ -117,6 +118,8 @@ export default async function DashboardPage({ searchParams }: { searchParams: Se
           days={days}
           projectId={projectId}
         />
+
+        <PendingInvites />
 
         {/* Quick overview */}
         <QuickOverview

@@ -22,6 +22,8 @@ const PREF_KEY: Record<NotificationType, keyof NotificationPrefs> = {
   feedback_new: "feedbackNew",
   reply_user: "replyUser",
   status_change: "statusChange",
+  agent_invite: "agentInvite",
+  assignment: "assignment",
 };
 
 export interface NotifyInput {
@@ -34,6 +36,8 @@ export interface NotifyInput {
   accentColor?: string;
   brandName?: string;
   logoUrl?: string;
+  /** Override preference channels for this send (e.g. skip email when a dedicated template already went out). */
+  channels?: Partial<import("./types").NotificationChannelPrefs>;
 }
 
 /**
@@ -51,7 +55,7 @@ export async function notify(userId: string, input: NotifyInput): Promise<void> 
     if (!u) return;
 
     const prefs = { ...DEFAULT_NOTIFICATION_PREFS, ...(u.prefs ?? {}) };
-    const channels = prefs[PREF_KEY[input.type]];
+    const channels = { ...prefs[PREF_KEY[input.type]], ...input.channels };
 
     if (channels.inApp) {
       const row = {

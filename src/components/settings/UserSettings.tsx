@@ -16,6 +16,7 @@ import {
   type NotificationChannelPrefs,
   type NotificationPrefs,
 } from "@/lib/types";
+import PendingInvites from "@/components/agents/PendingInvites";
 import {
   OptionCards,
   SettingsFooter,
@@ -290,6 +291,8 @@ const EVENTS: { key: keyof NotificationPrefs; labelKey: string; descKey: string 
   { key: "feedbackNew", labelKey: "eventFeedbackNew", descKey: "eventFeedbackNewDesc" },
   { key: "replyUser", labelKey: "eventReplyUser", descKey: "eventReplyUserDesc" },
   { key: "statusChange", labelKey: "eventStatusChange", descKey: "eventStatusChangeDesc" },
+  { key: "agentInvite", labelKey: "eventAgentInvite", descKey: "eventAgentInviteDesc" },
+  { key: "assignment", labelKey: "eventAssignment", descKey: "eventAssignmentDesc" },
 ];
 const CHANNELS: { key: keyof NotificationChannelPrefs; labelKey: string }[] = [
   { key: "inApp", labelKey: "channelInApp" },
@@ -390,6 +393,7 @@ function NotificationsTab() {
 
   return (
     <div>
+      <PendingInvites />
       <SettingsSectionHeader title={t("notificationsTitle")} description={t("notificationsDesc")} />
 
       {/* Channel legend */}

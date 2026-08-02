@@ -263,6 +263,8 @@ export const notificationTypeEnum = pgEnum("notification_type", [
   "feedback_new",
   "reply_user",
   "status_change",
+  "agent_invite",
+  "assignment",
 ]);
 
 export const notifications = pgTable("notifications", {

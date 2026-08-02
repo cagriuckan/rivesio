@@ -30,5 +30,5 @@ export async function POST(req: Request, ctx: { params: Promise<{ id: string }> 
 
   const membership = await inviteAgent(user.id, id, parsed.data.email, parsed.data.categories ?? null);
   if (!membership) return NextResponse.json({ error: "not_found" }, { status: 404 });
-  return NextResponse.json({ item: membership });
+  return NextResponse.json({ item: membership.membership, email: membership.email });
 }

@@ -11,6 +11,8 @@ const prefsSchema = z.object({
   feedbackNew: channelSchema,
   replyUser: channelSchema,
   statusChange: channelSchema,
+  agentInvite: channelSchema,
+  assignment: channelSchema,
 });
 
 export async function GET() {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
@@ -11,11 +12,18 @@ import AuthShell, { AuthError } from "@/components/auth/AuthShell";
 import SocialButtons from "@/components/auth/SocialButtons";
 import AuthDivider from "@/components/auth/AuthDivider";
 
+function safeNext(raw: string | null): string {
+  if (!raw || !raw.startsWith("/") || raw.startsWith("//")) return "/";
+  return raw;
+}
+
 export default function SignupPage() {
   const t = useTranslations("signup");
   const tc = useTranslations("common");
   const ta = useTranslations("auth");
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = safeNext(searchParams.get("next"));
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -36,7 +44,7 @@ export default function SignupPage() {
         setError(res.error.code === "USER_ALREADY_EXISTS" ? t("emailTaken") : t("failed"));
         return;
       }
-      router.replace("/");
+      router.replace(next);
       router.refresh();
     } catch {
       setError(tc("connectionError"));
@@ -44,6 +52,8 @@ export default function SignupPage() {
       setLoading(false);
     }
   }
+
+  const loginHref = next !== "/" ? `/login?next=${encodeURIComponent(next)}` : "/login";
 
   return (
     <AuthShell title={t("title")} subtitle={t("subtitle")}>
@@ -65,12 +75,18 @@ export default function SignupPage() {
         {error && <AuthError message={error} />}
 
         <Button type="submit" variant="primary" disabled={loading} className="mt-6 h-10 w-full">
-          {loading ? <><Spinner /> {t("signingUp")}</> : t("signUp")}
+          {loading ? (
+            <>
+              <Spinner /> {t("signingUp")}
+            </>
+          ) : (
+            t("signUp")
+          )}
         </Button>
 
         <p className="mt-5 text-center text-sm text-subtle">
           {t("haveAccount")}{" "}
-          <Link href="/login" className="font-semibold text-accent hover:underline">
+          <Link href={loginHref} className="font-semibold text-accent hover:underline">
             {t("signInLink")}
           </Link>
         </p>

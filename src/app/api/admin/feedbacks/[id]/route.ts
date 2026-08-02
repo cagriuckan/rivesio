@@ -17,6 +17,7 @@ import { sendReplyNotification } from "@/lib/email";
 import type { ConversationMessage } from "@/lib/email";
 import { deleteAttachmentDir } from "@/lib/storage";
 import { publish } from "@/lib/events";
+import { notify } from "@/lib/notify";
 
 const schema = z.object({
   status: z.enum(["open", "pending", "in_progress", "resolved", "closed"]).optional(),
@@ -82,17 +83,56 @@ export async function PATCH(req: Request, ctx: { params: Promise<{ id: string }>
   await updateFeedback(user.id, id, fields);
   if (pinned !== undefined) await setFeedbackPinned(user.id, id, pinned);
   if (fields.status !== undefined || fields.priority !== undefined) {
-    publish({
-      type: "feedback.updated",
-      userId: user.id,
-      payload: { feedback_id: id, status: fields.status ?? fb.status, priority: fields.priority ?? fb.priority },
-    });
+    const nextStatus = fields.status ?? fb.status;
+    const nextPriority = fields.priority ?? fb.priority;
+    for (const watcherId of await listProjectWatcherIds(fb.project_id)) {
+      publish({
+        type: "feedback.updated",
+        userId: watcherId,
+        payload: { feedback_id: id, status: nextStatus, priority: nextPriority },
+      });
+    }
+    if (fields.status !== undefined && fields.status !== fb.status) {
+      const project = await getAccessibleProject(user.id, fb.project_id);
+      const settings = project ? parseSettings(project) : null;
+      const recipients = (await listProjectWatcherIds(fb.project_id)).filter((uid) => uid !== user.id);
+      after(() =>
+        Promise.all(
+          recipients.map((uid) =>
+            notify(uid, {
+              type: "status_change",
+              title: `Durum güncellendi: ${nextStatus}`,
+              body: `${fb.category} — ${fb.message.slice(0, 120)}`,
+              link: `/feedbacks?f=${id}`,
+              accentColor: settings?.accentColor,
+              brandName: project?.name,
+              logoUrl: settings?.logoUrl,
+            }),
+          ),
+        ),
+      );
+    }
   }
   if (assigned_to !== undefined) {
     const ok = await reassignFeedback(user.id, id, assigned_to);
     if (!ok) return NextResponse.json({ error: "invalid_assignee" }, { status: 400 });
     for (const watcherId of await listProjectWatcherIds(fb.project_id)) {
       publish({ type: "feedback.assigned", userId: watcherId, payload: { feedback_id: id, assigned_to } });
+    }
+    if (assigned_to && assigned_to !== user.id) {
+      const project = await getAccessibleProject(user.id, fb.project_id);
+      const settings = project ? parseSettings(project) : null;
+      after(() =>
+        notify(assigned_to, {
+          type: "assignment",
+          title: `Sana atandı: ${fb.category}`,
+          body: fb.message.slice(0, 200),
+          link: `/feedbacks?f=${id}`,
+          accentColor: settings?.accentColor,
+          brandName: project?.name,
+          logoUrl: settings?.logoUrl,
+        }),
+      );
     }
   }
   if (reply) {

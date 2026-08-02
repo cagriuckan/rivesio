@@ -230,7 +230,12 @@ export const DEFAULT_WIDGET_TEXT: Record<WidgetLocale, WidgetText> = {
 };
 
 // ── Notifications ─────────────────────────────────────────────────────
-export type NotificationType = "feedback_new" | "reply_user" | "status_change";
+export type NotificationType =
+  | "feedback_new"
+  | "reply_user"
+  | "status_change"
+  | "agent_invite"
+  | "assignment";
 
 export interface NotificationChannelPrefs {
   inApp: boolean;
@@ -242,12 +247,16 @@ export interface NotificationPrefs {
   feedbackNew: NotificationChannelPrefs;
   replyUser: NotificationChannelPrefs;
   statusChange: NotificationChannelPrefs;
+  agentInvite: NotificationChannelPrefs;
+  assignment: NotificationChannelPrefs;
 }
 
 export const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = {
   feedbackNew: { inApp: true, email: true, push: true },
   replyUser: { inApp: true, email: true, push: true },
   statusChange: { inApp: true, email: false, push: false },
+  agentInvite: { inApp: true, email: true, push: true },
+  assignment: { inApp: true, email: true, push: true },
 };
 
 export interface NotificationRow {

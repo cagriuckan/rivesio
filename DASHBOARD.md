@@ -8,7 +8,8 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 ## Mevcut Durum
 - **Repo:** https://github.com/cagriuckan/rivesio · `main`
 - **Prod:** rivesio.com · DB: Neon
-- **Sürüm:** Beta v0.1.0 / package `0.1.0`
+- **Sürüm:** Beta v0.1.1 / package `0.1.1`
+- Bildirimler: ajan daveti in-app/push + e-posta sonucu; bekleyen davetler (kabul/red); atama/status_change/reply→assignee
 - Inbox triage durumları: `open` / `pending` / `in_progress` / `resolved` / `closed` (migration `0008`)
 - Widget **pasife alma**: `projects.is_active` (migration `0007`); kart menüsü + ayarlar toggle; pasifte script no-op, register/submit/conversation reddedilir
 - `allowConversation` kapalıysa widget’ta Geçmiş sekmesi (ve tabs bar) render edilmiyor
@@ -21,17 +22,20 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
 
 ## Kalanlar / Yapılacaklar
-- [x] Hostinger redeploy tetikle / smoke (v0.1.0) — `main` merge #26; Neon `0008` uygulandı; Hostinger SSH yok (Git deploy bekleniyor)
+- [ ] Hostinger redeploy (bildirim düzeltmeleri + `0009_notification_types`)
+- [ ] Prod `RESEND_API_KEY` + VAPID keys doğrula (e-posta/push yoksa sessiz kalır)
 - [ ] Soft nav + reply + sites pagination smoke test
 - [ ] Prod signup smoke test
 - [ ] İdeal OG 1200×630
-- [ ] Web push UX iyileştirme
+- [ ] Ajan daveti smoke (mevcut kullanıcıya bell + e-posta + kabul/red)
 - [ ] Mobile glass tab bar smoke test (scroll minimize + finger scrub)
 - [ ] Widget kategori dili smoke test (`lang=en` / `lang=tr`)
 - [ ] Widget pasife alma smoke test (kart / ayarlar / embed gizlenme)
 - [ ] Inbox durum seti smoke test (open→in_progress on reply, pending/closed filtre)
 
 ## Alınan Kararlar
+- 2026-08-02: Sürüm Beta v0.1.1 — bildirim sistemi (ajan daveti, atama, push/e-posta)
+- 2026-08-02: Ajan daveti `notify(agent_invite)` + dedicated e-posta; panelde bekleyen davetler kabul/red; atama/status/reply assignee kanalları
 - 2026-08-02: Sürüm Beta v0.1.0 / package `0.1.0`
 - 2026-08-02: Inbox triage `open/pending/in_progress/resolved/closed`; ilk ajan yanıtı `open`→`in_progress`; `planned/wontfix` kaldırıldı
 - 2026-08-02: Sidebar gelen kutusu badge'i `status=open` + ziyaretçi son konuşan; ajan/owner son mesajlı thread'ler sayıya dahil değil

@@ -36,18 +36,19 @@ export default async function AgentInvitePage({ params }: { params: Promise<{ to
   const categoriesLabel = invite.categories?.length ? invite.categories.join(", ") : t("acceptAllCategories");
 
   if (!sessionUser) {
+    const next = encodeURIComponent(`/agent-invite/${token}`);
     return (
       <AuthShell title={t("acceptTitle")} subtitle={t("acceptSubtitle", { inviter: invite.inviterName, project: invite.projectName })}>
         <p className="text-sm text-subtle">{t("acceptNotLoggedInBody", { email: invite.email })}</p>
         <div className="mt-5 flex gap-2">
           <Link
-            href="/login"
+            href={`/login?next=${next}`}
             className="inline-flex h-9 flex-1 items-center justify-center rounded-full bg-accent px-3.5 text-sm font-semibold text-white transition-colors hover:bg-accent-hover"
           >
             {t("acceptSignIn")}
           </Link>
           <Link
-            href="/signup"
+            href={`/signup?next=${next}`}
             className="inline-flex h-9 flex-1 items-center justify-center rounded-full border border-line-strong bg-surface px-3.5 text-sm font-semibold text-secondary transition-colors hover:bg-raised"
           >
             {t("acceptSignUp")}

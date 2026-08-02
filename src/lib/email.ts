@@ -100,18 +100,23 @@ function wrapEmail(opts: { brand?: EmailBrand; title: string; content: string; c
 </body></html>`;
 }
 
-async function deliver(to: string, subject: string, html: string): Promise<void> {
+async function deliver(to: string, subject: string, html: string): Promise<{ ok: boolean; mode?: "sent" | "dev"; error?: string }> {
   if (!resend) {
     // Dev / unconfigured: log instead of sending so the flow stays testable.
     console.info(`[email:dev] to=${to} subject="${subject}"\n${html}`);
-    return;
+    return { ok: true, mode: "dev" };
   }
   try {
     const { data, error } = await resend.emails.send({ from: env.email.from, to, subject, html });
-    if (error) console.error("[email] send rejected", error);
-    else console.info(`[email] sent id=${data?.id} to=${to} subject="${subject}"`);
+    if (error) {
+      console.error("[email] send rejected", error);
+      return { ok: false, error: typeof error === "object" && error && "message" in error ? String((error as { message: string }).message) : "send_rejected" };
+    }
+    console.info(`[email] sent id=${data?.id} to=${to} subject="${subject}"`);
+    return { ok: true, mode: "sent" };
   } catch (err) {
     console.error("[email] send failed", err);
+    return { ok: false, error: err instanceof Error ? err.message : "send_failed" };
   }
 }
 
@@ -232,7 +237,7 @@ export async function sendAgentInviteEmail(
   inviterName: string,
   categories: string[] | null,
   brand?: EmailBrand,
-): Promise<void> {
+): Promise<{ ok: boolean; mode?: "sent" | "dev"; error?: string }> {
   const categoryLine = categories?.length
     ? `<p style="margin:0 0 16px;color:#475569"><strong>Kategoriler:</strong> ${esc(categories.join(", "))}</p>`
     : "";
@@ -243,7 +248,7 @@ export async function sendAgentInviteEmail(
     </p>
     ${categoryLine}
     <p style="color:#94a3b8;font-size:12px;margin:16px 0 0">Bu davet 7 gün geçerlidir.</p>`;
-  await deliver(
+  return deliver(
     to,
     `${projectName} — ajan daveti`,
     wrapEmail({
