@@ -21,7 +21,7 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
 
 ## Kalanlar / Yapılacaklar
-- [ ] Hostinger redeploy tetikle / smoke (v0.1.0)
+- [x] Hostinger redeploy tetikle / smoke (v0.1.0) — `main` merge #26; Neon `0008` uygulandı; Hostinger SSH yok (Git deploy bekleniyor)
 - [ ] Soft nav + reply + sites pagination smoke test
 - [ ] Prod signup smoke test
 - [ ] İdeal OG 1200×630
