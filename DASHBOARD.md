@@ -1,6 +1,6 @@
 # Rivesio — Proje Panosu
 
-> Her oturum sonunda güncellenir. Son güncelleme: **2026-08-02**
+> Her oturum sonunda güncellenir. Son güncelleme: **2026-09-11**
 
 ## Proje Özeti
 Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19, Tailwind v4, Postgres + Drizzle, Better Auth, Resend, web-push, R2.
@@ -22,7 +22,8 @@ Merkezi feedback widget sunucusu + admin paneli. Next.js 15 App Router, React 19
 - Widget kategorileri TR/EN etiketli; wire format `categories: string[]` + `categoryLabels` (eski bundle uyumu)
 
 ## Kalanlar / Yapılacaklar
-- [ ] Hostinger redeploy (bildirim düzeltmeleri + `0009_notification_types`)
+- [ ] Hostinger redeploy (bildirim düzeltmeleri + `0009_notification_types` + DB pool idle_timeout)
+- [ ] Neon compute saatini 1 hafta izle; düşmezse Supabase'e taşı (pg_dump → restore → DATABASE_URL → db:migrate)
 - [ ] Prod `RESEND_API_KEY` + VAPID keys doğrula (e-posta/push yoksa sessiz kalır)
 - [ ] Soft nav + reply + sites pagination smoke test
 - [ ] Prod signup smoke test
